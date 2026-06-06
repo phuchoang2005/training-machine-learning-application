@@ -1,0 +1,55 @@
+ProjectConfigSummary:
+  type: object
+  required: [configId, configName, configPath, isDefault, updatedAt]
+  properties:
+    configId:
+      type: string
+      format: uuid
+    configName:
+      type: string
+    configPath:
+      type: string
+    isDefault:
+      type: boolean
+    updatedAt:
+      type: string
+      format: date-time
+ProjectConfigListResponse:
+  type: object
+  required: [data]
+  properties:
+    data:
+      type: array
+      items:
+        $ref: "#/ProjectConfigSummary"
+ProjectConfigContent:
+  allOf:
+    - $ref: "#/ProjectConfigSummary"
+    - type: object
+      required: [yamlContent, contentHash]
+      properties:
+        yamlContent:
+          type: string
+        contentHash:
+          type: string
+ValidateYamlRequest:
+  type: object
+  required: [yamlContent]
+  additionalProperties: false
+  properties:
+    yamlContent:
+      type: string
+      maxLength: 1048576
+ValidateYamlResponse:
+  type: object
+  required: [valid]
+  properties:
+    valid:
+      type: boolean
+    normalizedPreview:
+      type: object
+      additionalProperties: true
+    errors:
+      type: array
+      items:
+        type: string

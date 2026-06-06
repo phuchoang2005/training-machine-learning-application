@@ -1,0 +1,31 @@
+jobArtifacts:
+  get:
+    tags: [Artifacts]
+    summary: List job artifacts
+    operationId: listJobArtifacts
+    parameters:
+      - $ref: "../components/parameters.yaml#/JobId"
+    responses:
+      "200":
+        description: Artifact list
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/logs-artifacts.yaml#/ArtifactListResponse"
+artifactDownload:
+  get:
+    tags: [Artifacts]
+    summary: Download artifact
+    operationId: downloadArtifact
+    parameters:
+      - $ref: "../components/parameters.yaml#/ArtifactId"
+    responses:
+      "200":
+        description: Artifact file
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      "409":
+        $ref: "../components/responses.yaml#/Conflict"

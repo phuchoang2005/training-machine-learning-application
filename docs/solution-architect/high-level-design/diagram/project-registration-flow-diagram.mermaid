@@ -1,0 +1,28 @@
+flowchart TD
+    A[User Opens Project Registration] --> B{Source Type}
+
+    B -->|GitHub Public Repository| C[Enter Repository URL]
+    C --> D[Validate URL Format]
+    D --> E{Repository Reachable?}
+    E -->|No| F[Reject Registration<br/>Show Clone Validation Error]
+    E -->|Yes| G[Clone Repository to Source Storage]
+
+    B -->|ZIP Upload| H[Upload ZIP Package]
+    H --> I[Validate File Type and Size]
+    I --> J{ZIP Valid?}
+    J -->|No| K[Reject Upload<br/>Show Package Error]
+    J -->|Yes| L[Extract ZIP to Source Storage]
+
+    G --> M[Detect Project Structure]
+    L --> M
+
+    M --> N[Validate Required Files<br/>main.py, requirements.txt, configs/]
+    N --> O{Project Valid?}
+    O -->|No| P[Reject Project<br/>Show Missing Requirements]
+    O -->|Yes| Q[Register Project Metadata]
+
+    Q --> R[(Database<br/>projects, project_configs)]
+    Q --> S[Source Storage<br/>/data/sources/project_id/]
+    R --> T[Create Audit Log<br/>project_registered]
+    S --> U[Project Available for Training]
+    T --> U

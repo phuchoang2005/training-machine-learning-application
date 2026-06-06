@@ -1,0 +1,61 @@
+LogEvent:
+  type: object
+  required: [logEventId, sequenceNo, streamType, message, emittedAt]
+  properties:
+    logEventId:
+      type: string
+      format: uuid
+    sequenceNo:
+      type: integer
+    streamType:
+      $ref: "./common.yaml#/StreamType"
+    message:
+      type: string
+    emittedAt:
+      type: string
+      format: date-time
+LogEventPage:
+  type: object
+  required: [data, page]
+  properties:
+    data:
+      type: array
+      items:
+        $ref: "#/LogEvent"
+    page:
+      $ref: "./common.yaml#/Page"
+Artifact:
+  type: object
+  required: [artifactId, artifactName, artifactType, fileSizeBytes, checksum, createdAt]
+  properties:
+    artifactId:
+      type: string
+      format: uuid
+    artifactName:
+      type: string
+    artifactType:
+      $ref: "./common.yaml#/ArtifactType"
+    fileSizeBytes:
+      type: integer
+      format: int64
+    checksum:
+      type: string
+    createdAt:
+      type: string
+      format: date-time
+    modelVersion:
+      type: [object, "null"]
+      properties:
+        modelVersionId:
+          type: string
+          format: uuid
+        versionNumber:
+          type: string
+ArtifactListResponse:
+  type: object
+  required: [data]
+  properties:
+    data:
+      type: array
+      items:
+        $ref: "#/Artifact"

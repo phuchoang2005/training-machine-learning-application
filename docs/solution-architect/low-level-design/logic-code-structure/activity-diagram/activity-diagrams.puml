@@ -1,0 +1,7 @@
+' Aggregate PlantUML file for rendering all activity diagrams together.
+' The modular source files under diagrams/ are the canonical edit targets.
+
+!include diagrams/training-job-execution-activity.puml
+!include diagrams/project-registration-activity.puml
+!include diagrams/websocket-monitoring-activity.puml
+!include diagrams/recovery-cancel-activity.puml

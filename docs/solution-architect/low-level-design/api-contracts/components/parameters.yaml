@@ -1,0 +1,63 @@
+Limit:
+  name: limit
+  in: query
+  schema:
+    type: integer
+    minimum: 1
+    maximum: 100
+    default: 20
+Cursor:
+  name: cursor
+  in: query
+  schema:
+    type: string
+IdempotencyKey:
+  name: Idempotency-Key
+  in: header
+  required: true
+  schema:
+    type: string
+    minLength: 8
+    maxLength: 128
+UserId:
+  name: userId
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+ProjectId:
+  name: projectId
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+ConfigId:
+  name: configId
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+JobId:
+  name: jobId
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+ArtifactId:
+  name: artifactId
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+NotificationId:
+  name: notificationId
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid

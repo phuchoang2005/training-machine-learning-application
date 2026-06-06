@@ -1,0 +1,190 @@
+TriggeredBy:
+  type: object
+  required: [userId, email, fullName]
+  properties:
+    userId:
+      type: string
+      format: uuid
+    email:
+      type: string
+      format: email
+    fullName:
+      type: string
+Progress:
+  type: object
+  required: [available]
+  properties:
+    available:
+      type: boolean
+    value:
+      type: [integer, "null"]
+      minimum: 0
+      maximum: 100
+    epoch:
+      type: [integer, "null"]
+    totalEpoch:
+      type: [integer, "null"]
+    updatedAt:
+      type: [string, "null"]
+      format: date-time
+StartJobRequest:
+  type: object
+  required: [configId, yamlContent]
+  additionalProperties: false
+  properties:
+    configId:
+      type: string
+      format: uuid
+    yamlContent:
+      type: string
+      maxLength: 1048576
+StartJobResponse:
+  type: object
+  required: [jobId, projectId, status, configSnapshotId, createdAt]
+  properties:
+    jobId:
+      type: string
+      format: uuid
+    projectId:
+      type: string
+      format: uuid
+    status:
+      $ref: "./common.yaml#/JobStatus"
+    queuePosition:
+      type: [integer, "null"]
+    configSnapshotId:
+      type: string
+      format: uuid
+    createdAt:
+      type: string
+      format: date-time
+JobSummary:
+  type: object
+  required: [jobId, status, createdAt]
+  properties:
+    jobId:
+      type: string
+      format: uuid
+    status:
+      $ref: "./common.yaml#/JobStatus"
+    progressValue:
+      type: [integer, "null"]
+    queuePosition:
+      type: [integer, "null"]
+    createdAt:
+      type: string
+      format: date-time
+    startedAt:
+      type: [string, "null"]
+      format: date-time
+    endedAt:
+      type: [string, "null"]
+      format: date-time
+JobPage:
+  type: object
+  required: [data, page]
+  properties:
+    data:
+      type: array
+      items:
+        $ref: "#/JobSummary"
+    page:
+      $ref: "./common.yaml#/Page"
+JobDetail:
+  allOf:
+    - $ref: "#/JobSummary"
+    - type: object
+      properties:
+        projectId:
+          type: string
+          format: uuid
+        projectName:
+          type: string
+        triggeredBy:
+          $ref: "#/TriggeredBy"
+        progress:
+          $ref: "#/Progress"
+        retryOfJobId:
+          type: [string, "null"]
+          format: uuid
+        retryAttempt:
+          type: integer
+        queuedAt:
+          type: [string, "null"]
+          format: date-time
+        failureReason:
+          type: [string, "null"]
+CancelJobRequest:
+  type: object
+  additionalProperties: false
+  properties:
+    reason:
+      type: string
+      maxLength: 500
+CancelJobResponse:
+  type: object
+  required: [jobId, status, cancelAcceptedAt]
+  properties:
+    jobId:
+      type: string
+      format: uuid
+    status:
+      const: CANCELLED
+    cancelAcceptedAt:
+      type: string
+      format: date-time
+RetryMode:
+  type: string
+  enum: [PREVIOUS_CONFIGURATION, MODIFIED_CONFIGURATION]
+RetryJobRequest:
+  type: object
+  required: [mode]
+  additionalProperties: false
+  properties:
+    mode:
+      $ref: "#/RetryMode"
+    yamlContent:
+      type: string
+      maxLength: 1048576
+RetryJobResponse:
+  type: object
+  required: [jobId, retryOfJobId, status, retryAttempt]
+  properties:
+    jobId:
+      type: string
+      format: uuid
+    retryOfJobId:
+      type: string
+      format: uuid
+    status:
+      $ref: "./common.yaml#/JobStatus"
+    retryAttempt:
+      type: integer
+QueueSnapshot:
+  type: object
+  required: [runningCount, runningLimit, queuedCount, items]
+  properties:
+    runningCount:
+      type: integer
+    runningLimit:
+      type: integer
+    queuedCount:
+      type: integer
+    items:
+      type: array
+      items:
+        type: object
+        required: [jobId, projectName, status, queuePosition, enqueuedAt]
+        properties:
+          jobId:
+            type: string
+            format: uuid
+          projectName:
+            type: string
+          status:
+            $ref: "./common.yaml#/JobStatus"
+          queuePosition:
+            type: integer
+          enqueuedAt:
+            type: string
+            format: date-time

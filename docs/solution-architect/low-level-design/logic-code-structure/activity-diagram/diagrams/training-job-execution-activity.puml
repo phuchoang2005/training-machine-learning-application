@@ -1,0 +1,178 @@
+@startuml training_job_execution_activity
+title Activity Diagram - End-to-End Training Job Execution
+
+skinparam shadowing false
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+  FontColor #0F172A
+}
+skinparam partition {
+  BackgroundColor #EEF2FF
+  BorderColor #475569
+  FontColor #0F172A
+}
+
+start
+
+partition "React Frontend" {
+  :User opens Project Detail page;
+  :Load project metadata, configs,\nand training history;
+  :User edits YAML configuration;
+  :Submit YAML validation request;
+}
+
+partition "Spring Boot API" {
+  :Authenticate session / token;
+  :Authorize project ownership;
+  :Validate YAML syntax and required fields;
+}
+
+if (Validation successful?) then (yes)
+  partition "React Frontend" {
+    :Enable Start Training action;
+    :User confirms immutable config snapshot;
+    :POST /projects/{projectId}/jobs\nwith Idempotency-Key;
+  }
+
+  partition "Spring Boot API" {
+    :Authenticate and authorize request;
+    :Check idempotency key;
+    :Validate project structure\nmain.py, requirements.txt, configs/;
+    :Create config snapshot;
+    :Create training job;
+    :Create FIFO queue entry;
+    :Write audit log TRAINING_START;
+    :Return jobId and initial status;
+  }
+
+  partition "PostgreSQL" {
+    :Persist config_snapshots;
+    :Persist training_jobs = QUEUED;
+    :Persist job_queue_entries = WAITING;
+    :Persist audit_logs;
+  }
+
+  partition "Queue Scheduler" {
+    while (Queue has WAITING jobs?) is (yes)
+      :Count RUNNING jobs;
+      if (RUNNING jobs < 2?) then (yes)
+        :Lock oldest WAITING queue row\nFOR UPDATE SKIP LOCKED;
+        :Mark queue entry DISPATCHED;
+        :Mark job RUNNING;
+        :Publish JOB_STATUS event;
+        break
+      else (no)
+        :Wait for next scheduler tick;
+      endif
+    endwhile (no)
+  }
+
+  partition "Docker Runner" {
+    :Resolve source path through StorageService;
+    :Create /data/workspaces/{jobId};
+    :Copy project source into workspace;
+    :Write runtime config snapshot;
+    :Check free disk space >= 5 GB;
+  }
+
+  if (Disk capacity sufficient?) then (yes)
+    partition "Docker Runner" {
+      if (Source type?) then (GitHub)
+        :Use originally cloned public repository;
+      else (ZIP)
+        :Use validated extracted ZIP source;
+      endif
+      :Build or prepare Docker image;
+      :Run container training-job-{jobId};
+      :Execute training entrypoint main.py;
+    }
+
+    fork
+      partition "Log Collector" {
+        :Read stdout and stderr streams;
+        :Append to job log files;
+        :Persist searchable log events;
+        :Publish LOG events to WebSocket;
+      }
+    fork again
+      partition "Progress Parser" {
+        :Inspect stdout lines for JSON progress events;
+        if (Line is valid progress event?) then (yes)
+          :Persist progress event;
+          :Publish PROGRESS event to WebSocket;
+        else (no)
+          :Ignore for progress tracking;
+        endif
+      }
+    fork again
+      partition "Docker Runner" {
+        :Wait for container exit;
+      }
+    end fork
+
+    partition "Docker Runner" {
+      if (Container exit code == 0?) then (success)
+        :Mark job SUCCESS;
+        :Publish JOB_STATUS SUCCESS;
+      else (failed)
+        :Capture failure reason;
+        :Mark job FAILED;
+        :Publish JOB_STATUS FAILED;
+      endif
+    }
+
+    if (Job SUCCESS?) then (yes)
+      partition "Artifact Service" {
+        :Read artifact_path from config snapshot;
+        :Scan workspace/container output path;
+        if (Artifacts found?) then (yes)
+          :Validate file names, sizes,\nchecksums, and path safety;
+          if (Artifact validation passed?) then (yes)
+            :Copy artifacts to\n/data/artifacts/{projectId}/{jobId};
+            :Register artifact metadata;
+            :Create model version;
+            :Publish ARTIFACT_REGISTERED event;
+          else (no)
+            :Create artifact failure notification;
+          endif
+        else (no)
+          :Create artifact not found notification;
+        endif
+      }
+    endif
+
+    partition "Notification Worker" {
+      if (Terminal status?) then (SUCCESS or FAILED)
+        :Create in-app notification;
+        :Send Google Workspace email;
+        if (Email failed?) then (yes)
+          :Keep job status unchanged;
+          :Mark notification EMAIL FAILED;
+        else (no)
+          :Mark notification EMAIL SENT;
+        endif
+      else (CANCELLED)
+        :No outcome email for cancelled job;
+      endif
+    }
+
+    stop
+  else (no)
+    partition "Spring Boot API / Runner" {
+      :Mark job FAILED;
+      :Set failure reason DISK_CAPACITY_INSUFFICIENT;
+      :Create in-app notification;
+      :Publish JOB_STATUS FAILED;
+    }
+    stop
+  endif
+else (no)
+  partition "React Frontend" {
+    :Show YAML validation errors;
+    :Keep Start Training disabled;
+  }
+  stop
+endif
+
+@enduml

@@ -1,0 +1,40 @@
+jobLogs:
+  get:
+    tags: [Logs]
+    summary: Search historical logs
+    operationId: searchJobLogs
+    parameters:
+      - $ref: "../components/parameters.yaml#/JobId"
+      - $ref: "../components/parameters.yaml#/Limit"
+      - $ref: "../components/parameters.yaml#/Cursor"
+      - name: query
+        in: query
+        schema:
+          type: string
+          maxLength: 200
+      - name: streamType
+        in: query
+        schema:
+          $ref: "../components/schemas/common.yaml#/StreamType"
+    responses:
+      "200":
+        description: Log event page
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/logs-artifacts.yaml#/LogEventPage"
+jobLogsDownload:
+  get:
+    tags: [Logs]
+    summary: Download combined job logs
+    operationId: downloadJobLogs
+    parameters:
+      - $ref: "../components/parameters.yaml#/JobId"
+    responses:
+      "200":
+        description: Log file
+        content:
+          text/plain:
+            schema:
+              type: string
+              format: binary

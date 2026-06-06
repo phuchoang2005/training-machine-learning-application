@@ -1,0 +1,50 @@
+sequenceDiagram
+    actor User
+    participant FE as Web Frontend
+    participant API as Backend API
+    participant Auth as Auth & Access Control
+    participant Job as Job Service
+    participant Queue as Queue & Scheduler
+    participant Log as Log & Progress Service
+    participant Artifact as Artifact Service
+    participant DB as Database
+
+    User->>FE: Login
+    FE->>API: POST /auth/login
+    API->>Auth: Validate company credentials
+    Auth->>DB: Load user and role
+    DB-->>Auth: User profile
+    Auth-->>API: Session / token
+    API-->>FE: Authenticated
+
+    FE->>API: GET /projects
+    API->>Auth: Filter projects by ownership / role
+    Auth->>DB: Query authorized projects
+    DB-->>API: Project list
+    API-->>FE: Projects
+
+    User->>FE: Start Training
+    FE->>API: POST /projects/{project_id}/jobs
+    API->>Auth: Authorize project action
+    API->>Job: Validate project and config snapshot
+    Job->>DB: Create job and snapshot records
+    Job->>Queue: Enqueue job
+    Queue->>DB: Persist queue entry
+    API-->>FE: Job ID and status
+
+    FE->>API: GET /jobs/{job_id}/status
+    API->>DB: Load job state
+    DB-->>API: Status and progress
+    API-->>FE: Job status
+
+    FE->>API: WebSocket connect /ws/jobs/{job_id}
+    API->>Auth: Authorize stream access
+    API->>Log: Subscribe to job stream
+    Log-->>FE: Push log, progress, and status events
+
+    FE->>API: GET /jobs/{job_id}/artifacts
+    API->>Auth: Authorize artifact access
+    API->>Artifact: List artifacts
+    Artifact->>DB: Query registered artifacts
+    DB-->>Artifact: Artifact metadata
+    API-->>FE: Artifact list

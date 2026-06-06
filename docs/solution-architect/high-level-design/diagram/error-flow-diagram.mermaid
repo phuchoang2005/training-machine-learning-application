@@ -1,0 +1,35 @@
+flowchart TD
+    A[User Starts Training] --> B[Authorization Check]
+    B --> C{Authorized?}
+    C -->|No| D[Reject Request<br/>403 Forbidden]
+    C -->|Yes| E[Project Source Validation]
+
+    E --> F{Git Clone or ZIP Valid?}
+    F -->|No| G[Job Not Started<br/>Notify User]
+    F -->|Yes| H[Disk Capacity Check]
+
+    H --> I{Free Disk >= 5GB?}
+    I -->|No| J[Job Not Started<br/>Status FAILED<br/>Notify User]
+    I -->|Yes| K[Queue Job]
+
+    K --> L[Launch Docker Container]
+    L --> M{Container Starts?}
+    M -->|No| N[Status FAILED<br/>Capture Runner Error]
+    M -->|Yes| O[Stream stdout / stderr]
+
+    O --> P{Training Result}
+    P -->|Exit Code 0| Q[Status SUCCESS]
+    P -->|Non-zero Exit| R[Status FAILED<br/>Persist Error Logs]
+    P -->|User Cancel| S[Status CANCELLED<br/>Stop Container]
+    P -->|Server Restart| T[Status RETRYING<br/>Requeue Job]
+
+    Q --> U[Register Artifacts]
+    U --> V{Artifact Registration OK?}
+    V -->|No| W[Artifact Status FAILED<br/>Training Remains SUCCESS<br/>Notify User]
+    V -->|Yes| X[Create Model Version]
+
+    R --> Y[Send Failure Email]
+    N --> Y
+    W --> Z[In-App Notification]
+    X --> AA[Send Success Email]
+    T --> K

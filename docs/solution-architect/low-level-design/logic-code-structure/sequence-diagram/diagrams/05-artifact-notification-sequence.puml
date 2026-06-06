@@ -1,0 +1,59 @@
+@startuml artifact_notification_sequence
+title Sequence Diagram - Artifact Registration, Model Versioning, Notification
+
+skinparam shadowing false
+participant "Training Job Service" as JOB
+participant "Artifact Scanner" as ART
+participant "Storage Service" as STORAGE
+database "PostgreSQL" as DB
+participant "WebSocket Publisher" as WS
+participant "Notification Worker" as NOTI
+participant "Google Workspace Email" as EMAIL
+participant "React Training Detail" as FE
+
+JOB -> ART: trigger after job SUCCESS
+ART -> DB: load job, project, config snapshot
+DB --> ART: artifact_path and job metadata
+ART -> STORAGE: scan workspace artifact_path
+
+alt no artifacts found
+  ART -> DB: insert notification ARTIFACT_NOT_FOUND
+  ART -> WS: publish ERROR or artifact warning
+else artifacts found
+  ART -> STORAGE: validate file names, path safety, size, checksum
+  alt validation failed
+    ART -> DB: insert notification ARTIFACT_REGISTRATION_FAILED
+    ART -> WS: publish ERROR or artifact warning
+  else validation passed
+    ART -> STORAGE: copy to /data/artifacts/{projectId}/{jobId}
+    ART -> DB: insert artifacts
+    ART -> DB: create model_versions
+    ART -> DB: insert audit_logs ARTIFACT_REGISTERED
+    ART -> WS: publish ARTIFACT_REGISTERED
+    WS -> FE: invalidate artifact list query
+  end
+end
+
+JOB -> NOTI: terminal job status event
+
+alt status SUCCESS
+  NOTI -> DB: create in-app SUCCESS notification
+  NOTI -> EMAIL: send success email
+else status FAILED
+  NOTI -> DB: create in-app FAILURE notification
+  NOTI -> EMAIL: send failure email with details link
+else status CANCELLED
+  NOTI -> DB: create optional in-app cancellation status
+  NOTI -> NOTI: skip outcome email
+end
+
+alt email sent
+  EMAIL --> NOTI: accepted
+  NOTI -> DB: mark email notification SENT
+else email failed
+  EMAIL --> NOTI: delivery error
+  NOTI -> DB: mark email notification FAILED
+  NOTI -> DB: create in-app email failure notice
+end
+
+@enduml

@@ -1,0 +1,45 @@
+@startuml auth_project_dashboard_sequence
+title Sequence Diagram - Authentication and Project Dashboard
+
+actor "User" as U
+participant "React SPA" as FE
+participant "Spring Security" as SEC
+participant "Google Workspace OIDC" as GWS
+participant "Auth Module" as AM
+participant "Project API" as PA
+participant "Authorization Service" as AZ
+database "PostgreSQL" as PG
+participant "Audit Service" as AS
+
+U -> FE: Open application
+FE -> AM: GET /api/v1/auth/me
+AM -> SEC: Resolve authenticated principal
+
+alt No active session
+  SEC --> FE: 401 UNAUTHENTICATED
+  FE -> SEC: Redirect to OAuth login
+  SEC -> GWS: Authorization request
+  GWS --> SEC: Authorization code and ID token
+  SEC -> AM: Map Google identity by email
+  AM -> PG: Upsert or load user by email
+  PG --> AM: User profile and role
+  AM -> AS: Record LOGIN
+  AS -> PG: Insert audit log
+  SEC --> FE: Set session and redirect
+else Active session
+  SEC --> AM: Current user principal
+end
+
+AM --> FE: 200 CurrentUser
+
+U -> FE: Open Project Dashboard
+FE -> PA: GET /api/v1/projects
+PA -> SEC: Resolve current user
+PA -> AZ: Authorize project list
+AZ --> PA: Allowed with ownership scope
+PA -> PG: Query visible projects
+PG --> PA: Project summaries
+PA --> FE: ProjectPage
+FE --> U: Render dashboard
+
+@enduml

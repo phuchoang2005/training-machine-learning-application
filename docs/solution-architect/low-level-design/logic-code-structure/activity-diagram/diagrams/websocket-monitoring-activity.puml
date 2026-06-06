@@ -1,0 +1,106 @@
+@startuml websocket_monitoring_activity
+title Activity Diagram - WebSocket Log and Progress Monitoring
+
+skinparam shadowing false
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+}
+
+start
+
+partition "React Training Detail Page" {
+  :Load job detail through REST;
+  :Open WebSocket /ws/jobs/{jobId};
+}
+
+partition "Spring Boot WebSocket Gateway" {
+  :Authenticate handshake;
+  :Resolve job and project;
+  :Authorize project ownership;
+}
+
+if (Authorized?) then (yes)
+  partition "Spring Boot WebSocket Gateway" {
+    :Accept connection;
+    :Send SNAPSHOT event\nstatus, progress, lastLogSequenceNo;
+  }
+
+  partition "React Training Detail Page" {
+    :Store lastEventId;
+    :Render status, progress, and live log buffer;
+  }
+
+  while (WebSocket connected?) is (yes)
+    fork
+      partition "Log Collector" {
+        :Receive stdout/stderr line;
+        :Persist log event with sequenceNo;
+        :Publish LOG event;
+      }
+    fork again
+      partition "Progress Parser" {
+        :Receive structured progress JSON;
+        :Persist progress value;
+        :Publish PROGRESS event;
+      }
+    fork again
+      partition "Job Service" {
+        :Job status changes;
+        :Publish JOB_STATUS event;
+      }
+    end fork
+
+    partition "React Training Detail Page" {
+      :De-duplicate event by eventId;
+      if (Event type?) then (LOG)
+        :Append to bounded live log buffer;
+      elseif (PROGRESS)
+        :Update progress panel;
+      elseif (JOB_STATUS)
+        :Update status badge and available actions;
+      elseif (ARTIFACT_REGISTERED)
+        :Invalidate artifact query;
+      else (ERROR)
+        :Show stream error;
+      endif
+    }
+  endwhile (no)
+
+  partition "React Training Detail Page" {
+    :Start reconnect backoff\n1s, 2s, 5s, 10s, max 30s;
+    :Reconnect and send RESUME lastEventId;
+  }
+
+  partition "Spring Boot WebSocket Gateway" {
+    if (Replay available?) then (yes)
+      :Replay missed events where eventId > lastEventId;
+    else (no)
+      :Send fresh SNAPSHOT;
+    endif
+  }
+
+  if (Reconnect repeatedly fails?) then (yes)
+    partition "React Training Detail Page" {
+      :Fall back to REST polling for job status;
+      :Show WebSocket disconnected state;
+    }
+    stop
+  else (no)
+    :Continue live monitoring;
+    stop
+  endif
+
+else (no)
+  partition "Spring Boot WebSocket Gateway" {
+    :Send ERROR STREAM_FORBIDDEN when possible;
+    :Close connection with policy violation;
+  }
+
+  partition "React Training Detail Page" {
+    :Show permission denied or not found state;
+  }
+  stop
+endif
+
+@enduml

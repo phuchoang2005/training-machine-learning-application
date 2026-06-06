@@ -1,0 +1,53 @@
+projectConfigs:
+  get:
+    tags: [Configurations]
+    summary: List project YAML configurations
+    operationId: listProjectConfigs
+    parameters:
+      - $ref: "../components/parameters.yaml#/ProjectId"
+    responses:
+      "200":
+        description: Config list
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/configurations.yaml#/ProjectConfigListResponse"
+projectConfigById:
+  get:
+    tags: [Configurations]
+    summary: Get YAML configuration content
+    operationId: getProjectConfig
+    parameters:
+      - $ref: "../components/parameters.yaml#/ProjectId"
+      - $ref: "../components/parameters.yaml#/ConfigId"
+    responses:
+      "200":
+        description: Config content
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/configurations.yaml#/ProjectConfigContent"
+      "404":
+        $ref: "../components/responses.yaml#/NotFound"
+projectConfigValidation:
+  post:
+    tags: [Configurations]
+    summary: Validate YAML configuration
+    operationId: validateYamlConfig
+    parameters:
+      - $ref: "../components/parameters.yaml#/ProjectId"
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/configurations.yaml#/ValidateYamlRequest"
+    responses:
+      "200":
+        description: Validation result
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/configurations.yaml#/ValidateYamlResponse"
+      "400":
+        $ref: "../components/responses.yaml#/ValidationError"

@@ -1,0 +1,206 @@
+@startuml backend_service_class_diagram
+title Class Diagram - Spring Boot Backend Services
+
+interface Repository
+
+class AuthController {
+  +CurrentUserResponse getCurrentUser()
+  +void logout()
+}
+
+class ProjectController {
+  +ProjectPage listProjects(ProjectFilter filter)
+  +CreateProjectResponse createGithubProject(CreateGithubProjectRequest request)
+  +CreateProjectResponse uploadZipProject(ZipProjectUploadRequest request)
+  +ProjectDetailResponse getProject(UUID projectId)
+  +void deleteProject(UUID projectId)
+}
+
+class ConfigController {
+  +ProjectConfigListResponse listConfigs(UUID projectId)
+  +ProjectConfigContentResponse getConfig(UUID projectId, UUID configId)
+  +ValidateYamlResponse validateYaml(UUID projectId, ValidateYamlRequest request)
+}
+
+class JobController {
+  +StartJobResponse startJob(UUID projectId, StartJobRequest request)
+  +JobDetailResponse getJob(UUID jobId)
+  +JobPage listProjectJobs(UUID projectId, JobFilter filter)
+  +CancelJobResponse cancelJob(UUID jobId, CancelJobRequest request)
+  +RetryJobResponse retryJob(UUID jobId, RetryJobRequest request)
+}
+
+class ArtifactController {
+  +ArtifactListResponse listJobArtifacts(UUID jobId)
+  +Resource downloadArtifact(UUID artifactId)
+}
+
+class LogController {
+  +LogEventPage searchLogs(UUID jobId, LogSearchFilter filter)
+  +Resource downloadLogs(UUID jobId)
+}
+
+class AuthorizationService {
+  +void requireProjectOwner(CurrentUser user, UUID projectId)
+  +void requireJobStreamAccess(CurrentUser user, UUID jobId)
+  +boolean canCancel(CurrentUser user, TrainingJob job)
+  +boolean canRetry(CurrentUser user, TrainingJob job)
+}
+
+class ProjectApplicationService {
+  +CreateProjectResult registerGithubProject(CreateGithubProjectCommand command)
+  +CreateProjectResult registerZipProject(ZipProjectCommand command)
+  +ProjectDetail getProject(UUID projectId)
+}
+
+class ConfigSnapshotService {
+  +YamlValidationResult validateYaml(String yamlContent)
+  +ConfigSnapshot createSnapshot(UUID projectId, UUID configId, String yamlContent)
+  +List<ProjectConfig> discoverConfigs(Project project)
+}
+
+class TrainingJobApplicationService {
+  +StartJobResult startJob(StartJobCommand command)
+  +CancelJobResult cancelJob(CancelJobCommand command)
+  +RetryJobResult retryJob(RetryJobCommand command)
+  +void markRunning(UUID jobId)
+  +void markSuccess(UUID jobId)
+  +void markFailed(UUID jobId, String reason)
+}
+
+class JobStatusMachine {
+  +boolean canTransition(JobStatus fromStatus, JobStatus toStatus)
+  +void assertTransition(JobStatus fromStatus, JobStatus toStatus)
+  +boolean isTerminal(JobStatus status)
+}
+
+class QueueScheduler {
+  +void dispatchWaitingJobs()
+}
+
+class QueueService {
+  +JobQueueEntry enqueue(UUID jobId)
+  +Optional<UUID> claimOldestWaitingJob()
+  +void cancelQueueEntry(UUID jobId)
+}
+
+class DockerRunnerService {
+  +void runJob(UUID jobId)
+  +void stopContainer(UUID jobId)
+}
+
+class WorkspaceService {
+  +Path prepareWorkspace(TrainingJob job)
+  +void writeRuntimeConfig(ConfigSnapshot snapshot, Path workspace)
+  +void validateDiskCapacity()
+}
+
+class LogCollector {
+  +void collectStdout(UUID jobId, InputStream stream)
+  +void collectStderr(UUID jobId, InputStream stream)
+}
+
+class ProgressParser {
+  +Optional<ProgressEvent> parse(String stdoutLine)
+}
+
+class ArtifactScannerService {
+  +void registerArtifacts(UUID jobId)
+}
+
+class NotificationWorker {
+  +void processPendingNotifications()
+}
+
+class AuditService {
+  +void record(AuditCommand command)
+}
+
+class StorageService {
+  +Path resolveSourcePath(UUID projectId)
+  +Path resolveWorkspacePath(UUID jobId)
+  +Path resolveArtifactPath(UUID projectId, UUID jobId)
+  +void rejectUnsafePath(String path)
+}
+
+class JobStreamHandler {
+  +void afterConnectionEstablished(WebSocketSession session)
+  +void handleMessage(WebSocketSession session, String payload)
+  +void afterConnectionClosed(WebSocketSession session)
+}
+
+class JobStreamPublisher {
+  +void publishJobStatus(UUID jobId, JobStatus status)
+  +void publishLog(UUID jobId, LogPayload payload)
+  +void publishProgress(UUID jobId, ProgressPayload payload)
+  +void publishArtifactRegistered(UUID jobId, Artifact artifact)
+}
+
+class UserRepository
+class ProjectRepository
+class ConfigRepository
+class TrainingJobRepository
+class QueueRepository
+class LogRepository
+class ProgressRepository
+class ArtifactRepository
+class NotificationRepository
+class AuditRepository
+
+Repository <|.. UserRepository
+Repository <|.. ProjectRepository
+Repository <|.. ConfigRepository
+Repository <|.. TrainingJobRepository
+Repository <|.. QueueRepository
+Repository <|.. LogRepository
+Repository <|.. ProgressRepository
+Repository <|.. ArtifactRepository
+Repository <|.. NotificationRepository
+Repository <|.. AuditRepository
+
+AuthController --> UserRepository
+ProjectController --> ProjectApplicationService
+ConfigController --> ConfigSnapshotService
+JobController --> TrainingJobApplicationService
+LogController --> LogRepository
+ArtifactController --> ArtifactScannerService
+
+ProjectApplicationService --> AuthorizationService
+ProjectApplicationService --> ProjectRepository
+ProjectApplicationService --> StorageService
+ProjectApplicationService --> ConfigSnapshotService
+ProjectApplicationService --> AuditService
+
+TrainingJobApplicationService --> AuthorizationService
+TrainingJobApplicationService --> JobStatusMachine
+TrainingJobApplicationService --> TrainingJobRepository
+TrainingJobApplicationService --> QueueService
+TrainingJobApplicationService --> ConfigSnapshotService
+TrainingJobApplicationService --> AuditService
+TrainingJobApplicationService --> JobStreamPublisher
+
+QueueScheduler --> QueueService
+QueueScheduler --> TrainingJobApplicationService
+QueueScheduler --> DockerRunnerService
+
+DockerRunnerService --> WorkspaceService
+DockerRunnerService --> LogCollector
+DockerRunnerService --> ProgressParser
+DockerRunnerService --> TrainingJobApplicationService
+
+LogCollector --> LogRepository
+LogCollector --> JobStreamPublisher
+ProgressParser --> ProgressRepository
+ProgressParser --> JobStreamPublisher
+
+ArtifactScannerService --> ArtifactRepository
+ArtifactScannerService --> StorageService
+ArtifactScannerService --> NotificationRepository
+ArtifactScannerService --> JobStreamPublisher
+
+NotificationWorker --> NotificationRepository
+NotificationWorker --> AuditService
+JobStreamHandler --> AuthorizationService
+JobStreamHandler --> JobStreamPublisher
+
+@enduml

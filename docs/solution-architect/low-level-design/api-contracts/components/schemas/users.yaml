@@ -1,0 +1,64 @@
+UserSummary:
+  type: object
+  required: [userId, email, fullName, role, status]
+  properties:
+    userId:
+      type: string
+      format: uuid
+    email:
+      type: string
+      format: email
+    fullName:
+      type: string
+    role:
+      $ref: "./common.yaml#/UserRole"
+    status:
+      $ref: "./common.yaml#/UserStatus"
+CurrentUser:
+  allOf:
+    - $ref: "#/UserSummary"
+    - type: object
+      properties:
+        lastLoginAt:
+          type: [string, "null"]
+          format: date-time
+UserPage:
+  type: object
+  required: [data, page]
+  properties:
+    data:
+      type: array
+      items:
+        allOf:
+          - $ref: "#/UserSummary"
+          - type: object
+            properties:
+              createdAt:
+                type: string
+                format: date-time
+              lastLoginAt:
+                type: [string, "null"]
+                format: date-time
+    page:
+      $ref: "./common.yaml#/Page"
+UpdateUserStatusRequest:
+  type: object
+  required: [status]
+  additionalProperties: false
+  properties:
+    status:
+      $ref: "./common.yaml#/UserStatus"
+UserStatusResponse:
+  type: object
+  required: [userId, email, role, status]
+  properties:
+    userId:
+      type: string
+      format: uuid
+    email:
+      type: string
+      format: email
+    role:
+      $ref: "./common.yaml#/UserRole"
+    status:
+      $ref: "./common.yaml#/UserStatus"

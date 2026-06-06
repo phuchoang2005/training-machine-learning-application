@@ -1,0 +1,51 @@
+adminUsers:
+  get:
+    tags: [Users]
+    summary: List users for administration
+    operationId: listUsers
+    parameters:
+      - $ref: "../components/parameters.yaml#/Limit"
+      - $ref: "../components/parameters.yaml#/Cursor"
+      - name: status
+        in: query
+        schema:
+          $ref: "../components/schemas/common.yaml#/UserStatus"
+      - name: role
+        in: query
+        schema:
+          $ref: "../components/schemas/common.yaml#/UserRole"
+    responses:
+      "200":
+        description: Users page
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/users.yaml#/UserPage"
+      "403":
+        $ref: "../components/responses.yaml#/Forbidden"
+adminUserStatus:
+  patch:
+    tags: [Users]
+    summary: Update user status
+    operationId: updateUserStatus
+    parameters:
+      - $ref: "../components/parameters.yaml#/UserId"
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/users.yaml#/UpdateUserStatusRequest"
+    responses:
+      "200":
+        description: Updated user status
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/users.yaml#/UserStatusResponse"
+      "400":
+        $ref: "../components/responses.yaml#/ValidationError"
+      "403":
+        $ref: "../components/responses.yaml#/Forbidden"
+      "404":
+        $ref: "../components/responses.yaml#/NotFound"

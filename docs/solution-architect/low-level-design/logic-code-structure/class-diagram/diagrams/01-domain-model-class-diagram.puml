@@ -1,0 +1,230 @@
+@startuml domain_model_class_diagram
+title Class Diagram - Domain Model and Persistence Entities
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum SourceType {
+  GITHUB
+  ZIP
+}
+
+enum JobStatus {
+  CREATED
+  QUEUED
+  RUNNING
+  SUCCESS
+  FAILED
+  CANCELLED
+  RETRYING
+}
+
+enum QueueStatus {
+  WAITING
+  DISPATCHED
+  CANCELLED
+}
+
+enum StreamType {
+  STDOUT
+  STDERR
+}
+
+enum ArtifactType {
+  MODEL
+  CHECKPOINT
+  METRIC
+  OTHER
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  READ
+}
+
+class User {
+  +UUID userId
+  +String email
+  +String fullName
+  +UserRole role
+  +UserStatus status
+  +Instant createdAt
+  +Instant lastLoginAt
+  +boolean isAdmin()
+  +boolean isActive()
+}
+
+class Project {
+  +UUID projectId
+  +UUID ownerUserId
+  +String projectName
+  +String description
+  +SourceType sourceType
+  +String repositoryUrl
+  +String localSourcePath
+  +String trainingEntrypoint
+  +String status
+  +Instant createdAt
+  +Instant updatedAt
+}
+
+class ProjectConfig {
+  +UUID configId
+  +UUID projectId
+  +String configName
+  +String configPath
+  +String yamlContent
+  +boolean defaultConfig
+  +Instant updatedAt
+}
+
+class ConfigSnapshot {
+  +UUID snapshotId
+  +UUID projectId
+  +UUID configId
+  +String yamlContent
+  +String contentHash
+  +Instant createdAt
+  +boolean isImmutable()
+}
+
+class TrainingJob {
+  +UUID jobId
+  +UUID projectId
+  +UUID triggeredByUserId
+  +UUID configSnapshotId
+  +UUID retryOfJobId
+  +JobStatus status
+  +int retryAttempt
+  +Integer queuePosition
+  +Instant queuedAt
+  +Instant startedAt
+  +Instant endedAt
+  +String containerId
+  +String logPath
+  +String artifactBasePath
+  +String failureReason
+  +Instant createdAt
+  +boolean isTerminal()
+}
+
+class JobQueueEntry {
+  +UUID queueEntryId
+  +UUID jobId
+  +QueueStatus queueStatus
+  +Instant enqueuedAt
+  +Instant dispatchedAt
+}
+
+class JobLogSession {
+  +UUID logSessionId
+  +UUID jobId
+  +String stdoutLogPath
+  +String stderrLogPath
+  +Instant createdAt
+}
+
+class JobLogEvent {
+  +UUID logEventId
+  +UUID logSessionId
+  +StreamType streamType
+  +String message
+  +Instant emittedAt
+  +int sequenceNo
+}
+
+class JobProgressEvent {
+  +UUID progressEventId
+  +UUID jobId
+  +int progressValue
+  +Integer epoch
+  +Integer totalEpoch
+  +String rawPayload
+  +Instant emittedAt
+}
+
+class Artifact {
+  +UUID artifactId
+  +UUID projectId
+  +UUID jobId
+  +String artifactName
+  +ArtifactType artifactType
+  +String filePath
+  +long fileSizeBytes
+  +String checksum
+  +Instant createdAt
+}
+
+class ModelVersion {
+  +UUID modelVersionId
+  +UUID projectId
+  +UUID jobId
+  +UUID artifactId
+  +UUID configSnapshotId
+  +String modelName
+  +String versionNumber
+  +Instant createdAt
+}
+
+class Notification {
+  +UUID notificationId
+  +UUID userId
+  +UUID jobId
+  +String type
+  +NotificationChannel channel
+  +NotificationStatus status
+  +String message
+  +Instant createdAt
+  +Instant sentAt
+}
+
+class AuditLog {
+  +UUID auditId
+  +UUID actorUserId
+  +UUID projectId
+  +UUID jobId
+  +String action
+  +String resourceType
+  +String resourceId
+  +String metadataJson
+  +Instant createdAt
+}
+
+User "1" --> "0..*" Project : owns
+User "1" --> "0..*" TrainingJob : triggers
+User "1" --> "0..*" Notification : receives
+User "1" --> "0..*" AuditLog : performs
+
+Project "1" --> "0..*" ProjectConfig : has
+Project "1" --> "0..*" ConfigSnapshot : snapshots
+Project "1" --> "0..*" TrainingJob : jobs
+Project "1" --> "0..*" Artifact : artifacts
+Project "1" --> "0..*" ModelVersion : versions
+
+ProjectConfig "1" --> "0..*" ConfigSnapshot : source
+ConfigSnapshot "1" --> "0..*" TrainingJob : used by
+TrainingJob "1" --> "0..1" JobQueueEntry : queue entry
+TrainingJob "1" --> "0..*" JobLogSession : log sessions
+JobLogSession "1" --> "0..*" JobLogEvent : events
+TrainingJob "1" --> "0..*" JobProgressEvent : progress
+TrainingJob "1" --> "0..*" Artifact : generates
+Artifact "1" --> "0..1" ModelVersion : registered as
+TrainingJob "0..1" --> "0..*" TrainingJob : retried as
+TrainingJob "1" --> "0..*" Notification : triggers
+TrainingJob "1" --> "0..*" AuditLog : audited
+
+@enduml

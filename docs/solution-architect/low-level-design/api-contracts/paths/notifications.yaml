@@ -1,0 +1,33 @@
+notifications:
+  get:
+    tags: [Notifications]
+    summary: List current user's notifications
+    operationId: listNotifications
+    parameters:
+      - $ref: "../components/parameters.yaml#/Limit"
+      - $ref: "../components/parameters.yaml#/Cursor"
+      - name: status
+        in: query
+        schema:
+          $ref: "../components/schemas/common.yaml#/NotificationStatus"
+    responses:
+      "200":
+        description: Notification page
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/notifications-audit.yaml#/NotificationPage"
+notificationRead:
+  patch:
+    tags: [Notifications]
+    summary: Mark notification as read
+    operationId: markNotificationRead
+    parameters:
+      - $ref: "../components/parameters.yaml#/NotificationId"
+    responses:
+      "200":
+        description: Updated notification
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/notifications-audit.yaml#/NotificationStatusResponse"

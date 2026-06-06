@@ -1,0 +1,21 @@
+@startuml sequence_diagram_index
+title Sequence Diagram Index
+
+skinparam shadowing false
+
+actor "Reviewer / Developer" as User
+collections "Sequence Diagram Modules" as Modules
+
+User -> Modules: Render 01-auth-project-dashboard-sequence.puml
+User -> Modules: Render 02-project-registration-sequence.puml
+User -> Modules: Render 03-start-training-job-sequence.puml
+User -> Modules: Render 04-docker-log-progress-sequence.puml
+User -> Modules: Render 05-artifact-notification-sequence.puml
+User -> Modules: Render 06-cancel-retry-recovery-sequence.puml
+
+note right of Modules
+  Each module is a standalone PlantUML file.
+  Render individual files from the diagrams/ folder.
+end note
+
+@enduml

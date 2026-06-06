@@ -1,0 +1,78 @@
+Notification:
+  type: object
+  required: [notificationId, type, channel, status, message, createdAt]
+  properties:
+    notificationId:
+      type: string
+      format: uuid
+    jobId:
+      type: [string, "null"]
+      format: uuid
+    type:
+      type: string
+    channel:
+      type: string
+      enum: [IN_APP, EMAIL]
+    status:
+      $ref: "./common.yaml#/NotificationStatus"
+    message:
+      type: string
+    createdAt:
+      type: string
+      format: date-time
+NotificationPage:
+  type: object
+  required: [data, page]
+  properties:
+    data:
+      type: array
+      items:
+        $ref: "#/Notification"
+    page:
+      $ref: "./common.yaml#/Page"
+NotificationStatusResponse:
+  type: object
+  required: [notificationId, status]
+  properties:
+    notificationId:
+      type: string
+      format: uuid
+    status:
+      $ref: "./common.yaml#/NotificationStatus"
+AuditLog:
+  type: object
+  required: [auditId, action, resourceType, resourceId, createdAt]
+  properties:
+    auditId:
+      type: string
+      format: uuid
+    actor:
+      $ref: "./jobs.yaml#/TriggeredBy"
+    projectId:
+      type: [string, "null"]
+      format: uuid
+    jobId:
+      type: [string, "null"]
+      format: uuid
+    action:
+      type: string
+    resourceType:
+      type: string
+    resourceId:
+      type: string
+    metadata:
+      type: object
+      additionalProperties: true
+    createdAt:
+      type: string
+      format: date-time
+AuditLogPage:
+  type: object
+  required: [data, page]
+  properties:
+    data:
+      type: array
+      items:
+        $ref: "#/AuditLog"
+    page:
+      $ref: "./common.yaml#/Page"

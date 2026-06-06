@@ -1,0 +1,18 @@
+@startuml class_diagram_index
+title Class Diagram Index
+
+class "Domain Model" as Domain
+class "Backend Services" as Backend
+class "API DTO Contracts" as Api
+class "WebSocket Events" as Ws
+
+Domain --> Backend : used by
+Api --> Backend : mapped by controllers
+Ws --> Backend : published by services
+
+note right of Domain
+  Render individual modules from diagrams/.
+  Each module is standalone PlantUML.
+end note
+
+@enduml

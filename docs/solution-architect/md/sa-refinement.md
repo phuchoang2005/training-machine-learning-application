@@ -531,11 +531,10 @@ Elapsed Time: 01:25:34
 
 ## 15A.5 Update Mechanism
 
-Progress updates shall support the same real-time communication mechanism used for monitoring:
+Progress updates shall use the same real-time communication mechanism used for monitoring:
 
-* WebSocket
-* Server-Sent Events (SSE)
-* Polling
+* WebSocket as the primary mechanism
+* REST polling as a fallback when WebSocket is unavailable
 
 ---
 

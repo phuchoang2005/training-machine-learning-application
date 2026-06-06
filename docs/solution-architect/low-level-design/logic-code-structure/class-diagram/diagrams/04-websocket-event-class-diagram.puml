@@ -1,0 +1,119 @@
+@startuml websocket_event_class_diagram
+title Class Diagram - WebSocket Stream Events
+
+enum JobStreamEventType {
+  SNAPSHOT
+  JOB_STATUS
+  LOG
+  PROGRESS
+  ARTIFACT_REGISTERED
+  ERROR
+}
+
+class JobStreamEnvelope {
+  +long eventId
+  +UUID jobId
+  +JobStreamEventType type
+  +Instant timestamp
+  +Object payload
+}
+
+class ClientMessage {
+  +String type
+}
+
+class PingMessage {
+  +String type
+  +Instant clientTime
+}
+
+class ResumeMessage {
+  +String type
+  +long lastEventId
+}
+
+class SnapshotPayload {
+  +JobStatus status
+  +ProgressPayload progress
+  +Integer queuePosition
+  +int lastLogSequenceNo
+}
+
+class JobStatusPayload {
+  +JobStatus previousStatus
+  +JobStatus status
+  +Integer queuePosition
+}
+
+class LogPayload {
+  +StreamType streamType
+  +int sequenceNo
+  +String message
+}
+
+class ProgressPayload {
+  +boolean available
+  +Integer value
+  +Integer epoch
+  +Integer totalEpoch
+  +String rawPayload
+}
+
+class ArtifactRegisteredPayload {
+  +UUID artifactId
+  +String artifactName
+  +ArtifactType artifactType
+  +String modelVersion
+}
+
+class StreamErrorPayload {
+  +String code
+  +String message
+}
+
+class JobStreamSession {
+  +String sessionId
+  +UUID userId
+  +UUID jobId
+  +long lastEventId
+  +Instant connectedAt
+  +boolean authorized
+}
+
+class JobStreamHandler {
+  +void authorizeHandshake(JobStreamSession session)
+  +void handlePing(PingMessage message)
+  +void handleResume(ResumeMessage message)
+  +void closeUnauthorized(JobStreamSession session)
+}
+
+class JobStreamPublisher {
+  +void publish(JobStreamEnvelope event)
+  +void publishSnapshot(UUID jobId, UUID sessionId)
+  +void replay(UUID jobId, long afterEventId)
+}
+
+class JobStreamEventStore {
+  +void append(JobStreamEnvelope event)
+  +List<JobStreamEnvelope> findAfter(UUID jobId, long eventId)
+  +SnapshotPayload buildSnapshot(UUID jobId)
+}
+
+ClientMessage <|-- PingMessage
+ClientMessage <|-- ResumeMessage
+
+JobStreamEnvelope --> JobStreamEventType
+JobStreamEnvelope --> SnapshotPayload
+JobStreamEnvelope --> JobStatusPayload
+JobStreamEnvelope --> LogPayload
+JobStreamEnvelope --> ProgressPayload
+JobStreamEnvelope --> ArtifactRegisteredPayload
+JobStreamEnvelope --> StreamErrorPayload
+
+SnapshotPayload --> ProgressPayload
+JobStreamHandler --> JobStreamSession
+JobStreamHandler --> JobStreamPublisher
+JobStreamPublisher --> JobStreamEventStore
+JobStreamPublisher --> JobStreamEnvelope
+
+@enduml

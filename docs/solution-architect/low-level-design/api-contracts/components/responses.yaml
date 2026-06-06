@@ -1,0 +1,48 @@
+Unauthenticated:
+  description: Missing or invalid authentication
+  content:
+    application/json:
+      schema:
+        $ref: "./schemas/common.yaml#/ErrorResponse"
+Forbidden:
+  description: Not authorized
+  content:
+    application/json:
+      schema:
+        $ref: "./schemas/common.yaml#/ErrorResponse"
+NotFound:
+  description: Resource not found
+  content:
+    application/json:
+      schema:
+        $ref: "./schemas/common.yaml#/ErrorResponse"
+ValidationError:
+  description: Validation error
+  content:
+    application/json:
+      schema:
+        $ref: "./schemas/common.yaml#/ErrorResponse"
+Conflict:
+  description: State conflict
+  content:
+    application/json:
+      schema:
+        $ref: "./schemas/common.yaml#/ErrorResponse"
+PlatformBusy:
+  description: Platform capacity exceeded
+  content:
+    application/json:
+      schema:
+        $ref: "./schemas/common.yaml#/ErrorResponse"
+PayloadTooLarge:
+  description: Upload is too large
+  content:
+    application/json:
+      schema:
+        $ref: "./schemas/common.yaml#/ErrorResponse"
+UnsupportedMediaType:
+  description: Unsupported media type
+  content:
+    application/json:
+      schema:
+        $ref: "./schemas/common.yaml#/ErrorResponse"

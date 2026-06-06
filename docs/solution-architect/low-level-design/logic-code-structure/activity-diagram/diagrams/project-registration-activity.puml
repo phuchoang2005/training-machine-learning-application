@@ -1,0 +1,104 @@
+@startuml project_registration_activity
+title Activity Diagram - Project Registration and Source Intake
+
+skinparam shadowing false
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+}
+
+start
+
+partition "React Frontend" {
+  :User opens Project Registration form;
+  :Select source type;
+}
+
+if (Source type?) then (GitHub)
+  partition "React Frontend" {
+    :Enter project metadata\nand public GitHub URL;
+    :Submit project registration;
+  }
+
+  partition "Spring Boot API" {
+    :Authenticate user;
+    :Authorize USER role;
+    :Validate repository URL format;
+    :Check public GitHub accessibility;
+  }
+
+  if (Repository reachable?) then (yes)
+    partition "Storage Service" {
+      :Clone repository if local source\nfor project does not exist;
+      :Store source under /data/sources/{projectId};
+    }
+  else (no)
+    partition "Spring Boot API" {
+      :Return PROJECT_VALIDATION_FAILED;
+    }
+    stop
+  endif
+
+else (ZIP)
+  partition "React Frontend" {
+    :Attach ZIP file and metadata;
+    :Submit multipart upload;
+  }
+
+  partition "Spring Boot API" {
+    :Authenticate user;
+    :Authorize USER role;
+    :Validate content type and upload size;
+  }
+
+  if (ZIP accepted?) then (yes)
+    partition "Storage Service" {
+      :Store original ZIP under /data/uploads/{projectId};
+      :Validate each archive entry;
+      if (Unsafe ZIP entry?) then (yes)
+        :Reject Zip Slip / unsafe archive;
+        stop
+      else (no)
+        :Extract into controlled source directory;
+      endif
+    }
+  else (no)
+    partition "Spring Boot API" {
+      :Return ZIP_VALIDATION_FAILED;
+    }
+    stop
+  endif
+endif
+
+partition "Project Service" {
+  :Detect source structure;
+  :Validate required files\nmain.py, requirements.txt, configs/;
+}
+
+if (Required project files exist?) then (yes)
+  partition "Config Service" {
+    :Discover YAML files under configs/;
+    :Register project config metadata;
+  }
+
+  partition "PostgreSQL" {
+    :Persist projects;
+    :Persist project_configs;
+    :Persist audit_logs PROJECT_REGISTERED;
+  }
+
+  partition "React Frontend" {
+    :Navigate to Project Detail page;
+    :Show project ready for training;
+  }
+  stop
+else (no)
+  partition "Spring Boot API" {
+    :Reject registration;
+    :Return missing project requirements;
+    :Write audit log for validation failure;
+  }
+  stop
+endif
+
+@enduml

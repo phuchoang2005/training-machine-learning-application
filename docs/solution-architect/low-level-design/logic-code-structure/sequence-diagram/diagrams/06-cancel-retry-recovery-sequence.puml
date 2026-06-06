@@ -1,0 +1,89 @@
+@startuml cancel_retry_recovery_sequence
+title Sequence Diagram - Cancel, Retry, and Restart Recovery
+
+skinparam shadowing false
+actor User
+participant "React SPA" as FE
+participant "Job API" as API
+participant "Authorization Service" as AUTHZ
+participant "Training Job Service" as JOB
+participant "Queue Service" as QUEUE
+participant "Docker Runner" as RUNNER
+participant "Recovery Worker" as RECOVERY
+participant "Queue Scheduler" as SCHED
+database "PostgreSQL" as DB
+participant "WebSocket Publisher" as WS
+participant "Audit Service" as AUDIT
+
+== Cancel ==
+
+User -> FE: Cancel job
+FE -> API: POST /api/v1/jobs/{jobId}/cancel
+API -> AUTHZ: authorize owner or admin cancel
+AUTHZ --> API: allowed
+API -> JOB: cancel(jobId, reason)
+JOB -> DB: load job status
+
+alt status QUEUED
+  JOB -> QUEUE: cancel queue entry
+  QUEUE -> DB: mark queue CANCELLED
+  JOB -> DB: mark job CANCELLED
+  JOB -> AUDIT: record TRAINING_CANCEL
+  JOB -> WS: publish JOB_STATUS CANCELLED
+  API --> FE: 202 cancel accepted
+else status RUNNING
+  JOB -> RUNNER: stop container
+  RUNNER --> JOB: stopped or forced stopped
+  JOB -> DB: mark job CANCELLED
+  JOB -> AUDIT: record TRAINING_CANCEL
+  JOB -> WS: publish JOB_STATUS CANCELLED
+  API --> FE: 202 cancel accepted
+else terminal or invalid
+  JOB --> API: INVALID_STATE_TRANSITION
+  API --> FE: 409 conflict
+end
+
+== Retry ==
+
+User -> FE: Retry failed/cancelled job
+FE -> API: POST /api/v1/jobs/{jobId}/retry\nIdempotency-Key
+API -> AUTHZ: authorize owner retry
+AUTHZ --> API: allowed
+API -> JOB: create retry job
+JOB -> DB: load original job and config snapshot
+
+alt original status FAILED or CANCELLED
+  JOB -> DB: insert new config snapshot if modified
+  JOB -> DB: insert new training_jobs retry_of_job_id=original
+  JOB -> QUEUE: enqueue new job
+  QUEUE -> DB: insert WAITING queue row
+  JOB -> AUDIT: record TRAINING_RETRY
+  JOB -> WS: publish JOB_STATUS QUEUED for new job
+  API --> FE: 202 retry job created
+else original not retryable
+  JOB --> API: INVALID_STATE_TRANSITION
+  API --> FE: 409 conflict
+end
+
+== Restart Recovery ==
+
+RECOVERY -> DB: find jobs status RUNNING
+
+alt running jobs found
+  loop each interrupted job
+    RECOVERY -> RUNNER: stop orphan container if exists
+    RECOVERY -> DB: mark job RETRYING
+    RECOVERY -> QUEUE: create or update WAITING queue entry
+    QUEUE -> DB: persist queue row
+    RECOVERY -> DB: mark job QUEUED
+    RECOVERY -> AUDIT: record JOB_RECOVERED
+    RECOVERY -> WS: publish JOB_STATUS QUEUED
+  end
+else none found
+  RECOVERY -> RECOVERY: no recovery action
+end
+
+RECOVERY -> SCHED: start normal scheduler
+SCHED -> DB: dispatch oldest WAITING when RUNNING < 2
+
+@enduml

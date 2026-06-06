@@ -1,0 +1,26 @@
+authMe:
+  get:
+    tags: [Auth]
+    summary: Get current authenticated user
+    operationId: getCurrentUser
+    responses:
+      "200":
+        description: Current user profile
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/users.yaml#/CurrentUser"
+      "401":
+        $ref: "../components/responses.yaml#/Unauthenticated"
+      "403":
+        $ref: "../components/responses.yaml#/Forbidden"
+authLogout:
+  post:
+    tags: [Auth]
+    summary: Logout current user
+    operationId: logout
+    responses:
+      "204":
+        description: Logged out
+      "401":
+        $ref: "../components/responses.yaml#/Unauthenticated"

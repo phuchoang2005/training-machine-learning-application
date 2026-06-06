@@ -1,0 +1,65 @@
+@startuml project_registration_sequence
+title Sequence Diagram - Project Registration with GitHub or ZIP
+
+skinparam shadowing false
+actor User
+participant "React SPA" as FE
+participant "Project API" as API
+participant "Authorization Service" as AUTHZ
+participant "Project Service" as PROJECT
+participant "Storage Service" as STORAGE
+participant "GitHub Public Repo" as GITHUB
+participant "ZIP Validator" as ZIP
+participant "Config Service" as CONFIG
+database "PostgreSQL" as DB
+participant "Audit Service" as AUDIT
+
+User -> FE: Submit project registration
+
+alt GitHub source
+  FE -> API: POST /api/v1/projects\nIdempotency-Key
+  API -> AUTHZ: authorize create project
+  AUTHZ --> API: allowed
+  API -> PROJECT: validate metadata and GitHub URL
+  PROJECT -> GITHUB: Check public repository accessibility
+  alt repository reachable
+    PROJECT -> STORAGE: allocate /data/sources/{projectId}
+    STORAGE -> GITHUB: clone repository if absent
+    GITHUB --> STORAGE: repository contents
+  else repository not reachable
+    PROJECT --> API: PROJECT_VALIDATION_FAILED
+    API --> FE: 400 validation error
+  end
+else ZIP source
+  FE -> API: POST /api/v1/projects/upload-zip\nmultipart + Idempotency-Key
+  API -> AUTHZ: authorize create project
+  AUTHZ --> API: allowed
+  API -> PROJECT: validate metadata
+  PROJECT -> STORAGE: store original ZIP
+  PROJECT -> ZIP: validate entries, size, type, Zip Slip
+  alt ZIP valid
+    ZIP -> STORAGE: extract to controlled source directory
+  else ZIP invalid
+    ZIP --> API: ZIP_VALIDATION_FAILED
+    API --> FE: 400 validation error
+  end
+end
+
+PROJECT -> STORAGE: inspect source directory
+PROJECT -> PROJECT: verify main.py, requirements.txt, configs/
+
+alt required files exist
+  PROJECT -> CONFIG: discover YAML config files
+  CONFIG -> DB: insert project_configs
+  PROJECT -> DB: insert projects
+  PROJECT -> AUDIT: record PROJECT_REGISTERED
+  AUDIT -> DB: insert audit_logs
+  API --> FE: 201 CreateProjectResponse
+  FE --> User: Navigate to Project Detail
+else required files missing
+  PROJECT -> AUDIT: record PROJECT_VALIDATION_FAILED
+  AUDIT -> DB: insert audit_logs
+  API --> FE: 400 missing requirements
+end
+
+@enduml

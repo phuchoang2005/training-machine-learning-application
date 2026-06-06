@@ -1,0 +1,97 @@
+ProjectSummary:
+  type: object
+  required: [projectId, projectName, sourceType]
+  properties:
+    projectId:
+      type: string
+      format: uuid
+    projectName:
+      type: string
+    description:
+      type: string
+    sourceType:
+      $ref: "./common.yaml#/SourceType"
+    latestJobStatus:
+      anyOf:
+        - $ref: "./common.yaml#/JobStatus"
+        - type: "null"
+    lastTrainingTime:
+      type: [string, "null"]
+      format: date-time
+    lastTrainingOwner:
+      type: [string, "null"]
+ProjectPage:
+  type: object
+  required: [data, page]
+  properties:
+    data:
+      type: array
+      items:
+        $ref: "#/ProjectSummary"
+    page:
+      $ref: "./common.yaml#/Page"
+CreateGithubProjectRequest:
+  type: object
+  required: [projectName, repositoryUrl, trainingEntrypoint]
+  additionalProperties: false
+  properties:
+    projectName:
+      type: string
+      minLength: 1
+      maxLength: 120
+    description:
+      type: string
+      maxLength: 1000
+    repositoryUrl:
+      type: string
+      format: uri
+    trainingEntrypoint:
+      type: string
+      default: main.py
+ZipProjectMetadata:
+  type: object
+  required: [projectName, trainingEntrypoint]
+  additionalProperties: false
+  properties:
+    projectName:
+      type: string
+    description:
+      type: string
+    trainingEntrypoint:
+      type: string
+      default: main.py
+CreateProjectResponse:
+  type: object
+  required: [projectId, projectName, sourceType, status, createdAt]
+  properties:
+    projectId:
+      type: string
+      format: uuid
+    projectName:
+      type: string
+    sourceType:
+      $ref: "./common.yaml#/SourceType"
+    status:
+      type: string
+      example: ACTIVE
+    createdAt:
+      type: string
+      format: date-time
+ProjectDetail:
+  allOf:
+    - $ref: "#/ProjectSummary"
+    - type: object
+      properties:
+        repositoryUrl:
+          type: [string, "null"]
+          format: uri
+        trainingEntrypoint:
+          type: string
+        owner:
+          $ref: "./users.yaml#/UserSummary"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

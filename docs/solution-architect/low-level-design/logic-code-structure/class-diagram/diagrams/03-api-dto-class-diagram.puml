@@ -1,0 +1,209 @@
+@startuml api_dto_class_diagram
+title Class Diagram - REST API DTO Contracts
+
+class ErrorResponse {
+  +ApiError error
+}
+
+class ApiError {
+  +String code
+  +String message
+  +String correlationId
+  +List<ValidationDetail> details
+}
+
+class ValidationDetail {
+  +String field
+  +String reason
+}
+
+class Page {
+  +int limit
+  +String nextCursor
+  +boolean hasMore
+}
+
+class CurrentUserResponse {
+  +UUID userId
+  +String email
+  +String fullName
+  +UserRole role
+  +UserStatus status
+  +Instant lastLoginAt
+}
+
+class CreateGithubProjectRequest {
+  +String projectName
+  +String description
+  +String repositoryUrl
+  +String trainingEntrypoint
+}
+
+class ZipProjectMetadata {
+  +String projectName
+  +String description
+  +String trainingEntrypoint
+}
+
+class ProjectSummaryResponse {
+  +UUID projectId
+  +String projectName
+  +String description
+  +SourceType sourceType
+  +JobStatus latestJobStatus
+  +Instant lastTrainingTime
+  +String lastTrainingOwner
+}
+
+class ProjectDetailResponse {
+  +UUID projectId
+  +String projectName
+  +String description
+  +SourceType sourceType
+  +String repositoryUrl
+  +String trainingEntrypoint
+  +UserSummary owner
+  +Instant createdAt
+  +Instant updatedAt
+}
+
+class ProjectPage {
+  +List<ProjectSummaryResponse> data
+  +Page page
+}
+
+class ProjectConfigSummaryResponse {
+  +UUID configId
+  +String configName
+  +String configPath
+  +boolean isDefault
+  +Instant updatedAt
+}
+
+class ProjectConfigContentResponse {
+  +UUID configId
+  +String configPath
+  +String yamlContent
+  +String contentHash
+}
+
+class ValidateYamlRequest {
+  +String yamlContent
+}
+
+class ValidateYamlResponse {
+  +boolean valid
+  +Map normalizedPreview
+  +List<String> errors
+}
+
+class StartJobRequest {
+  +UUID configId
+  +String yamlContent
+}
+
+class StartJobResponse {
+  +UUID jobId
+  +UUID projectId
+  +JobStatus status
+  +Integer queuePosition
+  +UUID configSnapshotId
+  +Instant createdAt
+}
+
+class JobDetailResponse {
+  +UUID jobId
+  +UUID projectId
+  +String projectName
+  +UserSummary triggeredBy
+  +JobStatus status
+  +Integer queuePosition
+  +ProgressResponse progress
+  +UUID retryOfJobId
+  +int retryAttempt
+  +Instant createdAt
+  +Instant queuedAt
+  +Instant startedAt
+  +Instant endedAt
+  +String failureReason
+}
+
+class ProgressResponse {
+  +boolean available
+  +Integer value
+  +Integer epoch
+  +Integer totalEpoch
+  +Instant updatedAt
+}
+
+class CancelJobRequest {
+  +String reason
+}
+
+class RetryJobRequest {
+  +RetryMode mode
+  +String yamlContent
+}
+
+class LogEventResponse {
+  +UUID logEventId
+  +int sequenceNo
+  +StreamType streamType
+  +String message
+  +Instant emittedAt
+}
+
+class ArtifactResponse {
+  +UUID artifactId
+  +String artifactName
+  +ArtifactType artifactType
+  +long fileSizeBytes
+  +String checksum
+  +Instant createdAt
+  +ModelVersionSummary modelVersion
+}
+
+class NotificationResponse {
+  +UUID notificationId
+  +UUID jobId
+  +String type
+  +NotificationChannel channel
+  +NotificationStatus status
+  +String message
+  +Instant createdAt
+}
+
+class AuditLogResponse {
+  +UUID auditId
+  +UserSummary actor
+  +UUID projectId
+  +UUID jobId
+  +String action
+  +String resourceType
+  +String resourceId
+  +Map metadata
+  +Instant createdAt
+}
+
+class UserSummary {
+  +UUID userId
+  +String email
+  +String fullName
+}
+
+class ModelVersionSummary {
+  +UUID modelVersionId
+  +String versionNumber
+}
+
+ErrorResponse --> ApiError
+ApiError --> ValidationDetail
+ProjectPage --> ProjectSummaryResponse
+ProjectPage --> Page
+ProjectDetailResponse --> UserSummary
+JobDetailResponse --> UserSummary
+JobDetailResponse --> ProgressResponse
+ArtifactResponse --> ModelVersionSummary
+AuditLogResponse --> UserSummary
+
+@enduml

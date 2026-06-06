@@ -1,0 +1,217 @@
+@startuml physical_database_erd
+title Physical ERD - AI Training Management Platform PostgreSQL Schema
+
+hide methods
+hide stereotypes
+
+entity users {
+  * user_id : uuid <<PK>>
+  --
+  * email : varchar(320) <<UK>>
+  * full_name : varchar(255)
+  * role : user_role
+  * status : user_status
+  * created_at : timestamptz
+  last_login_at : timestamptz
+}
+
+entity projects {
+  * project_id : uuid <<PK>>
+  --
+  * owner_user_id : uuid <<FK users.user_id>>
+  * project_name : varchar(160)
+  description : text
+  * source_type : source_type
+  repository_url : text
+  * local_source_path : text
+  * training_entrypoint : varchar(255)
+  * status : varchar(40)
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity project_configs {
+  * config_id : uuid <<PK>>
+  --
+  * project_id : uuid <<FK projects.project_id>>
+  * config_name : varchar(160)
+  * config_path : text
+  * yaml_content : text
+  * is_default : boolean
+  * updated_at : timestamptz
+}
+
+entity config_snapshots {
+  * snapshot_id : uuid <<PK>>
+  --
+  * project_id : uuid <<FK projects.project_id>>
+  * config_id : uuid <<FK project_configs.config_id>>
+  * yaml_content : text
+  * content_hash : varchar(128)
+  * created_at : timestamptz
+}
+
+entity training_jobs {
+  * job_id : uuid <<PK>>
+  --
+  * project_id : uuid <<FK projects.project_id>>
+  * triggered_by_user_id : uuid <<FK users.user_id>>
+  * config_snapshot_id : uuid <<FK config_snapshots.snapshot_id>>
+  retry_of_job_id : uuid <<FK training_jobs.job_id>>
+  * status : job_status
+  * retry_attempt : integer
+  queue_position : integer
+  queued_at : timestamptz
+  started_at : timestamptz
+  ended_at : timestamptz
+  container_id : varchar(128)
+  log_path : text
+  artifact_base_path : text
+  failure_reason : text
+  * created_at : timestamptz
+}
+
+entity job_queue_entries {
+  * queue_entry_id : uuid <<PK>>
+  --
+  * job_id : uuid <<FK training_jobs.job_id>>
+  * queue_status : queue_status
+  * enqueued_at : timestamptz
+  dispatched_at : timestamptz
+}
+
+entity job_log_sessions {
+  * log_session_id : uuid <<PK>>
+  --
+  * job_id : uuid <<FK training_jobs.job_id>>
+  * stdout_log_path : text
+  * stderr_log_path : text
+  * created_at : timestamptz
+}
+
+entity job_log_events {
+  * log_event_id : uuid <<PK>>
+  --
+  * log_session_id : uuid <<FK job_log_sessions.log_session_id>>
+  * stream_type : stream_type
+  * message : text
+  * emitted_at : timestamptz
+  * sequence_no : integer
+}
+
+entity job_progress_events {
+  * progress_event_id : uuid <<PK>>
+  --
+  * job_id : uuid <<FK training_jobs.job_id>>
+  * progress_value : integer
+  epoch : integer
+  total_epoch : integer
+  raw_payload : jsonb
+  * emitted_at : timestamptz
+}
+
+entity artifacts {
+  * artifact_id : uuid <<PK>>
+  --
+  * project_id : uuid <<FK projects.project_id>>
+  * job_id : uuid <<FK training_jobs.job_id>>
+  * artifact_name : varchar(255)
+  * artifact_type : artifact_type
+  * file_path : text
+  * file_size_bytes : bigint
+  * checksum : varchar(128)
+  * created_at : timestamptz
+}
+
+entity model_versions {
+  * model_version_id : uuid <<PK>>
+  --
+  * project_id : uuid <<FK projects.project_id>>
+  * job_id : uuid <<FK training_jobs.job_id>>
+  artifact_id : uuid <<FK artifacts.artifact_id>>
+  * config_snapshot_id : uuid <<FK config_snapshots.snapshot_id>>
+  * model_name : varchar(160)
+  * version_number : varchar(40)
+  * created_at : timestamptz
+}
+
+entity notifications {
+  * notification_id : uuid <<PK>>
+  --
+  * user_id : uuid <<FK users.user_id>>
+  job_id : uuid <<FK training_jobs.job_id>>
+  * type : varchar(80)
+  * channel : notification_channel
+  * status : notification_status
+  * message : text
+  * created_at : timestamptz
+  sent_at : timestamptz
+}
+
+entity audit_logs {
+  * audit_id : uuid <<PK>>
+  --
+  * actor_user_id : uuid <<FK users.user_id>>
+  project_id : uuid <<FK projects.project_id>>
+  job_id : uuid <<FK training_jobs.job_id>>
+  * action : varchar(100)
+  * resource_type : varchar(80)
+  * resource_id : varchar(120)
+  metadata_json : jsonb
+  * created_at : timestamptz
+}
+
+entity idempotency_keys {
+  * idempotency_key_id : uuid <<PK>>
+  --
+  * user_id : uuid <<FK users.user_id>>
+  * endpoint : text
+  * idempotency_key : varchar(128)
+  * request_hash : varchar(128)
+  response_status : integer
+  response_body : jsonb
+  * created_at : timestamptz
+  * expires_at : timestamptz
+}
+
+entity job_stream_events {
+  * stream_event_id : uuid <<PK>>
+  --
+  * job_id : uuid <<FK training_jobs.job_id>>
+  * event_id : bigint
+  * event_type : varchar(40)
+  * payload_json : jsonb
+  * created_at : timestamptz
+}
+
+users ||--o{ projects : owns
+users ||--o{ training_jobs : triggers
+users ||--o{ notifications : receives
+users ||--o{ audit_logs : performs
+users ||--o{ idempotency_keys : owns
+
+projects ||--o{ project_configs : has
+projects ||--o{ config_snapshots : snapshots
+projects ||--o{ training_jobs : has
+projects ||--o{ artifacts : owns
+projects ||--o{ model_versions : versions
+projects ||--o{ audit_logs : audited
+
+project_configs ||--o{ config_snapshots : source
+config_snapshots ||--o{ training_jobs : used_by
+config_snapshots ||--o{ model_versions : reproduces
+
+training_jobs ||--o| job_queue_entries : queued_as
+training_jobs ||--o{ job_log_sessions : log_sessions
+training_jobs ||--o{ job_progress_events : progress
+training_jobs ||--o{ artifacts : generates
+training_jobs ||--o{ model_versions : creates
+training_jobs ||--o{ notifications : triggers
+training_jobs ||--o{ audit_logs : related
+training_jobs ||--o{ job_stream_events : streams
+training_jobs ||--o{ training_jobs : retry_chain
+
+job_log_sessions ||--o{ job_log_events : contains
+artifacts ||--o| model_versions : registered_as
+
+@enduml

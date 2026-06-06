@@ -1,0 +1,8 @@
+bearerAuth:
+  type: http
+  scheme: bearer
+  bearerFormat: JWT
+sessionCookie:
+  type: apiKey
+  in: cookie
+  name: SESSION

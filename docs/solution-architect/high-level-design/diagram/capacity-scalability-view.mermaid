@@ -1,0 +1,33 @@
+flowchart LR
+    subgraph MVP["MVP Capacity"]
+        Users["Maximum 7 active users"]
+        Running["Maximum 2 RUNNING jobs"]
+        Queue["FIFO queue<br/>up to 50 queued jobs"]
+        Server["Single training server"]
+        Docker["Docker Engine<br/>isolated containers"]
+        Storage["Local host storage"]
+        DB["Relational database<br/>persistent queue and job state"]
+    end
+
+    Users --> API["Backend API"]
+    API --> Queue
+    Queue --> Running
+    Running --> Server
+    Server --> Docker
+    Docker --> Storage
+    Queue --> DB
+    Running --> DB
+
+    subgraph Future["Future Scalability Roadmap"]
+        Workers["Multiple training workers"]
+        GPU["GPU scheduling"]
+        K8S["Kubernetes orchestration"]
+        ObjectStorage["Object storage for artifacts and logs"]
+        MQ["Message queue"]
+    end
+
+    Queue -. replace DB queue when needed .-> MQ
+    Server -. scale out .-> Workers
+    Docker -. orchestrate .-> K8S
+    Running -. schedule accelerator jobs .-> GPU
+    Storage -. externalize durable files .-> ObjectStorage

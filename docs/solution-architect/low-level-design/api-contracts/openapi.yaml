@@ -1,0 +1,183 @@
+openapi: 3.1.0
+info:
+  title: AI Training Management Platform API
+  version: 1.0.0
+  description: REST API contract for project management, training jobs, logs, artifacts, notifications, and audit records.
+servers:
+  - url: /api/v1
+    description: Version 1 API
+security:
+  - bearerAuth: []
+  - sessionCookie: []
+tags:
+  - name: Auth
+  - name: Users
+  - name: Projects
+  - name: Configurations
+  - name: Training Jobs
+  - name: Logs
+  - name: Artifacts
+  - name: Notifications
+  - name: Audit
+paths:
+  /auth/me:
+    $ref: "./paths/auth.yaml#/authMe"
+  /auth/logout:
+    $ref: "./paths/auth.yaml#/authLogout"
+  /admin/users:
+    $ref: "./paths/users.yaml#/adminUsers"
+  /admin/users/{userId}/status:
+    $ref: "./paths/users.yaml#/adminUserStatus"
+  /projects:
+    $ref: "./paths/projects.yaml#/projects"
+  /projects/upload-zip:
+    $ref: "./paths/projects.yaml#/projectZipUpload"
+  /projects/{projectId}:
+    $ref: "./paths/projects.yaml#/projectById"
+  /projects/{projectId}/configs:
+    $ref: "./paths/configurations.yaml#/projectConfigs"
+  /projects/{projectId}/configs/{configId}:
+    $ref: "./paths/configurations.yaml#/projectConfigById"
+  /projects/{projectId}/configs/validate:
+    $ref: "./paths/configurations.yaml#/projectConfigValidation"
+  /projects/{projectId}/jobs:
+    $ref: "./paths/training-jobs.yaml#/projectJobs"
+  /jobs/{jobId}:
+    $ref: "./paths/training-jobs.yaml#/jobById"
+  /jobs/{jobId}/cancel:
+    $ref: "./paths/training-jobs.yaml#/jobCancel"
+  /jobs/{jobId}/retry:
+    $ref: "./paths/training-jobs.yaml#/jobRetry"
+  /jobs/queue:
+    $ref: "./paths/training-jobs.yaml#/jobQueue"
+  /jobs/{jobId}/logs:
+    $ref: "./paths/logs.yaml#/jobLogs"
+  /jobs/{jobId}/logs/download:
+    $ref: "./paths/logs.yaml#/jobLogsDownload"
+  /jobs/{jobId}/artifacts:
+    $ref: "./paths/artifacts.yaml#/jobArtifacts"
+  /artifacts/{artifactId}/download:
+    $ref: "./paths/artifacts.yaml#/artifactDownload"
+  /notifications:
+    $ref: "./paths/notifications.yaml#/notifications"
+  /notifications/{notificationId}/read:
+    $ref: "./paths/notifications.yaml#/notificationRead"
+  /audit-logs:
+    $ref: "./paths/audit.yaml#/auditLogs"
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: "./components/security-schemes.yaml#/bearerAuth"
+    sessionCookie:
+      $ref: "./components/security-schemes.yaml#/sessionCookie"
+  parameters:
+    Limit:
+      $ref: "./components/parameters.yaml#/Limit"
+    Cursor:
+      $ref: "./components/parameters.yaml#/Cursor"
+    IdempotencyKey:
+      $ref: "./components/parameters.yaml#/IdempotencyKey"
+    UserId:
+      $ref: "./components/parameters.yaml#/UserId"
+    ProjectId:
+      $ref: "./components/parameters.yaml#/ProjectId"
+    ConfigId:
+      $ref: "./components/parameters.yaml#/ConfigId"
+    JobId:
+      $ref: "./components/parameters.yaml#/JobId"
+    ArtifactId:
+      $ref: "./components/parameters.yaml#/ArtifactId"
+    NotificationId:
+      $ref: "./components/parameters.yaml#/NotificationId"
+  responses:
+    Unauthenticated:
+      $ref: "./components/responses.yaml#/Unauthenticated"
+    Forbidden:
+      $ref: "./components/responses.yaml#/Forbidden"
+    NotFound:
+      $ref: "./components/responses.yaml#/NotFound"
+    ValidationError:
+      $ref: "./components/responses.yaml#/ValidationError"
+    Conflict:
+      $ref: "./components/responses.yaml#/Conflict"
+    PlatformBusy:
+      $ref: "./components/responses.yaml#/PlatformBusy"
+    PayloadTooLarge:
+      $ref: "./components/responses.yaml#/PayloadTooLarge"
+    UnsupportedMediaType:
+      $ref: "./components/responses.yaml#/UnsupportedMediaType"
+  schemas:
+    Page:
+      $ref: "./components/schemas/common.yaml#/Page"
+    ErrorResponse:
+      $ref: "./components/schemas/common.yaml#/ErrorResponse"
+    UserRole:
+      $ref: "./components/schemas/common.yaml#/UserRole"
+    UserStatus:
+      $ref: "./components/schemas/common.yaml#/UserStatus"
+    SourceType:
+      $ref: "./components/schemas/common.yaml#/SourceType"
+    JobStatus:
+      $ref: "./components/schemas/common.yaml#/JobStatus"
+    StreamType:
+      $ref: "./components/schemas/common.yaml#/StreamType"
+    ArtifactType:
+      $ref: "./components/schemas/common.yaml#/ArtifactType"
+    NotificationStatus:
+      $ref: "./components/schemas/common.yaml#/NotificationStatus"
+    CurrentUser:
+      $ref: "./components/schemas/users.yaml#/CurrentUser"
+    UserPage:
+      $ref: "./components/schemas/users.yaml#/UserPage"
+    UpdateUserStatusRequest:
+      $ref: "./components/schemas/users.yaml#/UpdateUserStatusRequest"
+    UserStatusResponse:
+      $ref: "./components/schemas/users.yaml#/UserStatusResponse"
+    UserSummary:
+      $ref: "./components/schemas/users.yaml#/UserSummary"
+    ProjectPage:
+      $ref: "./components/schemas/projects.yaml#/ProjectPage"
+    CreateGithubProjectRequest:
+      $ref: "./components/schemas/projects.yaml#/CreateGithubProjectRequest"
+    ZipProjectMetadata:
+      $ref: "./components/schemas/projects.yaml#/ZipProjectMetadata"
+    CreateProjectResponse:
+      $ref: "./components/schemas/projects.yaml#/CreateProjectResponse"
+    ProjectDetail:
+      $ref: "./components/schemas/projects.yaml#/ProjectDetail"
+    ProjectConfigListResponse:
+      $ref: "./components/schemas/configurations.yaml#/ProjectConfigListResponse"
+    ProjectConfigContent:
+      $ref: "./components/schemas/configurations.yaml#/ProjectConfigContent"
+    ValidateYamlRequest:
+      $ref: "./components/schemas/configurations.yaml#/ValidateYamlRequest"
+    ValidateYamlResponse:
+      $ref: "./components/schemas/configurations.yaml#/ValidateYamlResponse"
+    StartJobRequest:
+      $ref: "./components/schemas/jobs.yaml#/StartJobRequest"
+    StartJobResponse:
+      $ref: "./components/schemas/jobs.yaml#/StartJobResponse"
+    JobPage:
+      $ref: "./components/schemas/jobs.yaml#/JobPage"
+    JobDetail:
+      $ref: "./components/schemas/jobs.yaml#/JobDetail"
+    CancelJobRequest:
+      $ref: "./components/schemas/jobs.yaml#/CancelJobRequest"
+    CancelJobResponse:
+      $ref: "./components/schemas/jobs.yaml#/CancelJobResponse"
+    RetryJobRequest:
+      $ref: "./components/schemas/jobs.yaml#/RetryJobRequest"
+    RetryJobResponse:
+      $ref: "./components/schemas/jobs.yaml#/RetryJobResponse"
+    QueueSnapshot:
+      $ref: "./components/schemas/jobs.yaml#/QueueSnapshot"
+    LogEventPage:
+      $ref: "./components/schemas/logs-artifacts.yaml#/LogEventPage"
+    ArtifactListResponse:
+      $ref: "./components/schemas/logs-artifacts.yaml#/ArtifactListResponse"
+    NotificationPage:
+      $ref: "./components/schemas/notifications-audit.yaml#/NotificationPage"
+    NotificationStatusResponse:
+      $ref: "./components/schemas/notifications-audit.yaml#/NotificationStatusResponse"
+    AuditLogPage:
+      $ref: "./components/schemas/notifications-audit.yaml#/AuditLogPage"

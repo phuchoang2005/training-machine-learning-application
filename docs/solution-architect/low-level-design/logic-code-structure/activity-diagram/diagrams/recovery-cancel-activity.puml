@@ -1,0 +1,75 @@
+@startuml recovery_cancel_activity
+title Activity Diagram - Restart Recovery and Cancel Handling
+
+skinparam shadowing false
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+}
+
+start
+
+fork
+  partition "Recovery Worker" {
+    :Application starts;
+    :Load jobs with status RUNNING;
+    if (Interrupted running jobs exist?) then (yes)
+      :Mark each job RETRYING;
+      :Stop orphan Docker containers if found;
+      :Create recovery audit record;
+      :Create or update WAITING queue entry;
+      :Mark job QUEUED;
+      :Publish JOB_STATUS QUEUED;
+    else (no)
+      :No recovery actions required;
+    endif
+    :Start normal queue scheduler;
+  }
+fork again
+  partition "Cancel Flow" {
+    :User or Admin requests cancel;
+    :Authenticate request;
+    :Resolve job and project;
+    if (Actor allowed to cancel?) then (yes)
+      if (Job status?) then (QUEUED)
+        :Mark queue entry CANCELLED;
+        :Mark job CANCELLED;
+        :Write audit log TRAINING_CANCEL;
+        :Publish JOB_STATUS CANCELLED;
+      elseif (RUNNING)
+        :Request Docker Runner stop;
+        :Stop container gracefully;
+        if (Graceful stop succeeds?) then (yes)
+          :Mark job CANCELLED;
+        else (no)
+          :Force stop container;
+          :Mark job CANCELLED with stop warning;
+        endif
+        :Write audit log TRAINING_CANCEL;
+        :Publish JOB_STATUS CANCELLED;
+      else (Terminal or invalid)
+        :Reject with INVALID_STATE_TRANSITION;
+      endif
+    else (no)
+      :Reject with FORBIDDEN or hidden 404;
+      :Write authorization denial audit record;
+    endif
+  }
+end fork
+
+partition "Queue Scheduler" {
+  while (WAITING jobs exist?) is (yes)
+    :Count RUNNING jobs;
+    if (RUNNING jobs < 2?) then (yes)
+      :Dispatch oldest WAITING job;
+      :Mark job RUNNING;
+      :Launch Docker execution from beginning;
+    else (no)
+      :Wait for next tick;
+    endif
+  endwhile (no)
+}
+
+stop
+
+@enduml

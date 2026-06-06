@@ -1,0 +1,54 @@
+UserRole:
+  type: string
+  enum: [USER, ADMIN]
+UserStatus:
+  type: string
+  enum: [ACTIVE, DISABLED]
+SourceType:
+  type: string
+  enum: [GITHUB, ZIP]
+JobStatus:
+  type: string
+  enum: [CREATED, QUEUED, RUNNING, SUCCESS, FAILED, CANCELLED, RETRYING]
+StreamType:
+  type: string
+  enum: [STDOUT, STDERR]
+ArtifactType:
+  type: string
+  enum: [MODEL, CHECKPOINT, METRIC, OTHER]
+NotificationStatus:
+  type: string
+  enum: [PENDING, SENT, FAILED, READ]
+Page:
+  type: object
+  required: [limit, hasMore]
+  properties:
+    limit:
+      type: integer
+    nextCursor:
+      type: [string, "null"]
+    hasMore:
+      type: boolean
+ErrorResponse:
+  type: object
+  required: [error]
+  properties:
+    error:
+      type: object
+      required: [code, message, correlationId]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        correlationId:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              reason:
+                type: string

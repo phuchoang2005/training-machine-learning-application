@@ -1,0 +1,62 @@
+@startuml docker_log_progress_sequence
+title Sequence Diagram - Docker Execution, Logs, Progress, WebSocket
+
+participant "Docker Runner" as DR
+participant "Storage Service" as SS
+participant "Docker Engine" as DE
+participant "Training Container" as TC
+participant "Python Training Process" as PY
+participant "Log Collector" as LC
+participant "Progress Parser" as PP
+database "PostgreSQL" as PG
+participant "Log Files" as LF
+participant "WebSocket Publisher" as WS
+participant "React Training Detail" as FE
+participant "Training Job Service" as JS
+
+DR -> SS: Create workspace for job
+DR -> SS: Copy source and write runtime config
+DR -> SS: Check free disk capacity
+
+alt Disk capacity is insufficient
+  DR -> JS: Mark job FAILED
+  JS -> PG: Update training job failure reason
+  JS -> WS: Publish JOB_STATUS FAILED
+  WS -> FE: Push failed status
+else Disk capacity is sufficient
+  DR -> DE: Build or prepare image
+  DE --> DR: Image ready
+  DR -> DE: Run training container
+  DE -> TC: Start container
+  TC -> PY: Execute main.py with runtime config
+
+  loop Container emits runtime output
+    PY --> LC: Emit stdout or stderr line
+    LC -> LF: Append line to log file
+    LC -> PG: Insert searchable log event
+    LC -> WS: Publish LOG event
+    WS -> FE: Push LOG event
+    LC -> PP: Forward stdout line
+    PP -> PG: Insert progress event when JSON is valid
+    PP -> WS: Publish PROGRESS event when available
+    WS -> FE: Push PROGRESS event when available
+  end
+
+  PY --> TC: Process exits
+  TC --> DE: Exit code
+  DE --> DR: Container finished
+
+  alt Exit code is zero
+    DR -> JS: Mark job SUCCESS
+    JS -> PG: Update training job ended time
+    JS -> WS: Publish JOB_STATUS SUCCESS
+    WS -> FE: Push success status
+  else Exit code is non-zero
+    DR -> JS: Mark job FAILED
+    JS -> PG: Update training job failure reason
+    JS -> WS: Publish JOB_STATUS FAILED
+    WS -> FE: Push failed status
+  end
+end
+
+@enduml

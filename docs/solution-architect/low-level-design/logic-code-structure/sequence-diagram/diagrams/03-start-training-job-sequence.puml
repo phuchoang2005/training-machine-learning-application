@@ -1,0 +1,68 @@
+@startuml start_training_job_sequence
+title Sequence Diagram - Start Training Job, Snapshot, Queue, Dispatch
+
+skinparam shadowing false
+actor User
+participant "React SPA" as FE
+participant "Job API" as API
+participant "Authorization Service" as AUTHZ
+participant "Idempotency Filter" as IDEMP
+participant "Config Service" as CONFIG
+participant "Project Service" as PROJECT
+participant "Training Job Service" as JOB
+participant "Queue Service" as QUEUE
+database "PostgreSQL" as DB
+participant "Audit Service" as AUDIT
+participant "Queue Scheduler" as SCHED
+participant "Docker Runner" as RUNNER
+participant "WebSocket Publisher" as WS
+
+User -> FE: Click Start Training
+FE -> API: POST /api/v1/projects/{projectId}/jobs\nIdempotency-Key, configId, yamlContent
+API -> IDEMP: check or reserve idempotency key
+
+alt duplicate same payload
+  IDEMP --> API: stored response
+  API --> FE: replay stored response
+else duplicate different payload
+  IDEMP --> API: IDEMPOTENCY_CONFLICT
+  API --> FE: 409 conflict
+else new request
+  IDEMP --> API: proceed
+end
+
+API -> AUTHZ: authorize project ownership
+AUTHZ --> API: allowed
+API -> CONFIG: validate YAML
+CONFIG --> API: valid
+API -> PROJECT: validate project structure
+PROJECT --> API: valid source
+
+API -> JOB: create training job transaction
+JOB -> DB: insert config_snapshots
+JOB -> DB: insert training_jobs status=CREATED
+JOB -> QUEUE: enqueue FIFO
+QUEUE -> DB: insert job_queue_entries status=WAITING
+JOB -> DB: update training_jobs status=QUEUED
+JOB -> AUDIT: record TRAINING_START
+AUDIT -> DB: insert audit_logs
+JOB --> API: StartJobResponse
+API -> IDEMP: store response
+API --> FE: 202 jobId, QUEUED, queuePosition
+FE -> WS: open /ws/jobs/{jobId}
+
+loop every scheduler tick
+  SCHED -> DB: count RUNNING jobs
+  DB --> SCHED: running count
+  alt running count < 2
+    SCHED -> DB: lock oldest WAITING queue row\nFOR UPDATE SKIP LOCKED
+    DB --> SCHED: queue entry + jobId
+    SCHED -> DB: mark queue DISPATCHED\nmark job RUNNING
+    SCHED -> WS: publish JOB_STATUS RUNNING
+    SCHED -> RUNNER: submit job execution
+  else capacity full
+    SCHED -> SCHED: wait next tick
+  end
+end
+
+@enduml

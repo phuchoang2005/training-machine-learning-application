@@ -1,0 +1,109 @@
+projects:
+  get:
+    tags: [Projects]
+    summary: List visible projects
+    operationId: listProjects
+    parameters:
+      - $ref: "../components/parameters.yaml#/Limit"
+      - $ref: "../components/parameters.yaml#/Cursor"
+      - name: query
+        in: query
+        schema:
+          type: string
+          maxLength: 200
+      - name: latestStatus
+        in: query
+        schema:
+          $ref: "../components/schemas/common.yaml#/JobStatus"
+    responses:
+      "200":
+        description: Project page
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/projects.yaml#/ProjectPage"
+  post:
+    tags: [Projects]
+    summary: Register a public GitHub project
+    operationId: createGithubProject
+    parameters:
+      - $ref: "../components/parameters.yaml#/IdempotencyKey"
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/projects.yaml#/CreateGithubProjectRequest"
+    responses:
+      "201":
+        description: Project created
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/projects.yaml#/CreateProjectResponse"
+      "400":
+        $ref: "../components/responses.yaml#/ValidationError"
+      "409":
+        $ref: "../components/responses.yaml#/Conflict"
+projectZipUpload:
+  post:
+    tags: [Projects]
+    summary: Upload and register a ZIP project
+    operationId: uploadZipProject
+    parameters:
+      - $ref: "../components/parameters.yaml#/IdempotencyKey"
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required: [metadata, file]
+            properties:
+              metadata:
+                $ref: "../components/schemas/projects.yaml#/ZipProjectMetadata"
+              file:
+                type: string
+                format: binary
+    responses:
+      "201":
+        description: Project created
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/projects.yaml#/CreateProjectResponse"
+      "400":
+        $ref: "../components/responses.yaml#/ValidationError"
+      "413":
+        $ref: "../components/responses.yaml#/PayloadTooLarge"
+      "415":
+        $ref: "../components/responses.yaml#/UnsupportedMediaType"
+projectById:
+  get:
+    tags: [Projects]
+    summary: Get project detail
+    operationId: getProject
+    parameters:
+      - $ref: "../components/parameters.yaml#/ProjectId"
+    responses:
+      "200":
+        description: Project detail
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/projects.yaml#/ProjectDetail"
+      "404":
+        $ref: "../components/responses.yaml#/NotFound"
+  delete:
+    tags: [Projects]
+    summary: Delete project
+    operationId: deleteProject
+    parameters:
+      - $ref: "../components/parameters.yaml#/ProjectId"
+    responses:
+      "204":
+        description: Project deleted
+      "403":
+        $ref: "../components/responses.yaml#/Forbidden"
+      "404":
+        $ref: "../components/responses.yaml#/NotFound"

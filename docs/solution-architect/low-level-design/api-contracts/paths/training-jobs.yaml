@@ -1,0 +1,129 @@
+projectJobs:
+  get:
+    tags: [Training Jobs]
+    summary: List project training jobs
+    operationId: listProjectJobs
+    parameters:
+      - $ref: "../components/parameters.yaml#/ProjectId"
+      - $ref: "../components/parameters.yaml#/Limit"
+      - $ref: "../components/parameters.yaml#/Cursor"
+      - name: status
+        in: query
+        schema:
+          $ref: "../components/schemas/common.yaml#/JobStatus"
+      - name: from
+        in: query
+        schema:
+          type: string
+          format: date-time
+      - name: to
+        in: query
+        schema:
+          type: string
+          format: date-time
+    responses:
+      "200":
+        description: Job page
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/jobs.yaml#/JobPage"
+  post:
+    tags: [Training Jobs]
+    summary: Start a training job
+    operationId: startTrainingJob
+    parameters:
+      - $ref: "../components/parameters.yaml#/ProjectId"
+      - $ref: "../components/parameters.yaml#/IdempotencyKey"
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/jobs.yaml#/StartJobRequest"
+    responses:
+      "202":
+        description: Job accepted
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/jobs.yaml#/StartJobResponse"
+      "400":
+        $ref: "../components/responses.yaml#/ValidationError"
+      "409":
+        $ref: "../components/responses.yaml#/Conflict"
+      "429":
+        $ref: "../components/responses.yaml#/PlatformBusy"
+jobById:
+  get:
+    tags: [Training Jobs]
+    summary: Get training job detail
+    operationId: getJob
+    parameters:
+      - $ref: "../components/parameters.yaml#/JobId"
+    responses:
+      "200":
+        description: Job detail
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/jobs.yaml#/JobDetail"
+      "404":
+        $ref: "../components/responses.yaml#/NotFound"
+jobCancel:
+  post:
+    tags: [Training Jobs]
+    summary: Cancel a queued or running job
+    operationId: cancelJob
+    parameters:
+      - $ref: "../components/parameters.yaml#/JobId"
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/jobs.yaml#/CancelJobRequest"
+    responses:
+      "202":
+        description: Cancel accepted
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/jobs.yaml#/CancelJobResponse"
+      "409":
+        $ref: "../components/responses.yaml#/Conflict"
+jobRetry:
+  post:
+    tags: [Training Jobs]
+    summary: Retry a failed or cancelled job
+    operationId: retryJob
+    parameters:
+      - $ref: "../components/parameters.yaml#/JobId"
+      - $ref: "../components/parameters.yaml#/IdempotencyKey"
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/jobs.yaml#/RetryJobRequest"
+    responses:
+      "202":
+        description: Retry job created
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/jobs.yaml#/RetryJobResponse"
+      "409":
+        $ref: "../components/responses.yaml#/Conflict"
+jobQueue:
+  get:
+    tags: [Training Jobs]
+    summary: Get queue snapshot
+    operationId: getQueueSnapshot
+    responses:
+      "200":
+        description: Queue snapshot
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas/jobs.yaml#/QueueSnapshot"
