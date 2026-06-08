@@ -33,6 +33,7 @@ Diagram: [frontend-architecture-context.mermaid](diagrams/frontend-architecture-
 | Styling | TailwindCSS |
 | UI primitives | Radix UI |
 | Component baseline | shadcn/ui components owned in the repository |
+| Motion library | Framer Motion (`framer-motion`) for route, panel, dialog, list, and live-state transitions |
 | Theme | System-driven light mode and dark mode through `prefers-color-scheme` |
 | Form state | Controlled React state or a lightweight form helper integrated with Redux actions where needed |
 | Schema validation | Runtime validators generated from or aligned with OpenAPI when needed |
@@ -86,6 +87,10 @@ frontend/
         status-badge.tsx
         empty-state.tsx
         loading-state.tsx
+      motion/
+        motion-provider.tsx
+        motion-tokens.ts
+        variants.ts
       utils/
         date-time.ts
         duration.ts
@@ -181,6 +186,7 @@ frontend/
 | `shared/realtime/` | WebSocket connection lifecycle, reconnect, duplicate-event protection, polling fallback helpers. |
 | `shared/auth/` | Current session model and client-side permission helpers. |
 | `shared/ui/` | Reusable components based on shadcn/ui and Radix UI primitives. |
+| `shared/motion/` | Framer Motion provider, shared animation tokens, route/list/dialog variants, and reduced-motion helpers. |
 | `store/` | Redux root store, typed hooks, listener middleware, domain slices, and theme slice. |
 | `entities/` | API models, selectors, service functions, async thunks, and reducers for backend resources. |
 | `features/` | User-facing workflows and page-level feature composition. |
@@ -421,6 +427,7 @@ Primary components:
 * Keep backend DTOs and frontend types aligned with OpenAPI.
 * Keep Redux slices small, domain-scoped, and selector-driven.
 * Use TailwindCSS utilities and shadcn/ui components for common UI before adding custom component styles.
+* Use Framer Motion for frontend motion patterns that improve orientation, perceived responsiveness, or emotional warmth; do not animate high-frequency log lines or large tables.
 * Initialize light or dark mode from `prefers-color-scheme` and update when the system preference changes.
 * Use route-level code splitting for large feature areas such as job detail and admin console.
 * Keep large log streams virtualized or windowed to avoid slow browser rendering.
@@ -431,7 +438,52 @@ Primary components:
 * Require confirmation for destructive actions such as cancel and delete.
 * Treat WebSocket as the primary monitoring path and REST polling as degradation support.
 
-## 14. Open Decisions
+## 14. Framer Motion Integration
+
+Use Framer Motion as a small shared motion layer, not as page-specific one-off animation code. Motion should support the Pleiades/Sirius visual direction while keeping the product usable for dense engineering workflows.
+
+### Dependency and Ownership
+
+| Concern | Requirement |
+| --- | --- |
+| Package | Install `framer-motion` in the frontend package. |
+| Owner module | Keep reusable variants in `src/shared/motion/`. |
+| Component boundary | Wrap shadcn/ui or Radix primitives with motion only in shared components or page-level layout components. |
+| Reduced motion | Use Framer Motion's `useReducedMotion()` and CSS `prefers-reduced-motion`; replace movement with opacity changes or static states. |
+| Performance | Animate `opacity`, `transform`, and lightweight SVG/background layers only. Avoid animating layout-heavy table rows, log lines, or thousands of DOM nodes. |
+
+### Recommended Motion Patterns
+
+| Pattern | Use Cases | Guidance |
+| --- | --- | --- |
+| Route fade and lift | Login, dashboard, project detail, job detail route changes. | `opacity: 0 -> 1`, `y: 8 -> 0`, `duration: 0.22s`. |
+| Panel reveal | Cards, side panels, configuration validation result, artifact panel. | Stagger child panels by `0.04s` to `0.07s`; keep total reveal under `0.45s`. |
+| Dialog spring | Start training, cancel, retry confirmations. | Use a subtle spring scale from `0.98 -> 1`; never bounce destructive confirmations. |
+| Status pulse | `RUNNING`, reconnecting WebSocket, live log tail. | Use low-opacity pulse; disable or simplify when reduced motion is requested. |
+| Background drift | Light-mode aurora and star-field accents. | Very slow transform or opacity drift only; must not compete with data surfaces. |
+| List enter/exit | Notifications, artifacts, project cards on filtered views. | Animate only visible rows; use `AnimatePresence` for small lists. |
+
+### Shared Variant Example
+
+```typescript
+import type { Variants } from 'framer-motion';
+
+export const pageVariants: Variants = {
+  initial: { opacity: 0, y: 8 },
+  enter: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] },
+  },
+  exit: {
+    opacity: 0,
+    y: -4,
+    transition: { duration: 0.14, ease: [0.4, 0, 1, 1] },
+  },
+};
+```
+
+## 15. Open Decisions
 
 | Decision | Recommendation |
 | --- | --- |
@@ -440,3 +492,4 @@ Primary components:
 | Log rendering library | Use virtualization once log size exceeds normal DOM rendering limits. |
 | YAML editor | Use a lightweight code editor with YAML syntax support and validation feedback. |
 | WebSocket protocol shape | Define event schema for status, progress, log, terminal, heartbeat, and error events before implementation. |
+| Motion depth | Start with shared Framer Motion variants for pages, dialogs, panels, and status indicators; expand only after usability testing confirms value. |

@@ -2,31 +2,31 @@
 
         <defs>
             <radialGradient id="bg-glow" cx="85%" cy="15%" r="65%">
-                <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.2"/>
-                <stop offset="100%" stop-color="#040b16" stop-opacity="1"/>
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#061426" stop-opacity="1"/>
             </radialGradient>
             <radialGradient id="bg-glow2" cx="15%" cy="85%" r="65%">
-                <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.15"/>
-                <stop offset="100%" stop-color="#040b16" stop-opacity="0"/>
+                <stop offset="0%" stop-color="#2563eb" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="#061426" stop-opacity="0"/>
             </radialGradient>
             <radialGradient id="bg-glow3" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.05"/>
-                <stop offset="100%" stop-color="#040b16" stop-opacity="0"/>
+                <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.1"/>
+                <stop offset="100%" stop-color="#061426" stop-opacity="0"/>
             </radialGradient>
             
             <linearGradient id="primary-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#38bdf8"/>
-                <stop offset="100%" stop-color="#2563eb"/>
+                <stop offset="100%" stop-color="#60a5fa"/>
             </linearGradient>
             
             <linearGradient id="text-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#f0f9ff"/>
-                <stop offset="100%" stop-color="#bae6fd"/>
+                <stop offset="0%" stop-color="#e0f2fe"/>
+                <stop offset="100%" stop-color="#bfdbfe"/>
             </linearGradient>
             
             <linearGradient id="sidebar-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="rgba(4, 11, 22, 0.7)"/>
-                <stop offset="100%" stop-color="rgba(4, 11, 22, 0.3)"/>
+                <stop offset="0%" stop-color="rgba(7, 19, 39, 0.86)"/>
+                <stop offset="100%" stop-color="rgba(7, 19, 39, 0.42)"/>
             </linearGradient>
             
             <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
@@ -37,10 +37,10 @@
             </filter>
             
             <filter id="glow-primary" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#3b82f6" flood-opacity="0.4"/>
+                <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#60a5fa" flood-opacity="0.5"/>
             </filter>
             <filter id="glow-success" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#10b981" flood-opacity="0.4"/>
+                <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#a78bfa" flood-opacity="0.5"/>
             </filter>
             
             <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
@@ -53,9 +53,9 @@
         * { font-family: 'Inter', sans-serif; }
         .mono { font-family: 'JetBrains Mono', monospace; }
         
-        .bg-base { fill: #040b16; }
-        .card { fill: rgba(15, 23, 42, 0.45); stroke: rgba(56, 189, 248, 0.15); stroke-width: 1; backdrop-filter: blur(12px); }
-        .card:hover { stroke: rgba(56, 189, 248, 0.4); transition: stroke 0.3s ease; }
+        .bg-base { fill: #061426; }
+        .card { fill: rgba(9, 25, 48, 0.68); stroke: rgba(56, 189, 248, 0.22); stroke-width: 1; backdrop-filter: blur(12px); }
+        .card:hover { stroke: rgba(96, 165, 250, 0.58); transition: stroke 0.3s ease; }
         .glass { fill: url(#sidebar-grad); }
         
         .text-primary { fill: #f0f9ff; }
@@ -77,10 +77,10 @@
         .btn-primary-text { fill: #ffffff; }
         
         .btn-secondary { fill: rgba(56, 189, 248, 0.05); stroke: rgba(56, 189, 248, 0.2); cursor: pointer; transition: all 0.2s; }
-        .btn-secondary:hover { fill: rgba(56, 189, 248, 0.1); stroke: rgba(56, 189, 248, 0.4); }
+        .btn-secondary:hover { fill: rgba(56, 189, 248, 0.1); stroke: rgba(96, 165, 250, 0.58); }
         .btn-secondary-text { fill: #e0f2fe; }
         
-        .btn-danger { fill: rgba(239, 68, 68, 0.1); stroke: rgba(239, 68, 68, 0.3); }
+        .btn-danger { fill: rgba(244, 63, 94, 0.1); stroke: rgba(244, 63, 94, 0.3); }
         .btn-danger-text { fill: #fca5a5; }
         
 ]]></style>
@@ -88,12 +88,12 @@
 <rect x="0" y="0" width="1280" height="800" class="" fill="url(#bg-glow)"  rx="0"  />
 <rect x="0" y="0" width="1280" height="800" class="" fill="url(#bg-glow2)"  rx="0"  />
 <rect x="0" y="0" width="1280" height="800" class="" fill="url(#bg-glow3)"  rx="0"  />
-<rect x="420" y="140" width="440" height="520" class="fade-in" fill="rgba(15, 23, 42, 0.45)" stroke="rgba(56, 189, 248, 0.15)" rx="24" filter="url(#shadow)" style="backdrop-filter: blur(16px);" />
+<rect x="420" y="140" width="440" height="520" class="fade-in" fill="rgba(9, 25, 48, 0.68)" stroke="rgba(56, 189, 248, 0.15)" rx="24" filter="url(#shadow)" style="backdrop-filter: blur(16px);" />
 <g class="fade-in delay-1">
 <rect x="612.0" y="180" width="56" height="56" class="" fill="rgba(56, 189, 248, 0.15)" stroke="rgba(56, 189, 248, 0.2)" rx="16"  />
-<svg x="624.0" y="192" width="32" height="32" viewBox="0 0 24 24"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="url(#primary-grad)" stroke="none"/><circle cx="18" cy="6" r="1.5" fill="#38bdf8"/><circle cx="6" cy="18" r="1" fill="#3b82f6"/></svg>
-<text x="640.0" y="270" class="text-primary" font-size="28" font-weight="800" text-anchor="middle"  >Welcome Back</text>
-<text x="640.0" y="295" class="text-muted" font-size="15" font-weight="normal" text-anchor="middle"  >Sign in to manage AI training models</text>
+<svg x="624.0" y="192" width="32" height="32" viewBox="0 0 24 24"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="url(#primary-grad)" stroke="none"/><circle cx="18" cy="6" r="1.5" fill="#38bdf8"/><circle cx="6" cy="18" r="1" fill="#60a5fa"/></svg>
+<text x="640.0" y="270" class="text-primary" font-size="28" font-weight="800" text-anchor="middle"  >Welcome Home</text>
+<text x="640.0" y="295" class="text-muted" font-size="15" font-weight="normal" text-anchor="middle"  >A calm place to care for training work</text>
 </g>
 <g class="fade-in delay-2">
 <g class="">
@@ -105,19 +105,19 @@
 <line x1="680" y1="410" x2="820" y2="410" stroke="rgba(56, 189, 248, 0.1)" stroke-width="1"  />
 <g class="">
 <text x="460" y="452" class="text-muted" font-size="13" font-weight="600" text-anchor="start"  >Email Address</text>
-<rect x="460" y="460" width="360" height="48" class="" fill="rgba(4, 11, 22, 0.6)" stroke="rgba(56, 189, 248, 0.2)" rx="8" filter="url(#shadow-sm)" />
+<rect x="460" y="460" width="360" height="48" class="" fill="rgba(7, 19, 39, 0.76)" stroke="rgba(56, 189, 248, 0.2)" rx="8" filter="url(#shadow-sm)" />
 <svg x="472" y="474.0" width="20" height="20" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <text x="500" y="489.0" class="text-primary" font-size="14" font-weight="normal" text-anchor="start"  >engineer@company.com</text>
 </g>
 <g class="">
 <text x="460" y="532" class="text-muted" font-size="13" font-weight="600" text-anchor="start"  >Password</text>
-<rect x="460" y="540" width="360" height="48" class="" fill="rgba(4, 11, 22, 0.6)" stroke="rgba(56, 189, 248, 0.2)" rx="8" filter="url(#shadow-sm)" />
+<rect x="460" y="540" width="360" height="48" class="" fill="rgba(7, 19, 39, 0.76)" stroke="rgba(56, 189, 248, 0.2)" rx="8" filter="url(#shadow-sm)" />
 <svg x="472" y="554.0" width="20" height="20" viewBox="0 0 24 24"><path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z M12 17v-2 M7 11V7a5 5 0 0 1 10 0v4" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <text x="500" y="569.0" class="text-primary" font-size="14" font-weight="normal" text-anchor="start"  >••••••••••••</text>
 </g>
 <g class="">
 <rect x="460" y="620" width="360" height="48" class="btn-primary"   rx="12"  />
-<text x="640.0" y="649.0" class="btn-primary-text" font-size="14" font-weight="600" text-anchor="middle"  >Sign In</text>
+<text x="640.0" y="649.0" class="btn-primary-text" font-size="14" font-weight="600" text-anchor="middle"  >Enter Workspace</text>
 </g>
 </g>
 </svg>

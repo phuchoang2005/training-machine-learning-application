@@ -2,31 +2,31 @@
 
         <defs>
             <radialGradient id="bg-glow" cx="85%" cy="15%" r="65%">
-                <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.2"/>
-                <stop offset="100%" stop-color="#040b16" stop-opacity="1"/>
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#061426" stop-opacity="1"/>
             </radialGradient>
             <radialGradient id="bg-glow2" cx="15%" cy="85%" r="65%">
-                <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.15"/>
-                <stop offset="100%" stop-color="#040b16" stop-opacity="0"/>
+                <stop offset="0%" stop-color="#2563eb" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="#061426" stop-opacity="0"/>
             </radialGradient>
             <radialGradient id="bg-glow3" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.05"/>
-                <stop offset="100%" stop-color="#040b16" stop-opacity="0"/>
+                <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.1"/>
+                <stop offset="100%" stop-color="#061426" stop-opacity="0"/>
             </radialGradient>
             
             <linearGradient id="primary-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#38bdf8"/>
-                <stop offset="100%" stop-color="#2563eb"/>
+                <stop offset="100%" stop-color="#60a5fa"/>
             </linearGradient>
             
             <linearGradient id="text-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#f0f9ff"/>
-                <stop offset="100%" stop-color="#bae6fd"/>
+                <stop offset="0%" stop-color="#e0f2fe"/>
+                <stop offset="100%" stop-color="#bfdbfe"/>
             </linearGradient>
             
             <linearGradient id="sidebar-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="rgba(4, 11, 22, 0.7)"/>
-                <stop offset="100%" stop-color="rgba(4, 11, 22, 0.3)"/>
+                <stop offset="0%" stop-color="rgba(7, 19, 39, 0.86)"/>
+                <stop offset="100%" stop-color="rgba(7, 19, 39, 0.42)"/>
             </linearGradient>
             
             <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
@@ -37,10 +37,10 @@
             </filter>
             
             <filter id="glow-primary" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#3b82f6" flood-opacity="0.4"/>
+                <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#60a5fa" flood-opacity="0.5"/>
             </filter>
             <filter id="glow-success" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#10b981" flood-opacity="0.4"/>
+                <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#a78bfa" flood-opacity="0.5"/>
             </filter>
             
             <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
@@ -53,9 +53,9 @@
         * { font-family: 'Inter', sans-serif; }
         .mono { font-family: 'JetBrains Mono', monospace; }
         
-        .bg-base { fill: #040b16; }
-        .card { fill: rgba(15, 23, 42, 0.45); stroke: rgba(56, 189, 248, 0.15); stroke-width: 1; backdrop-filter: blur(12px); }
-        .card:hover { stroke: rgba(56, 189, 248, 0.4); transition: stroke 0.3s ease; }
+        .bg-base { fill: #061426; }
+        .card { fill: rgba(9, 25, 48, 0.68); stroke: rgba(56, 189, 248, 0.22); stroke-width: 1; backdrop-filter: blur(12px); }
+        .card:hover { stroke: rgba(96, 165, 250, 0.58); transition: stroke 0.3s ease; }
         .glass { fill: url(#sidebar-grad); }
         
         .text-primary { fill: #f0f9ff; }
@@ -77,10 +77,10 @@
         .btn-primary-text { fill: #ffffff; }
         
         .btn-secondary { fill: rgba(56, 189, 248, 0.05); stroke: rgba(56, 189, 248, 0.2); cursor: pointer; transition: all 0.2s; }
-        .btn-secondary:hover { fill: rgba(56, 189, 248, 0.1); stroke: rgba(56, 189, 248, 0.4); }
+        .btn-secondary:hover { fill: rgba(56, 189, 248, 0.1); stroke: rgba(96, 165, 250, 0.58); }
         .btn-secondary-text { fill: #e0f2fe; }
         
-        .btn-danger { fill: rgba(239, 68, 68, 0.1); stroke: rgba(239, 68, 68, 0.3); }
+        .btn-danger { fill: rgba(244, 63, 94, 0.1); stroke: rgba(244, 63, 94, 0.3); }
         .btn-danger-text { fill: #fca5a5; }
         
 ]]></style>
@@ -90,7 +90,7 @@
 <rect x="0" y="0" width="1280" height="800" class="" fill="url(#bg-glow3)"  rx="0"  />
 <rect x="0" y="0" width="260" height="800" class="glass"   rx="0" filter="url(#shadow)" />
 <line x1="260" y1="0" x2="260" y2="800" stroke="rgba(56, 189, 248, 0.1)" stroke-width="1"  />
-<svg x="24" y="32" width="32" height="32" viewBox="0 0 24 24"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="url(#primary-grad)" stroke="none"/><circle cx="18" cy="6" r="1.5" fill="#38bdf8"/><circle cx="6" cy="18" r="1" fill="#3b82f6"/></svg>
+<svg x="24" y="32" width="32" height="32" viewBox="0 0 24 24"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="url(#primary-grad)" stroke="none"/><circle cx="18" cy="6" r="1.5" fill="#38bdf8"/><circle cx="6" cy="18" r="1" fill="#60a5fa"/></svg>
 <text x="68" y="54" class="gradient-text" font-size="20" font-weight="800" text-anchor="start"  >Future</text>
 <svg x="36" y="108" width="20" height="20" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <text x="68" y="123" class="text-muted" font-size="15" font-weight="600" text-anchor="start"  >Projects</text>
@@ -101,7 +101,7 @@
 <svg x="36" y="275" width="18" height="18" viewBox="0 0 24 24"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <text x="68" y="289" class="text-muted" font-size="14" font-weight="500" text-anchor="start"  >Configuration</text>
 <rect x="16" y="312" width="228" height="36" class="" fill="rgba(56, 189, 248, 0.15)"  rx="8"  />
-<rect x="16" y="318" width="4" height="24" class="" fill="#3b82f6"  rx="2" filter="url(#glow-primary)" />
+<rect x="16" y="318" width="4" height="24" class="" fill="#60a5fa"  rx="2" filter="url(#glow-primary)" />
 <svg x="36" y="320" width="18" height="18" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" fill="none" stroke="#f0f9ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <text x="68" y="334" class="text-primary" font-size="14" font-weight="600" text-anchor="start"  >Training History</text>
 <svg x="36" y="365" width="18" height="18" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -111,29 +111,29 @@
 <text x="44" y="757" class="text-primary" font-size="15" font-weight="700" text-anchor="middle" fill="#ffffff" >EN</text>
 <text x="76" y="750" class="text-primary" font-size="13" font-weight="700" text-anchor="start"  >engineer@co.com</text>
 <text x="76" y="768" class="text-muted" font-size="12" font-weight="normal" text-anchor="start"  >AI Engineer</text>
-<rect x="260" y="0" width="1020" height="72" class="" fill="rgba(4, 11, 22, 0.5)"  rx="0" backdrop-filter="blur(12px)" />
+<rect x="260" y="0" width="1020" height="72" class="" fill="rgba(7, 19, 39, 0.56)"  rx="0" backdrop-filter="blur(12px)" />
 <line x1="260" y1="72" x2="1280" y2="72" stroke="rgba(56, 189, 248, 0.1)" stroke-width="1"  />
 <text x="290" y="42" class="text-muted" font-size="14" font-weight="600" text-anchor="start"  >Projects &gt; Fraud Detection &gt; History</text>
-<rect x="980" y="22" width="128" height="28" class="" fill="rgba(16, 185, 129, 0.1)" stroke="rgba(16, 185, 129, 0.3)" rx="14"  />
-<circle cx="996" cy="36" r="4" class="pulse" fill="#10b981"  filter="url(#glow-success)" />
-<text x="1010" y="40" class="text-primary" font-size="11" font-weight="800" text-anchor="start" fill="#10b981" >CONNECTED</text>
+<rect x="980" y="22" width="128" height="28" class="" fill="rgba(52, 211, 153, 0.1)" stroke="rgba(52, 211, 153, 0.3)" rx="14"  />
+<circle cx="996" cy="36" r="4" class="pulse" fill="#a78bfa"  filter="url(#glow-success)" />
+<text x="1010" y="40" class="text-primary" font-size="11" font-weight="800" text-anchor="start" fill="#a78bfa" >CONNECTED</text>
 <svg x="1140" y="24" width="24" height="24" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-<circle cx="1158" cy="26" r="4" class="" fill="#ef4444"   />
+<circle cx="1158" cy="26" r="4" class="" fill="#f43f5e"   />
 <text x="290" y="130" class="gradient-text fade-in" font-size="32" font-weight="800" text-anchor="start"  >Training History</text>
 <g class="fade-in delay-1">
 <g class="">
-<rect x="290" y="180" width="300" height="44" class="" fill="rgba(4, 11, 22, 0.6)" stroke="rgba(56, 189, 248, 0.2)" rx="8" filter="url(#shadow-sm)" />
+<rect x="290" y="180" width="300" height="44" class="" fill="rgba(7, 19, 39, 0.76)" stroke="rgba(56, 189, 248, 0.2)" rx="8" filter="url(#shadow-sm)" />
 <text x="306" y="207.0" class="text-primary" font-size="14" font-weight="normal" text-anchor="start"  >Search Job ID...</text>
 </g>
-<rect x="610" y="180" width="140" height="44" class="" fill="rgba(4, 11, 22, 0.6)" stroke="rgba(56, 189, 248, 0.2)" rx="8" filter="url(#shadow-sm)" />
+<rect x="610" y="180" width="140" height="44" class="" fill="rgba(7, 19, 39, 0.76)" stroke="rgba(56, 189, 248, 0.2)" rx="8" filter="url(#shadow-sm)" />
 <text x="626" y="207" class="text-primary" font-size="14" font-weight="600" text-anchor="start"  >All Statuses</text>
 <svg x="720" y="192" width="20" height="20" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-<rect x="770" y="180" width="180" height="44" class="" fill="rgba(4, 11, 22, 0.6)" stroke="rgba(56, 189, 248, 0.2)" rx="8" filter="url(#shadow-sm)" />
+<rect x="770" y="180" width="180" height="44" class="" fill="rgba(7, 19, 39, 0.76)" stroke="rgba(56, 189, 248, 0.2)" rx="8" filter="url(#shadow-sm)" />
 <text x="786" y="207" class="text-primary" font-size="14" font-weight="600" text-anchor="start"  >Date: Last 7 Days</text>
 <svg x="920" y="192" width="20" height="20" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 </g>
 <g class="fade-in delay-2">
-<rect x="290" y="240" width="950" height="480" class="" fill="rgba(15, 23, 42, 0.45)" stroke="rgba(56, 189, 248, 0.15)" rx="16" filter="url(#shadow)" />
+<rect x="290" y="240" width="950" height="480" class="" fill="rgba(9, 25, 48, 0.68)" stroke="rgba(56, 189, 248, 0.15)" rx="16" filter="url(#shadow)" />
 <text x="314" y="276" class="text-muted" font-size="13" font-weight="700" text-anchor="start"  >Job ID</text>
 <text x="410" y="276" class="text-muted" font-size="13" font-weight="700" text-anchor="start"  >Triggered By</text>
 <text x="590" y="276" class="text-muted" font-size="13" font-weight="700" text-anchor="start"  >Branch</text>
@@ -144,18 +144,18 @@
 <text x="314" y="330" class="text-primary mono" font-size="14" font-weight="700" text-anchor="start" fill="#38bdf8" >#1004</text>
 <text x="410" y="330" class="text-primary" font-size="14" font-weight="500" text-anchor="start"  >eng@co.com</text>
 <text x="590" y="330" class="text-muted mono" font-size="13" font-weight="normal" text-anchor="start"  >main</text>
-<rect x="770" y="314" width="88" height="24" class="" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" rx="12" stroke-opacity="0.3" />
-<svg x="776" y="318" width="16" height="16" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-<text x="796" y="331" class="" font-size="11" font-weight="700" text-anchor="start" fill="#10b981" >SUCCESS</text>
+<rect x="770" y="314" width="88" height="24" class="" fill="rgba(52, 211, 153, 0.15)" stroke="#a78bfa" rx="12" stroke-opacity="0.3" />
+<svg x="776" y="318" width="16" height="16" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<text x="796" y="331" class="" font-size="11" font-weight="700" text-anchor="start" fill="#a78bfa" >SUCCESS</text>
 <text x="930" y="330" class="text-primary" font-size="13" font-weight="500" text-anchor="start"  >2026-06-08 10:00</text>
 <text x="1110" y="330" class="text-primary" font-size="14" font-weight="500" text-anchor="start"  >1h 10m</text>
 <line x1="290" y1="356" x2="1240" y2="356" stroke="rgba(56, 189, 248, 0.1)" stroke-width="1"  />
 <text x="314" y="390" class="text-primary mono" font-size="14" font-weight="700" text-anchor="start" fill="#38bdf8" >#1003</text>
 <text x="410" y="390" class="text-primary" font-size="14" font-weight="500" text-anchor="start"  >eng@co.com</text>
 <text x="590" y="390" class="text-muted mono" font-size="13" font-weight="normal" text-anchor="start"  >dev-test</text>
-<rect x="770" y="374" width="80" height="24" class="" fill="rgba(239, 68, 68, 0.15)" stroke="#ef4444" rx="12" stroke-opacity="0.3" />
-<svg x="776" y="378" width="16" height="16" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-<text x="796" y="391" class="" font-size="11" font-weight="700" text-anchor="start" fill="#ef4444" >FAILED</text>
+<rect x="770" y="374" width="80" height="24" class="" fill="rgba(244, 63, 94, 0.15)" stroke="#f43f5e" rx="12" stroke-opacity="0.3" />
+<svg x="776" y="378" width="16" height="16" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" fill="none" stroke="#f43f5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<text x="796" y="391" class="" font-size="11" font-weight="700" text-anchor="start" fill="#f43f5e" >FAILED</text>
 <text x="930" y="390" class="text-primary" font-size="13" font-weight="500" text-anchor="start"  >2026-06-08 08:30</text>
 <text x="1110" y="390" class="text-primary" font-size="14" font-weight="500" text-anchor="start"  >32m</text>
 <line x1="290" y1="416" x2="1240" y2="416" stroke="rgba(56, 189, 248, 0.1)" stroke-width="1"  />

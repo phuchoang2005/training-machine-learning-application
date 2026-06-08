@@ -3,44 +3,58 @@
         <defs>
             <radialGradient id="bg-glow" cx="85%" cy="15%" r="65%">
                 <stop offset="0%" stop-color="#dbeafe" stop-opacity="1"/>
-                <stop offset="100%" stop-color="#f8fafc" stop-opacity="0"/>
+                <stop offset="100%" stop-color="#f8fbff" stop-opacity="0"/>
             </radialGradient>
             <radialGradient id="bg-glow2" cx="15%" cy="85%" r="65%">
-                <stop offset="0%" stop-color="#e0e7ff" stop-opacity="0.8"/>
-                <stop offset="100%" stop-color="#f8fafc" stop-opacity="0"/>
+                <stop offset="0%" stop-color="#e0f2fe" stop-opacity="0.8"/>
+                <stop offset="100%" stop-color="#f8fbff" stop-opacity="0"/>
             </radialGradient>
             <radialGradient id="bg-glow3" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
-                <stop offset="100%" stop-color="#f8fafc" stop-opacity="0"/>
+                <stop offset="0%" stop-color="#eef2ff" stop-opacity="1"/>
+                <stop offset="100%" stop-color="#f8fbff" stop-opacity="0"/>
             </radialGradient>
-            
+            <linearGradient id="light-aurora" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.55"/>
+                <stop offset="45%" stop-color="#60a5fa" stop-opacity="0.28"/>
+                <stop offset="100%" stop-color="#a78bfa" stop-opacity="0.32"/>
+            </linearGradient>
+            <linearGradient id="light-aurora-2" x1="100%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.36"/>
+                <stop offset="55%" stop-color="#93c5fd" stop-opacity="0.22"/>
+                <stop offset="100%" stop-color="#14b8a6" stop-opacity="0.2"/>
+            </linearGradient>
+            <radialGradient id="light-heart-glow" cx="50%" cy="42%" r="52%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
+                <stop offset="42%" stop-color="#bae6fd" stop-opacity="0.38"/>
+                <stop offset="100%" stop-color="#f8fbff" stop-opacity="0"/>
+            </radialGradient>
             <linearGradient id="primary-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#2563eb"/>
-                <stop offset="100%" stop-color="#4f46e5"/>
+                <stop offset="0%" stop-color="#0ea5e9"/>
+                <stop offset="100%" stop-color="#2563eb"/>
             </linearGradient>
             
             <linearGradient id="text-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#0f172a"/>
-                <stop offset="100%" stop-color="#334155"/>
+                <stop offset="0%" stop-color="#1e3a8a"/>
+                <stop offset="100%" stop-color="#0f766e"/>
             </linearGradient>
             
             <linearGradient id="sidebar-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="rgba(255, 255, 255, 0.95)"/>
-                <stop offset="100%" stop-color="rgba(255, 255, 255, 0.8)"/>
+                <stop offset="0%" stop-color="rgba(255, 255, 255, 0.96)"/>
+                <stop offset="100%" stop-color="rgba(255, 255, 255, 0.9)"/>
             </linearGradient>
             
             <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="12" stdDeviation="24" flood-color="#94a3b8" flood-opacity="0.15"/>
+                <feDropShadow dx="0" dy="12" stdDeviation="24" flood-color="#93c5fd" flood-opacity="0.15"/>
             </filter>
             <filter id="shadow-sm" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#94a3b8" flood-opacity="0.1"/>
+                <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#93c5fd" flood-opacity="0.1"/>
             </filter>
             
             <filter id="glow-primary" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#3b82f6" flood-opacity="0.4"/>
+                <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#2563eb" flood-opacity="0.4"/>
             </filter>
             <filter id="glow-success" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#10b981" flood-opacity="0.4"/>
+                <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#34d399" flood-opacity="0.4"/>
             </filter>
             
             <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
@@ -53,13 +67,13 @@
         * { font-family: 'Inter', sans-serif; }
         .mono { font-family: 'JetBrains Mono', monospace; }
         
-        .bg-base { fill: #f8fafc; }
-        .card { fill: rgba(255, 255, 255, 0.8); stroke: rgba(226, 232, 240, 0.8); stroke-width: 1; backdrop-filter: blur(12px); }
-        .card:hover { stroke: rgba(148, 163, 184, 0.5); transition: stroke 0.3s ease; }
+        .bg-base { fill: #f8fbff; }
+        .card { fill: rgba(255, 255, 255, 0.9); stroke: rgba(191, 219, 254, 0.9); stroke-width: 1; backdrop-filter: blur(12px); }
+        .card:hover { stroke: rgba(56, 189, 248, 0.55); transition: stroke 0.3s ease; }
         .glass { fill: url(#sidebar-grad); }
         
         .text-primary { fill: #0f172a; }
-        .text-muted { fill: #64748b; }
+        .text-muted { fill: #475569; }
         .gradient-text { fill: url(#text-grad); }
         
         .pulse { animation: pulse 2.5s infinite ease-in-out; }
@@ -76,8 +90,8 @@
         .btn-primary:hover { filter: brightness(1.1) url(#glow-primary); }
         .btn-primary-text { fill: #ffffff; }
         
-        .btn-secondary { fill: #ffffff; stroke: #cbd5e1; cursor: pointer; transition: all 0.2s; }
-        .btn-secondary:hover { fill: #f1f5f9; stroke: #94a3b8; }
+        .btn-secondary { fill: #ffffff; stroke: #bfdbfe; cursor: pointer; transition: all 0.2s; }
+        .btn-secondary:hover { fill: #eff6ff; stroke: #93c5fd; }
         .btn-secondary-text { fill: #334155; }
         
         .btn-danger { fill: #fee2e2; stroke: #f87171; }
@@ -88,28 +102,49 @@
 <rect x="0" y="0" width="1280" height="800" class="" fill="url(#bg-glow)"  rx="0"  />
 <rect x="0" y="0" width="1280" height="800" class="" fill="url(#bg-glow2)"  rx="0"  />
 <rect x="0" y="0" width="1280" height="800" class="" fill="url(#bg-glow3)"  rx="0"  />
+<g id="vivid-light-bg">
+<path d="M-80 210 C 210 30, 430 130, 640 84 S 1050 -10, 1360 118 L 1360 0 L -80 0 Z" fill="url(#light-aurora)" opacity="0.82"/>
+<path d="M-90 675 C 210 475, 395 558, 640 486 S 1030 324, 1370 470 L 1370 800 L -90 800 Z" fill="url(#light-aurora-2)" opacity="0.72"/>
+<ellipse cx="676" cy="330" rx="470" ry="230" fill="url(#light-heart-glow)" opacity="0.9"/>
+<circle cx="116" cy="116" r="3" fill="#2563eb" opacity="0.34"/>
+<circle cx="180" cy="268" r="2" fill="#38bdf8" opacity="0.42"/>
+<circle cx="316" cy="104" r="2.5" fill="#60a5fa" opacity="0.36"/>
+<circle cx="462" cy="188" r="2" fill="#14b8a6" opacity="0.36"/>
+<circle cx="540" cy="78" r="3" fill="#a78bfa" opacity="0.34"/>
+<circle cx="724" cy="142" r="2" fill="#0ea5e9" opacity="0.34"/>
+<circle cx="870" cy="86" r="3" fill="#38bdf8" opacity="0.34"/>
+<circle cx="1010" cy="194" r="2.5" fill="#60a5fa" opacity="0.38"/>
+<circle cx="1166" cy="96" r="3" fill="#2563eb" opacity="0.28"/>
+<circle cx="1120" cy="382" r="2" fill="#14b8a6" opacity="0.32"/>
+<circle cx="986" cy="610" r="2.5" fill="#38bdf8" opacity="0.36"/>
+<circle cx="760" cy="704" r="2" fill="#60a5fa" opacity="0.34"/>
+<circle cx="438" cy="650" r="2.5" fill="#2563eb" opacity="0.28"/>
+<circle cx="218" cy="588" r="2" fill="#a78bfa" opacity="0.32"/>
+<path d="M78 430 C 260 360, 378 396, 540 330" fill="none" stroke="#38bdf8" stroke-width="2" stroke-opacity="0.12"/>
+<path d="M745 256 C 910 190, 1040 214, 1218 146" fill="none" stroke="#2563eb" stroke-width="2" stroke-opacity="0.12"/>
+</g>
 <rect x="0" y="0" width="260" height="800" class="glass"   rx="0" filter="url(#shadow)" />
-<line x1="260" y1="0" x2="260" y2="800" stroke="#e2e8f0" stroke-width="1"  />
-<svg x="24" y="32" width="32" height="32" viewBox="0 0 24 24"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="url(#primary-grad)" stroke="none"/><circle cx="18" cy="6" r="1.5" fill="#38bdf8"/><circle cx="6" cy="18" r="1" fill="#3b82f6"/></svg>
+<line x1="260" y1="0" x2="260" y2="800" stroke="#dbeafe" stroke-width="1"  />
+<svg x="24" y="32" width="32" height="32" viewBox="0 0 24 24"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="url(#primary-grad)" stroke="none"/><circle cx="18" cy="6" r="1.5" fill="#0ea5e9"/><circle cx="6" cy="18" r="1" fill="#2563eb"/></svg>
 <text x="68" y="54" class="gradient-text" font-size="20" font-weight="800" text-anchor="start"  >Future</text>
-<svg x="36" y="108" width="20" height="20" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<svg x="36" y="108" width="20" height="20" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <text x="68" y="123" class="text-muted" font-size="15" font-weight="600" text-anchor="start"  >Projects</text>
-<line x1="24" y1="716" x2="236" y2="716" stroke="#e2e8f0" stroke-width="1"  />
+<line x1="24" y1="716" x2="236" y2="716" stroke="#dbeafe" stroke-width="1"  />
 <rect x="24" y="732" width="40" height="40" class="" fill="url(#primary-grad)"  rx="20"  />
 <text x="44" y="757" class="text-primary" font-size="15" font-weight="700" text-anchor="middle" fill="#ffffff" >EN</text>
 <text x="76" y="750" class="text-primary" font-size="13" font-weight="700" text-anchor="start"  >engineer@co.com</text>
 <text x="76" y="768" class="text-muted" font-size="12" font-weight="normal" text-anchor="start"  >AI Engineer</text>
-<rect x="260" y="0" width="1020" height="72" class="" fill="rgba(255, 255, 255, 0.7)"  rx="0" backdrop-filter="blur(12px)" />
-<line x1="260" y1="72" x2="1280" y2="72" stroke="#e2e8f0" stroke-width="1"  />
+<rect x="260" y="0" width="1020" height="72" class="" fill="rgba(248, 251, 255, 0.82)"  rx="0" backdrop-filter="blur(12px)" />
+<line x1="260" y1="72" x2="1280" y2="72" stroke="#dbeafe" stroke-width="1"  />
 <text x="290" y="42" class="text-muted" font-size="14" font-weight="600" text-anchor="start"  >Notifications</text>
-<rect x="980" y="22" width="128" height="28" class="" fill="#ecfdf5" stroke="#10b981" rx="14"  />
-<circle cx="996" cy="36" r="4" class="pulse" fill="#10b981"  filter="url(#glow-success)" />
+<rect x="980" y="22" width="128" height="28" class="" fill="#ecfdf5" stroke="#34d399" rx="14"  />
+<circle cx="996" cy="36" r="4" class="pulse" fill="#34d399"  filter="url(#glow-success)" />
 <text x="1010" y="40" class="text-primary" font-size="11" font-weight="800" text-anchor="start" fill="#059669" >CONNECTED</text>
-<svg x="1140" y="24" width="24" height="24" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-<circle cx="1158" cy="26" r="4" class="" fill="#ef4444"   />
+<svg x="1140" y="24" width="24" height="24" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<circle cx="1158" cy="26" r="4" class="" fill="#f43f5e"   />
 <text x="290" y="130" class="gradient-text fade-in" font-size="32" font-weight="800" text-anchor="start"  >Inbox &amp; Alerts</text>
 <g class="fade-in delay-1">
-<rect x="290" y="170" width="300" height="44" class="" fill="#f1f5f9" stroke="#cbd5e1" rx="8"  />
+<rect x="290" y="170" width="300" height="44" class="" fill="#eff6ff" stroke="#bfdbfe" rx="8"  />
 <rect x="294" y="174" width="100" height="36" class="" fill="#ffffff"  rx="6" filter="url(#shadow-sm)" />
 <text x="344" y="197" class="text-primary" font-size="14" font-weight="700" text-anchor="middle"  >All</text>
 <text x="444" y="197" class="text-muted" font-size="14" font-weight="600" text-anchor="middle"  >Unread (1)</text>
@@ -120,11 +155,11 @@
 </g>
 </g>
 <g class="fade-in delay-2">
-<rect x="290" y="240" width="950" height="110" class="" fill="#dbeafe" stroke="#2563eb" rx="16" filter="url(#shadow-sm)" />
-<circle cx="314" cy="295" r="6" class="" fill="#3b82f6"  filter="url(#glow-primary)" />
-<rect x="340" y="259" width="80" height="24" class="" fill="#fee2e2" stroke="#dc2626" rx="12" stroke-opacity="0.3" />
-<svg x="346" y="263" width="16" height="16" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-<text x="366" y="276" class="" font-size="11" font-weight="700" text-anchor="start" fill="#dc2626" >FAILED</text>
+<rect x="290" y="240" width="950" height="110" class="" fill="#dbeafe" stroke="#0f766e" rx="16" filter="url(#shadow-sm)" />
+<circle cx="314" cy="295" r="6" class="" fill="#2563eb"  filter="url(#glow-primary)" />
+<rect x="340" y="259" width="80" height="24" class="" fill="#fee2e2" stroke="#e11d48" rx="12" stroke-opacity="0.3" />
+<svg x="346" y="263" width="16" height="16" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<text x="366" y="276" class="" font-size="11" font-weight="700" text-anchor="start" fill="#e11d48" >FAILED</text>
 <text x="450" y="275" class="text-primary" font-size="16" font-weight="800" text-anchor="start"  >Job #1003 Failed - Fraud Detection</text>
 <text x="340" y="310" class="text-muted" font-size="14" font-weight="500" text-anchor="start"  >Error: CUDA out of memory. Epoch 42 runtime terminated.</text>
 <text x="1110" y="275" class="text-muted" font-size="13" font-weight="600" text-anchor="middle"  >3 hours ago</text>
@@ -134,7 +169,7 @@
 </g>
 </g>
 <g class="fade-in delay-2">
-<rect x="290" y="370" width="950" height="110" class="" fill="rgba(255, 255, 255, 0.8)" stroke="rgba(226, 232, 240, 0.8)" rx="16" filter="url(#shadow-sm)" />
+<rect x="290" y="370" width="950" height="110" class="" fill="rgba(255, 255, 255, 0.9)" stroke="rgba(191, 219, 254, 0.9)" rx="16" filter="url(#shadow-sm)" />
 <rect x="340" y="389" width="88" height="24" class="" fill="#d1fae5" stroke="#059669" rx="12" stroke-opacity="0.3" />
 <svg x="346" y="393" width="16" height="16" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <text x="366" y="406" class="" font-size="11" font-weight="700" text-anchor="start" fill="#059669" >SUCCESS</text>

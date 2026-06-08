@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-This document defines the design system and reusable UI component specification for the AI Training Management Platform frontend. It supports the React, TypeScript, Vite, Redux, TailwindCSS, Radix UI, and shadcn/ui architecture described in `docs/solution-architect/frontend-architecture-document/README.md`.
+This document defines the design system and reusable UI component specification for the AI Training Management Platform frontend. It supports the React, TypeScript, Vite, Redux, TailwindCSS, Radix UI, shadcn/ui, and Framer Motion architecture described in `docs/solution-architect/frontend-architecture-document/README.md`.
 
 The design system is optimized for operational workflows: project discovery, configuration review, training launch, real-time job monitoring, log inspection, artifact download, notifications, and administrator queue or user management.
 
@@ -117,6 +117,32 @@ Use a 4px spacing base.
 | `--shadow-dialog` | `0 18px 48px rgba(15, 23, 42, 0.18)` | Dialogs and popovers. |
 | `--focus-ring` | `0 0 0 3px color-mix(in srgb, hsl(var(--ring)) 28%, transparent)` | Keyboard focus state. |
 
+### Motion Tokens
+
+Use Framer Motion (`framer-motion`) for frontend motion. Motion should make transitions feel calm, vivid, and hopeful without reducing scanability or slowing operational work.
+
+| Token | Value | Usage |
+| --- | --- | --- |
+| `--motion-duration-fast` | `120ms` | Hover feedback, small icon state changes. |
+| `--motion-duration-standard` | `220ms` | Page, panel, and card reveal transitions. |
+| `--motion-duration-slow` | `420ms` | Sparse background glow or one-time empty-state reveal. |
+| `--motion-ease-out` | `[0.16, 1, 0.3, 1]` | Default entrance easing. |
+| `--motion-ease-in` | `[0.4, 0, 1, 1]` | Exit transitions. |
+| `--motion-y-small` | `8px` | Subtle vertical lift for route and panel entry. |
+| `--motion-scale-dialog` | `0.98` to `1` | Dialog entrance scale. |
+
+### Motion Design Rules
+
+| Area | Requirement |
+| --- | --- |
+| Library | Use `framer-motion`; do not introduce another animation library for React components. |
+| Scope | Keep reusable variants under `src/shared/motion/` and consume them from shared UI or page-level components. |
+| Purpose | Use motion to preserve spatial orientation, show live system state, soften loading, and support the Pleiades/Sirius celestial direction. |
+| Performance | Animate `opacity`, `transform`, lightweight SVG accents, and small visible lists. Do not animate table layout, log stream rows, or large DOM collections. |
+| Reduced motion | Honor `prefers-reduced-motion` and Framer Motion `useReducedMotion()`. Replace movement with opacity changes or static state. |
+| Timing | Keep workflow motion under `450ms`; long ambient background motion must be subtle and non-blocking. |
+| Data integrity | Never delay status, error, or security feedback for animation completion. |
+
 ## 5. Responsive Styling Guide
 
 ### Supported Viewports
@@ -212,6 +238,7 @@ Use a 4px spacing base.
 | `Banner` | Persistent page-level state. | Info, warning, danger, degraded. | Visible, dismissible when safe. |
 | `EmptyState` | Explain empty resource collections. | No projects, no jobs, no artifacts, no notifications. | Static with optional action. |
 | `LoadingState` | Indicate pending data. | Skeleton, spinner, inline. | Loading. |
+| `MotionPresence` | Shared Framer Motion wrapper for route, dialog, and panel enter/exit transitions. | Page, panel, dialog, list. | Entering, visible, exiting, reduced-motion. |
 
 ### Navigation Components
 
@@ -411,7 +438,7 @@ Use a 4px spacing base.
 | Errors | Validation messages must be associated with fields and summarized in complex forms. |
 | Dialogs | Focus must move into dialog on open and return to trigger on close. |
 | Logs | Log viewer must expose text content and should not trap keyboard focus. |
-| Motion | Loading and live indicators should respect reduced-motion preferences. |
+| Motion | Framer Motion transitions must respect reduced-motion preferences and must not hide or delay critical status, error, or permission feedback. |
 
 ## 10. Security and Permission UX
 
