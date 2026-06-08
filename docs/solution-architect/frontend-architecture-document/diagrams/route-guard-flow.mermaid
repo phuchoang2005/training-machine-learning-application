@@ -1,0 +1,18 @@
+flowchart TD
+    Start[Route matched] --> Public{Public route?}
+    Public -- Yes --> Render[Render route]
+    Public -- No --> LoadMe[Load /auth/me]
+    LoadMe --> Authenticated{Authenticated?}
+    Authenticated -- No --> Login[Redirect to company login]
+    Authenticated -- Yes --> RoleCheck{Admin-only route?}
+    RoleCheck -- Yes --> IsAdmin{role = ADMIN?}
+    IsAdmin -- No --> Forbidden[Render /403]
+    IsAdmin -- Yes --> Render
+    RoleCheck -- No --> ResourceRoute{Resource route?}
+    ResourceRoute -- No --> Render
+    ResourceRoute -- Yes --> FetchResource[Fetch resource through backend API]
+    FetchResource --> ApiResult{API result}
+    ApiResult -- 200 --> Render
+    ApiResult -- 401 --> Login
+    ApiResult -- 403 --> Forbidden
+    ApiResult -- 404 --> NotFound[Render /404]

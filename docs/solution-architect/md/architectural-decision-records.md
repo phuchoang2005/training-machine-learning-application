@@ -22,7 +22,7 @@ Version-sensitive decisions were reviewed on 2026-06-06. Use the newest LTS rele
 
 ---
 
-## ADR-002: Frontend Framework
+## ADR-002: Frontend Framework and Language
 
 **Status:** Accepted
 
@@ -32,7 +32,7 @@ Version-sensitive decisions were reviewed on 2026-06-06. Use the newest LTS rele
 
 **Rationale:** React matches the preferred technology stack and is appropriate for dashboard, project detail, log viewer, progress bar, and artifact browsing screens. TypeScript improves maintainability for API contracts and UI state.
 
-**Consequences:** React does not publish an LTS line, so the project should pin stable major versions and upgrade intentionally.
+**Consequences:** React does not publish an LTS line, so the project should pin stable major versions and upgrade intentionally. Frontend state, API, and UI decisions are captured in ADR-011 through ADR-014.
 
 ---
 
@@ -47,6 +47,62 @@ Version-sensitive decisions were reviewed on 2026-06-06. Use the newest LTS rele
 **Rationale:** Vite provides fast local development, simple React integration, and production builds without unnecessary framework complexity.
 
 **Consequences:** Server-side rendering is not included in the MVP. The frontend will be a static SPA served by the web tier or a reverse proxy.
+
+---
+
+## ADR-011: Frontend State Management
+
+**Status:** Accepted
+
+**Decision:** Use Redux with TypeScript for frontend application state and client-side server-state coordination.
+
+**Version Target:** Latest stable Redux Toolkit and React Redux compatible with the selected React version.
+
+**Rationale:** The platform has shared cross-route state for authentication, project/job caches, notification state, WebSocket connection state, filters, and live job monitoring. Redux Toolkit provides predictable state transitions, typed slices, async thunks or listener middleware, and a single integration point for WebSocket event synchronization.
+
+**Consequences:** State should be organized by domain slices such as `auth`, `projects`, `configurations`, `jobs`, `logs`, `artifacts`, `notifications`, `admin`, `ui`, and `theme`. Redux is the authoritative client cache; component-local state remains appropriate for transient UI state such as open dialogs and unsaved field text.
+
+---
+
+## ADR-012: Frontend API Client
+
+**Status:** Accepted
+
+**Decision:** Use Axios as the browser HTTP client for REST API integration.
+
+**Version Target:** Latest stable Axios compatible with Node.js 24 LTS tooling and target browsers.
+
+**Rationale:** Axios provides request and response interceptors, consistent error normalization, cancellation support, multipart upload support, and straightforward integration with Redux async workflows.
+
+**Consequences:** All REST calls must go through a shared Axios instance configured with `/api/v1`, authentication behavior, correlation ID extraction, idempotency headers where needed, and normalized `ApiError` handling. Feature components must not construct raw endpoint calls directly.
+
+---
+
+## ADR-013: Frontend Styling and Component System
+
+**Status:** Accepted
+
+**Decision:** Use TailwindCSS for styling, Radix UI primitives for accessible low-level interactions, and shadcn/ui as the component composition baseline.
+
+**Version Target:** Latest stable TailwindCSS, Radix UI packages, and shadcn/ui component templates compatible with the selected React version.
+
+**Rationale:** TailwindCSS supports consistent utility-based styling, dark-mode variants, and compact operational UI construction. Radix UI provides accessible primitives for dialogs, menus, tabs, tooltips, popovers, and other interactive components. shadcn/ui gives a pragmatic component baseline that can be owned directly in the repository and adapted to the platform design system.
+
+**Consequences:** Shared UI components should wrap or compose shadcn/ui and Radix primitives instead of introducing unrelated component systems. Tailwind design tokens must align with the documented design system. Components must remain accessible and must not rely on color alone for status communication.
+
+---
+
+## ADR-014: Frontend Theme Mode
+
+**Status:** Accepted
+
+**Decision:** Support light mode and dark mode using the operating system or browser `prefers-color-scheme` setting by default.
+
+**Version Target:** TailwindCSS dark mode configured for class-based or selector-based theming with an initial system-mode resolver.
+
+**Rationale:** Users may monitor long-running training jobs for extended periods, and system-based light/dark mode improves visual comfort while respecting user device preferences.
+
+**Consequences:** The frontend must initialize theme from system preference, react to system preference changes, and avoid a flash of incorrect theme during initial load. A future manual override may be added, but MVP default behavior is system-driven.
 
 ---
 
@@ -154,4 +210,9 @@ Version-sensitive decisions were reviewed on 2026-06-06. Use the newest LTS rele
 * Spring Boot project support reference: https://github.com/spring-projects/spring-boot/wiki
 * React latest stable reference: https://react.dev/versions
 * Node.js LTS release schedule: https://nodejs.org/tr/download/releases
+* Redux Toolkit documentation: https://redux-toolkit.js.org/
+* Axios documentation: https://axios-http.com/
+* TailwindCSS documentation: https://tailwindcss.com/
+* Radix UI documentation: https://www.radix-ui.com/
+* shadcn/ui documentation: https://ui.shadcn.com/
 * PostgreSQL supported release reference: https://www.postgresql.org/

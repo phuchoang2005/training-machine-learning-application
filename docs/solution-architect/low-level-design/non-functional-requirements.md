@@ -128,7 +128,7 @@ Future scalability targets include multi-worker execution, Kubernetes orchestrat
 | Requirement ID | Requirement |
 | --- | --- |
 | NFR-COMP-001 | Backend implementation shall target Spring Boot and Java according to the ADR baseline. |
-| NFR-COMP-002 | Frontend implementation shall target ReactJS and TypeScript according to the ADR baseline. |
+| NFR-COMP-002 | Frontend implementation shall target ReactJS, TypeScript, Vite, Redux, Axios, TailwindCSS, Radix UI, and shadcn/ui according to the ADR baseline. |
 | NFR-COMP-003 | The MVP shall use PostgreSQL as the primary database. |
 | NFR-COMP-004 | Training jobs shall run inside Docker containers, not directly on the host OS. |
 | NFR-COMP-005 | WebSocket shall be the primary real-time mechanism, with REST polling as fallback. |

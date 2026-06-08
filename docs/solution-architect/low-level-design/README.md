@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This Low-Level Design (LLD) translates the approved requirements, HLD, and ADR decisions into implementation-level guidance for the MVP. It assumes Spring Boot, ReactJS, PostgreSQL, Docker, Google Workspace authentication/email, local filesystem storage, and WebSocket-based real-time updates.
+This Low-Level Design (LLD) translates the approved requirements, HLD, and ADR decisions into implementation-level guidance for the MVP. It assumes Spring Boot, ReactJS with TypeScript, Vite, Redux, Axios, TailwindCSS, Radix UI, shadcn/ui, PostgreSQL, Docker, Google Workspace authentication/email, local filesystem storage, and WebSocket-based real-time updates.
 
 ## Document Set
 
@@ -19,7 +19,7 @@ This Low-Level Design (LLD) translates the approved requirements, HLD, and ADR d
 | Layer | Decision |
 | --- | --- |
 | Backend | Spring Boot 4.0.x, Java 25 LTS |
-| Frontend | React 19.2, TypeScript, Vite, Node.js 24 LTS |
+| Frontend | React 19.2, TypeScript, Vite, Redux, Axios, TailwindCSS, Radix UI, shadcn/ui, Node.js 24 LTS |
 | Database | PostgreSQL 18 |
 | Execution | Docker Engine, one centralized training server |
 | Realtime | WebSocket primary, REST polling fallback |

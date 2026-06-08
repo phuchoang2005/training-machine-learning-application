@@ -1,0 +1,63 @@
+@startuml
+skinparam packageStyle rectangle
+
+package "app" {
+  [App]
+  [Router]
+  [Providers]
+  [Route Guards]
+}
+
+package "features" {
+  [Project Dashboard]
+  [Project Detail]
+  [Job Detail]
+  [Artifact Browser]
+  [Notifications]
+  [Admin Console]
+}
+
+package "entities" {
+  [User Slice]
+  [Project Slice]
+  [Job Slice]
+  [Log Slice]
+  [Artifact Slice]
+}
+
+package "shared" {
+  [Axios Client]
+  [WebSocket Client]
+  [Permission Helpers]
+  [shadcn UI Components]
+  [Radix UI Primitives]
+}
+
+[App] --> [Router]
+[Router] --> [Route Guards]
+[Route Guards] --> [User Slice]
+[Router] --> [Project Dashboard]
+[Router] --> [Project Detail]
+[Router] --> [Job Detail]
+[Router] --> [Notifications]
+[Router] --> [Admin Console]
+
+[Project Dashboard] --> [Project Slice]
+[Project Detail] --> [Project Slice]
+[Project Detail] --> [Job Slice]
+[Job Detail] --> [Job Slice]
+[Job Detail] --> [Log Slice]
+[Job Detail] --> [Artifact Slice]
+[Job Detail] --> [WebSocket Client]
+[Artifact Browser] --> [Artifact Slice]
+[Notifications] --> [User Slice]
+[Notifications] --> [Axios Client]
+[Admin Console] --> [User Slice]
+[Admin Console] --> [Job Slice]
+
+[Project Slice] --> [Axios Client]
+[Job Slice] --> [Axios Client]
+[Log Slice] --> [Axios Client]
+[Artifact Slice] --> [Axios Client]
+[Route Guards] --> [Permission Helpers]
+@enduml

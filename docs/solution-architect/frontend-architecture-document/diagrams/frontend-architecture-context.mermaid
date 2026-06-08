@@ -1,0 +1,12 @@
+flowchart LR
+    User[AI Engineer / Admin] --> Browser[React SPA]
+    Browser --> Router[Route Layer]
+    Router --> Pages[Page Modules]
+    Pages --> Store[Redux Store]
+    Pages --> UIState[Client UI State]
+    Store --> ApiClient[Axios REST Client]
+    Pages --> WsClient[WebSocket Client]
+    ApiClient --> Backend[Spring Boot API]
+    WsClient --> Backend
+    Backend --> Auth[RBAC + Ownership Checks]
+    Backend --> Jobs[Project, Job, Log, Artifact Services]

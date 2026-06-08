@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant Page as Job Detail Page
+    participant Store as Redux Store
+    participant WS as Job WebSocket Client
+    participant API as REST API
+
+    Page->>API: GET /jobs/{jobId}
+    API-->>Store: Job detail
+    Page->>API: GET /jobs/{jobId}/logs?cursor=...
+    API-->>Store: Initial log page
+    Page->>WS: Connect /ws/jobs/{jobId}
+    WS-->>Page: connection_open
+    WS-->>Store: status/progress/log event
+    Store-->>Page: Render updated job and appended logs
+
+    WS--xPage: connection_lost
+    Page->>Page: Show reconnect state
+    WS->>WS: Retry with backoff
+    alt reconnect succeeds
+        WS-->>Page: connection_open
+        Page->>API: GET /jobs/{jobId}/logs?after=lastSeen
+        API-->>Store: Missed log events
+    else reconnect fails
+        Page->>API: Poll GET /jobs/{jobId}
+        Page->>API: Poll GET /jobs/{jobId}/logs?after=lastSeen
+    end

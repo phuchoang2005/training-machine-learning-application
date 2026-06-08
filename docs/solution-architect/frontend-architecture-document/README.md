@@ -1,0 +1,442 @@
+# Frontend Architecture Document
+
+## 1. Purpose
+
+This document defines the frontend architecture for the AI Training Management Platform MVP. It covers the React application structure, state management design, routing architecture, API integration, WebSocket monitoring, security boundaries, and test strategy.
+
+The frontend is a TypeScript single-page application built with React, Vite, Redux, Axios, TailwindCSS, Radix UI, and shadcn/ui, aligned with ADR-002, ADR-003, ADR-008, ADR-011, ADR-012, ADR-013, and ADR-014.
+
+## 2. Architecture Context
+
+The frontend provides authenticated web workflows for:
+
+* Viewing authorized projects.
+* Registering GitHub or ZIP-based projects.
+* Viewing and editing YAML training configuration.
+* Starting, cancelling, and retrying training jobs.
+* Monitoring real-time status, progress, and logs.
+* Reviewing job history, notifications, artifacts, and administrative views.
+
+Backend authorization remains authoritative for all REST endpoints and WebSocket subscriptions. The frontend must hide unavailable actions based on user role and resource ownership, but it must never treat UI checks as security enforcement.
+
+Diagram: [frontend-architecture-context.mermaid](diagrams/frontend-architecture-context.mermaid)
+
+## 3. Technology Baseline
+
+| Concern | Decision |
+| --- | --- |
+| Framework | React with TypeScript |
+| Build tool | Vite |
+| Routing | React Router |
+| State management | Redux Toolkit with typed slices, async thunks or listener middleware |
+| HTTP client | Axios shared instance with request and response interceptors |
+| Styling | TailwindCSS |
+| UI primitives | Radix UI |
+| Component baseline | shadcn/ui components owned in the repository |
+| Theme | System-driven light mode and dark mode through `prefers-color-scheme` |
+| Form state | Controlled React state or a lightweight form helper integrated with Redux actions where needed |
+| Schema validation | Runtime validators generated from or aligned with OpenAPI when needed |
+| Real-time updates | Browser WebSocket API with REST polling fallback |
+| API contract | OpenAPI under `docs/solution-architect/low-level-design/api-contracts/openapi.yaml` |
+| Test approach | Unit tests, component tests, contract-aware API mocks, end-to-end tests |
+
+## 4. Proposed Folder Structure
+
+The frontend code should use feature-first organization with shared platform modules under `src/app`, `src/shared`, and `src/entities`.
+
+```text
+frontend/
+  package.json
+  vite.config.ts
+  tsconfig.json
+  index.html
+  src/
+    main.tsx
+    app/
+      App.tsx
+      router.tsx
+      providers.tsx
+      store.ts
+      error-boundary.tsx
+      route-guards.tsx
+    assets/
+      styles/
+        global.css
+        tailwind.css
+    shared/
+      api/
+        axios-client.ts
+        api-error.ts
+        generated/
+          types.ts
+          client.ts
+      auth/
+        session.ts
+        permissions.ts
+      config/
+        env.ts
+      realtime/
+        job-stream-client.ts
+        reconnect-policy.ts
+        event-dedupe.ts
+      ui/
+        button.tsx
+        dialog.tsx
+        data-table.tsx
+        status-badge.tsx
+        empty-state.tsx
+        loading-state.tsx
+      utils/
+        date-time.ts
+        duration.ts
+        download.ts
+    store/
+      root-reducer.ts
+      listener-middleware.ts
+      hooks.ts
+      slices/
+        auth-slice.ts
+        project-slice.ts
+        job-slice.ts
+        log-slice.ts
+        artifact-slice.ts
+        notification-slice.ts
+        admin-slice.ts
+        ui-slice.ts
+        theme-slice.ts
+    entities/
+      user/
+        model.ts
+        selectors.ts
+      project/
+        model.ts
+        selectors.ts
+        thunks.ts
+        permissions.ts
+      training-job/
+        model.ts
+        selectors.ts
+        thunks.ts
+        status.ts
+      log/
+        model.ts
+        selectors.ts
+      artifact/
+        model.ts
+        selectors.ts
+      notification/
+        model.ts
+        selectors.ts
+        thunks.ts
+    features/
+      auth/
+        login-callback-page.tsx
+        logout-button.tsx
+      project-list/
+        project-dashboard-page.tsx
+        project-search.tsx
+        project-table.tsx
+      project-registration/
+        register-project-page.tsx
+        github-project-form.tsx
+        zip-project-upload-form.tsx
+      project-detail/
+        project-detail-page.tsx
+        project-summary-panel.tsx
+        config-editor.tsx
+        training-history-table.tsx
+        start-training-dialog.tsx
+      job-detail/
+        job-detail-page.tsx
+        job-status-panel.tsx
+        log-viewer.tsx
+        progress-panel.tsx
+        cancel-job-dialog.tsx
+        retry-job-dialog.tsx
+      artifacts/
+        artifact-list.tsx
+        artifact-download-button.tsx
+      notifications/
+        notification-list-page.tsx
+        notification-menu.tsx
+      admin/
+        user-management-page.tsx
+        queue-monitor-page.tsx
+    pages/
+      not-found-page.tsx
+      forbidden-page.tsx
+      platform-error-page.tsx
+    tests/
+      mocks/
+        handlers.ts
+        server.ts
+```
+
+### Folder Responsibilities
+
+| Folder | Responsibility |
+| --- | --- |
+| `app/` | Application composition, router, Redux provider, global error boundaries, route guards. |
+| `shared/api/` | Axios client, generated OpenAPI types, error normalization, request correlation handling. |
+| `shared/realtime/` | WebSocket connection lifecycle, reconnect, duplicate-event protection, polling fallback helpers. |
+| `shared/auth/` | Current session model and client-side permission helpers. |
+| `shared/ui/` | Reusable components based on shadcn/ui and Radix UI primitives. |
+| `store/` | Redux root store, typed hooks, listener middleware, domain slices, and theme slice. |
+| `entities/` | API models, selectors, service functions, async thunks, and reducers for backend resources. |
+| `features/` | User-facing workflows and page-level feature composition. |
+| `pages/` | Generic route-level pages for errors and navigation fallbacks. |
+| `tests/` | Frontend test fixtures and API mocks. |
+
+## 5. Frontend Module Model
+
+Diagram: [frontend-module-model.puml](diagrams/frontend-module-model.puml)
+
+## 6. State Management Design
+
+Frontend state is split into Redux-managed domain state, client UI state, form state, and real-time stream state.
+
+| State Category | Examples | Owner | Persistence |
+| --- | --- | --- | --- |
+| Server-backed domain state | Current user, projects, configs, jobs, logs, artifacts, notifications, queue snapshot | Redux slices | In memory; refreshed through Axios services and WebSocket events |
+| Client UI state | Active tabs, dialogs, table filters, local search text, sidebar state | React component state or Redux `ui` slice | In memory or URL query params |
+| Form state | Project registration fields, YAML editor draft, retry mode, cancellation reason | Form library + component state | In memory until submitted |
+| Real-time stream state | WebSocket status, last event ID, appended log buffer, reconnect attempts | `shared/realtime` and job detail feature | In memory; resumed from REST |
+| Auth session state | Current user profile, role, session loading state | Redux `auth` slice hydrated by `/auth/me` | Server-owned session or token |
+| Theme state | System theme mode, resolved light or dark theme | Redux `theme` slice and document root class | System preference by default |
+
+### Redux State Rules
+
+* Every API resource has a stable Redux slice or normalized entity map under its entity module.
+* Mutations refresh only the affected slices.
+* Start, cancel, and retry mutations update job detail optimistically only for pending UI state; final status must come from REST or WebSocket.
+* API errors must be normalized into a shared `ApiError` shape with `code`, `message`, `correlationId`, and optional field details.
+* Downloads for logs and artifacts should use direct authorized backend endpoints and should not load large files fully into memory.
+
+### Redux Slice Shape
+
+```typescript
+type EntityRequestState = {
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  error?: ApiError;
+  lastFetchedAt?: string;
+};
+
+type JobSliceState = {
+  byId: Record<string, JobDetail>;
+  idsByProjectId: Record<string, string[]>;
+  logsByJobId: Record<string, LogBufferState>;
+  artifactsByJobId: Record<string, ArtifactSummary[]>;
+  queue?: QueueSnapshot;
+  requests: Record<string, EntityRequestState>;
+};
+```
+
+### Mutation Effects
+
+| Mutation | Endpoint | Redux Effect | Navigation Effect |
+| --- | --- | --- | --- |
+| Register GitHub project | `POST /projects` | Refresh project list slice | Open created project detail |
+| Upload ZIP project | `POST /projects/upload-zip` | Refresh project list slice | Open created project detail |
+| Validate config | `POST /projects/{projectId}/configs/validate` | Store validation result in form-local state | Show validation result inline |
+| Start training | `POST /projects/{projectId}/jobs` | Upsert new job, refresh project jobs and queue | Open job detail |
+| Cancel job | `POST /jobs/{jobId}/cancel` | Set local cancel-requested state, then refresh job and queue | Stay on job detail |
+| Retry job | `POST /jobs/{jobId}/retry` | Upsert retry job, refresh original job, project jobs, and queue | Open new job detail |
+| Mark notification read | `POST /notifications/{notificationId}/read` | Optimistically mark notification read, rollback on failure | Stay in current view |
+| Disable user | `POST /admin/users/{userId}/status` | Optimistically update admin user row, rollback on failure | Stay in admin console |
+
+### Real-Time State Flow
+
+Diagram: [realtime-state-flow.mermaid](diagrams/realtime-state-flow.mermaid)
+
+### Job Stream Event Handling
+
+The `Job Detail` feature should process events using idempotent handlers. Each incoming event should include or derive a monotonic sequence, timestamp, or log offset. Duplicate events are ignored.
+
+```text
+Incoming event
+  -> validate shape
+  -> check jobId matches active route
+  -> check event id or offset has not been applied
+  -> dispatch Redux actions for status/progress
+  -> append log line to in-memory log buffer
+  -> refetch terminal resources when status enters SUCCESS, FAILED, or CANCELLED
+```
+
+## 7. Routing Architecture
+
+Routes are grouped by authentication requirement, ownership-sensitive resources, and administrator-only features.
+
+```text
+/
+  /login/callback
+  /projects
+  /projects/new
+  /projects/:projectId
+  /projects/:projectId/configs/:configId
+  /projects/:projectId/jobs/:jobId
+  /jobs/:jobId
+  /notifications
+  /admin/users
+  /admin/queue
+  /403
+  /404
+```
+
+### Route Table
+
+| Route | Component | Guard | Data Dependencies |
+| --- | --- | --- | --- |
+| `/login/callback` | `LoginCallbackPage` | Public callback route | Auth provider result |
+| `/projects` | `ProjectDashboardPage` | Authenticated | `/auth/me`, `/projects` |
+| `/projects/new` | `RegisterProjectPage` | Authenticated user, non-admin create rule | `/auth/me` |
+| `/projects/:projectId` | `ProjectDetailPage` | Authenticated; backend verifies ownership | `/projects/{projectId}`, configs, jobs |
+| `/projects/:projectId/configs/:configId` | `ProjectDetailPage` config tab | Authenticated; backend verifies ownership | `/projects/{projectId}/configs/{configId}` |
+| `/projects/:projectId/jobs/:jobId` | Redirect to canonical job route or nested job detail | Authenticated; backend verifies ownership | `/jobs/{jobId}` |
+| `/jobs/:jobId` | `JobDetailPage` | Authenticated; backend verifies ownership or admin cancel scope | `/jobs/{jobId}`, logs, artifacts, WebSocket |
+| `/notifications` | `NotificationListPage` | Authenticated | `/notifications` |
+| `/admin/users` | `UserManagementPage` | Admin role | `/admin/users` |
+| `/admin/queue` | `QueueMonitorPage` | Admin role | `/jobs/queue` |
+| `/403` | `ForbiddenPage` | Public | None |
+| `/404` | `NotFoundPage` | Public | None |
+
+### Route Guard Flow
+
+Diagram: [route-guard-flow.mermaid](diagrams/route-guard-flow.mermaid)
+
+### URL State
+
+Use URL query parameters for state that should be shareable or restorable:
+
+* Project search text and filters.
+* Training history pagination cursor and status filter.
+* Log search text, stream type filter, and cursor.
+* Notification status filter.
+
+Use component state for short-lived state:
+
+* Dialog open or closed.
+* Draft cancellation reason.
+* YAML editor dirty state before submit.
+* Current WebSocket reconnect banner state.
+
+## 8. API Integration Design
+
+The API client must be generated from or manually aligned with the OpenAPI contract. The shared Axios client should provide:
+
+* Shared Axios instance.
+* Base URL `/api/v1`.
+* Credentials or bearer token support based on backend authentication mode.
+* JSON request and response handling.
+* Multipart upload for ZIP project registration.
+* Download helper for logs and artifacts.
+* Correlation ID extraction from error responses.
+* Standard handling for `401`, `403`, `404`, `409`, `413`, `415`, and platform-busy responses.
+
+Diagram: [api-integration-flow.mermaid](diagrams/api-integration-flow.mermaid)
+
+## 9. Authorization and UI Permission Design
+
+Client-side permission helpers improve UX by hiding invalid actions, but backend checks remain mandatory.
+
+| UI Action | User Visibility Rule | Backend Enforcement |
+| --- | --- | --- |
+| View project list | Authenticated user | `/projects` filters authorized projects |
+| Create project | `USER` role | `POST /projects`, `POST /projects/upload-zip` |
+| View project detail | Project owner or project member | `GET /projects/{projectId}` |
+| Edit YAML config | Project owner or project member | Config endpoints |
+| Start training | Project owner or project member | `POST /projects/{projectId}/jobs` |
+| Cancel own job | Job owner or authorized project member | `POST /jobs/{jobId}/cancel` |
+| Cancel any running job | `ADMIN` role | `POST /jobs/{jobId}/cancel` |
+| Retry job | Project owner or project member | `POST /jobs/{jobId}/retry` |
+| View logs | Project owner or project member | REST logs endpoint and WebSocket subscription |
+| Download artifact | Project owner or project member | Artifact download endpoint |
+| Manage users | `ADMIN` role | `/admin/users` endpoints |
+
+## 10. Page Composition
+
+### Project Dashboard
+
+Primary components:
+
+* Project search and status filters.
+* Authorized project table.
+* Latest training status badge using `CREATED`, `QUEUED`, `RUNNING`, `SUCCESS`, `FAILED`, `CANCELLED`, and `RETRYING`.
+* Last training time and owner.
+* Empty state for no authorized projects.
+
+### Project Detail
+
+Primary components:
+
+* Project summary panel.
+* Git branch and dataset information.
+* YAML configuration editor with validation.
+* Training history table.
+* Start training dialog that submits immutable configuration content.
+
+### Job Detail
+
+Primary components:
+
+* Status, queue position, progress, duration, trigger owner, and retry relationship.
+* WebSocket connection indicator.
+* Log viewer with append, scroll, search, filter, and download.
+* Cancel and retry actions with confirmation.
+* Artifact list after terminal success.
+
+### Admin Console
+
+Primary components:
+
+* User list and status management.
+* Queue snapshot showing running count, running limit, queued count, and queued jobs.
+* Admin views must not expose source code, detailed logs, or artifacts unless the backend authorizes the admin as project owner.
+
+## 11. Error Handling Design
+
+| Error Type | UI Behavior |
+| --- | --- |
+| `401 Unauthenticated` | Clear current session cache and redirect to company login. |
+| `403 Forbidden` | Show forbidden page or inline permission message for resource actions. |
+| `404 Not Found` | Show not found page for route resources; show inline row state for nested resources. |
+| Validation error | Map field errors to the relevant form fields. |
+| Conflict | Show contextual message, refresh related Redux slice, and require user confirmation before retry. |
+| Platform busy | Show clear capacity message and refresh queue snapshot when relevant. |
+| WebSocket disconnect | Show degraded connection state, reconnect with backoff, then fall back to REST polling. |
+| Unknown server error | Show retryable error state with correlation ID. |
+
+## 12. Testing Strategy
+
+| Test Type | Scope |
+| --- | --- |
+| Unit tests | Permission helpers, Redux request key factories, status formatting, duration utilities, event dedupe. |
+| Component tests | Project dashboard, config editor validation, job status panel, log viewer, dialogs. |
+| API mock tests | Success and error paths for project, job, log, artifact, notification, and admin endpoints. |
+| WebSocket tests | Connect, reconnect, resume from last event, duplicate event ignore, fallback polling. |
+| End-to-end tests | Login flow, project registration, start training, monitor job, cancel job, retry job, download artifact. |
+| Accessibility checks | Status visibility without color-only meaning, keyboard dialog controls, log viewer focus handling. |
+
+## 13. Implementation Guidelines
+
+* Keep backend DTOs and frontend types aligned with OpenAPI.
+* Keep Redux slices small, domain-scoped, and selector-driven.
+* Use TailwindCSS utilities and shadcn/ui components for common UI before adding custom component styles.
+* Initialize light or dark mode from `prefers-color-scheme` and update when the system preference changes.
+* Use route-level code splitting for large feature areas such as job detail and admin console.
+* Keep large log streams virtualized or windowed to avoid slow browser rendering.
+* Keep YAML editor drafts local until validation or start-training submission.
+* Store no secrets, filesystem paths, or infrastructure credentials in browser storage.
+* Prefer backend-provided status and authorization results over inferred client state.
+* Show `Progress Information Not Available` when a job has no emitted progress data.
+* Require confirmation for destructive actions such as cancel and delete.
+* Treat WebSocket as the primary monitoring path and REST polling as degradation support.
+
+## 14. Open Decisions
+
+| Decision | Recommendation |
+| --- | --- |
+| Auth storage mode | Prefer secure HTTP-only session cookie if backend supports it; otherwise keep bearer tokens out of local storage. |
+| Generated API client | Generate TypeScript types from OpenAPI during frontend build or CI. |
+| Log rendering library | Use virtualization once log size exceeds normal DOM rendering limits. |
+| YAML editor | Use a lightweight code editor with YAML syntax support and validation feedback. |
+| WebSocket protocol shape | Define event schema for status, progress, log, terminal, heartbeat, and error events before implementation. |

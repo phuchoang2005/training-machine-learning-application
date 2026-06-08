@@ -1,0 +1,11 @@
+flowchart LR
+    Feature["Feature Component"] --> ReduxAction["Redux Action / Thunk"]
+    ReduxAction --> Client["Axios Service"]
+    Client --> Interceptor["Auth + Error Handling"]
+    Interceptor --> BackendApi["API v1 Backend"]
+    BackendApi --> Response{Response}
+    Response -->|2xx| Store["Redux Store"]
+    Response -->|401| AuthAction["Refresh session or login redirect"]
+    Response -->|403| Forbidden["Forbidden UI"]
+    Response -->|4xx validation| Form["Field errors"]
+    Response -->|5xx| ErrorUi["Error boundary / retry UI"]
