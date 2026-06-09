@@ -6,6 +6,11 @@ This directory contains the detailed user interface wireframes and layout specif
 
 This wireframe package is organized into individual files, each detailing the layout, components, responsive adaptations, and interactivity of a specific route in the application:
 
+Role-specific SVG mockups are stored separately:
+
+* User-role UI set: `docs/ui-ux/ui/user/`
+* Admin-role UI set: `docs/ui-ux/ui/admin/`
+
 * **01. Login Page** (`/login`): Authentication gate for user credential login.
   - [Markdown Specification](file:///Users/phuchoang/Local_Document/training-model-tool/docs/ui-ux/ui/wireframe/01-login.md) | [SVG Visual Wireframe](file:///Users/phuchoang/Local_Document/training-model-tool/docs/ui-ux/ui/wireframe/01-login.svg)
 * **02. Project Dashboard** (`/projects`): Searchable, filterable directory of all authorized projects with active status indicators.
