@@ -2,4 +2,7 @@ AGENTS.md
 SKILL.md
 .agents/
 .DS_Store
+._*
+backend/target/
+backend/storage/
 inspired.md

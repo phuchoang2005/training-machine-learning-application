@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: ai_training
+      POSTGRES_USER: ai_training
+      POSTGRES_PASSWORD: ai_training
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-18-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ai_training -d ai_training"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: .
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ai_training
+      SPRING_DATASOURCE_USERNAME: ai_training
+      SPRING_DATASOURCE_PASSWORD: ai_training
+      APP_STORAGE_ROOT: /data
+      APP_QUEUE_RUNNING_LIMIT: 2
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./storage:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres-18-data:

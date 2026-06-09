@@ -1,0 +1,18 @@
+server:
+  servlet:
+    context-path: /api/v1
+
+spring:
+  application:
+    name: ai-training-backend
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/ai_training}
+    username: ${SPRING_DATASOURCE_USERNAME:ai_training}
+    password: ${SPRING_DATASOURCE_PASSWORD:ai_training}
+  flyway:
+    enabled: true
+
+app:
+  storage-root: ${APP_STORAGE_ROOT:./storage}
+  queue:
+    running-limit: ${APP_QUEUE_RUNNING_LIMIT:2}

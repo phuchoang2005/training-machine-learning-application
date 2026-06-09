@@ -37,6 +37,15 @@ This Low-Level Design (LLD) translates the approved requirements, HLD, and ADR d
 * Dataset management remains inside project Python code.
 * Administrators cannot access project source code, detailed logs, or artifacts unless ownership rules allow it.
 
+## MVP Authentication Bootstrap
+
+The production authentication target remains Google Workspace OpenID Connect / OAuth 2.0. Until that integration is configured, the backend may run with a replaceable development bearer-token resolver for Docker-based implementation and testing.
+
+* `Authorization: Bearer <email-or-user-id>` resolves to an `ACTIVE` user in the PostgreSQL `users` table.
+* Flyway may seed one non-production `USER` and one non-production `ADMIN` account for local Docker validation.
+* Controllers, authorization checks, audit logging, and ownership rules must depend on the current-user abstraction, not on the bearer-token parser directly.
+* The development resolver must be isolated so Google Workspace/OIDC can replace it without changing resource controllers or RBAC services.
+
 ## Key References
 
 * HLD diagrams: `docs/sa/HLD/diagram/`
