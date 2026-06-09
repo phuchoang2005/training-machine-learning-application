@@ -1,4 +1,4 @@
-# AI Training Management Platform – Product Requirements
+# Future – Product Requirements
 
 ## Background
 
@@ -12,7 +12,7 @@ This approach creates several challenges:
 * There is no centralized history of training runs.
 * The workflow does not scale well as the number of AI projects increases.
 
-To address these issues, the company requires a web-based AI Training Management Platform that allows users to launch and monitor training jobs on centralized servers.
+To address these issues, the company requires Future, a web-based AI training management platform that allows users to launch and monitor training jobs on centralized servers.
 
 ---
 
@@ -61,8 +61,19 @@ Users must authenticate before accessing the platform.
 Requirements:
 
 * Login using company credentials.
+* Support a registration entry point for non-production onboarding validation before company SSO/OIDC is enabled.
 * Access only authorized projects.
 * Support role-based access control.
+* Provide clearly labeled non-production sample accounts for local Docker validation.
+
+Sample non-production accounts:
+
+| Role | Email | Password | Notes |
+| --- | --- | --- | --- |
+| User | `user@example.com` | `password` | Standard AI engineer account seeded for local validation. |
+| Admin | `admin@example.com` | `password` | Platform administrator account seeded for local validation. |
+
+The production authentication target remains company SSO/OIDC. Sample credentials must not be used in production.
 
 ---
 
@@ -194,7 +205,7 @@ Email content should include:
 Example subject:
 
 ```text
-[AI Training Failed] Recommendation Engine - Job #12345
+[Future Training Failed] Recommendation Engine - Job #12345
 ```
 
 ---

@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-This document defines the frontend architecture for the AI Training Management Platform MVP. It covers the React application structure, state management design, routing architecture, API integration, WebSocket monitoring, security boundaries, and test strategy.
+This document defines the frontend architecture for the Future MVP. It covers the React application structure, state management design, routing architecture, API integration, WebSocket monitoring, security boundaries, and test strategy.
 
 The frontend is a TypeScript single-page application built with React, Vite, Redux, Axios, TailwindCSS, Radix UI, and shadcn/ui, aligned with ADR-002, ADR-003, ADR-008, ADR-011, ADR-012, ADR-013, and ADR-014.
 
@@ -274,6 +274,8 @@ Routes are grouped by authentication requirement, ownership-sensitive resources,
 
 ```text
 /
+  /login
+  /register
   /login/callback
   /projects
   /projects/new
@@ -292,6 +294,8 @@ Routes are grouped by authentication requirement, ownership-sensitive resources,
 
 | Route | Component | Guard | Data Dependencies |
 | --- | --- | --- | --- |
+| `/login` | `LoginPage` | Public route | Development sample accounts or company login entry point |
+| `/register` | `RegisterAccountPage` | Public development-only route | Development onboarding form |
 | `/login/callback` | `LoginCallbackPage` | Public callback route | Auth provider result |
 | `/projects` | `ProjectDashboardPage` | Authenticated | `/auth/me`, `/projects` |
 | `/projects/new` | `RegisterProjectPage` | Authenticated user, non-admin create rule | `/auth/me` |
@@ -437,6 +441,25 @@ Primary components:
 * Show `Progress Information Not Available` when a job has no emitted progress data.
 * Require confirmation for destructive actions such as cancel and delete.
 * Treat WebSocket as the primary monitoring path and REST polling as degradation support.
+
+### Development Login and Registration Bootstrap
+
+Until Google Workspace/OIDC is configured, the frontend may provide a non-production login and registration phase for Docker validation. This phase must be visibly labeled as development-only and must not weaken backend authorization.
+
+Sample accounts:
+
+| Role | Email | Password | Backend bearer token |
+| --- | --- | --- | --- |
+| User | `user@example.com` | `password` | `user@example.com` |
+| Admin | `admin@example.com` | `password` | `admin@example.com` |
+
+Frontend behavior:
+
+* `/login` accepts the sample accounts above and creates a client session for local UI validation.
+* `/register` accepts a name, email, password, and role for non-production onboarding flow validation.
+* Registered accounts are local to the frontend mock session until a backend registration endpoint is introduced.
+* Authenticated API calls should use the selected account email as the development bearer token when calling the current backend.
+* Production builds must replace this phase with company SSO/OIDC and backend-managed sessions.
 
 ## 14. Framer Motion Integration
 

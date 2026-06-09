@@ -1,6 +1,6 @@
 # Admin Wireframe Specification (SVG Format)
 
-This directory contains administrator-role visual SVG wireframes for the AI Training Management Platform. The screens intentionally match the user-role UI direction in `docs/ui-ux/ui/user/`: the same 1280px by 800px desktop canvas, persistent app shell, Pleiades/Sirius light and dark themes, translucent operational panels, status badges, and WebSocket utility header.
+This directory contains administrator-role visual SVG wireframes for Future. The screens intentionally match the user-role UI direction in `docs/ui-ux/ui/user/`: the same 1280px by 800px desktop canvas, persistent app shell, Pleiades/Sirius light and dark themes, translucent operational panels, status badges, and WebSocket utility header.
 
 The admin shell includes the `Projects`, `Notifications`, and `Admin Console` navigation items. The profile area uses a platform administrator identity (`admin@co.com`) to make the role boundary visible.
 

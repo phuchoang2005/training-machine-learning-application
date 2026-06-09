@@ -1,6 +1,6 @@
 # User Wireframe Specification (SVG Format)
 
-This directory contains the user-role specific user interface wireframes for the AI Training Management Platform, rendered as visual SVGs. These wireframes are tailored for the standard user roles (**AI Engineer / Data Scientist** and **Project Owner**) and intentionally omit any administrative features or the global "Admin Console" menu link from the App Shell navigation menu.
+This directory contains the user-role specific user interface wireframes for Future, rendered as visual SVGs. These wireframes are tailored for the standard user roles (**AI Engineer / Data Scientist** and **Project Owner**) and intentionally omit any administrative features or the global "Admin Console" menu link from the App Shell navigation menu.
 
 The current visual direction is intentionally warmer, more vivid, and more emotionally generous than a default enterprise dashboard. It translates the inspiration note in `docs/ui-ux/ui/inspired.md` into a grounded product UI: structure and clarity remain present, but the screens should feel caring, restorative, hopeful, and safe to return to during long-running training work.
 

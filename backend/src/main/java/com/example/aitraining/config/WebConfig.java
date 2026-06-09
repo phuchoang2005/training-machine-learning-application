@@ -27,6 +27,10 @@ public class WebConfig extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         try {
+            if (isPublicHealthCheck(request)) {
+                chain.doFilter(request, response);
+                return;
+            }
             String header = request.getHeader(HttpHeaders.AUTHORIZATION);
             if (header == null || !header.startsWith("Bearer ")) {
                 throw new UnauthorizedException("Bearer token is required");
@@ -38,5 +42,9 @@ public class WebConfig extends OncePerRequestFilter {
         } finally {
             CurrentUserContext.clear();
         }
+    }
+
+    private boolean isPublicHealthCheck(HttpServletRequest request) {
+        return "GET".equals(request.getMethod()) && "/api/v1/health".equals(request.getRequestURI());
     }
 }

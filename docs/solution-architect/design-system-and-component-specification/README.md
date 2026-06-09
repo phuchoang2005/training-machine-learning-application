@@ -2,12 +2,14 @@
 
 ## 1. Purpose
 
-This document defines the design system and reusable UI component specification for the AI Training Management Platform frontend. It supports the React, TypeScript, Vite, Redux, TailwindCSS, Radix UI, shadcn/ui, and Framer Motion architecture described in `docs/solution-architect/frontend-architecture-document/README.md`.
+This document defines the design system and reusable UI component specification for the Future frontend. It supports the React, TypeScript, Vite, Redux, TailwindCSS, Radix UI, shadcn/ui, and Framer Motion architecture described in `docs/solution-architect/frontend-architecture-document/README.md`.
 
 The design system is optimized for operational workflows: project discovery, configuration review, training launch, real-time job monitoring, log inspection, artifact download, notifications, and administrator queue or user management.
 
 ## 2. Design Principles
 
+* Treat `Future` as the product name across app chrome, page titles, and browser metadata.
+* Use a star-based logo mark that aligns with the Pleiades/Sirius celestial visual direction without reducing operational clarity.
 * Prioritize scanability over decoration. Users must quickly compare projects, jobs, statuses, queue positions, durations, and failure messages.
 * Keep actions predictable. Destructive actions such as cancel and delete must require confirmation.
 * Do not rely on color alone. Job status, alerts, and progress states need text, icon, or shape indicators.
@@ -82,7 +84,7 @@ The frontend must support light and dark mode using system preference by default
 
 | Token | Desktop | Mobile | Usage |
 | --- | --- | --- | --- |
-| `--font-family-sans` | `Inter, system-ui, sans-serif` | Same | Application text. |
+| `--font-family-sans` | `Aptos, SF Pro Display, Segoe UI Variable, Inter, system-ui, sans-serif` | Same | Application text with a softer, modern operational feel. |
 | `--font-family-mono` | `JetBrains Mono, ui-monospace, monospace` | Same | Logs, YAML, IDs. |
 | `--font-size-xs` | `12px` | `12px` | Table metadata, hints. |
 | `--font-size-sm` | `14px` | `14px` | Body text, form fields. |

@@ -20,6 +20,7 @@ Diagram: [information-architecture.mermaid](diagrams/information-architecture.me
 ```text
 /
   /login
+  /register
   /auth/callback
   /projects
   /projects/register
@@ -42,7 +43,8 @@ Diagram: [information-architecture.mermaid](diagrams/information-architecture.me
 
 | Page | Core Content | Primary Actions | State Dependencies |
 | --- | --- | --- | --- |
-| Login | Company authentication entry point. | Sign in. | Auth provider availability. |
+| Login | Company authentication entry point with non-production sample account affordance. | Sign in, open registration. | Auth provider availability, development sample account availability. |
+| Register Account | Non-production onboarding validation before SSO/OIDC is enabled. | Create local development session, return to login. | Development-only account bootstrap policy. |
 | Project Dashboard | Authorized projects, latest status, filters, search. | Open project, register project when permitted. | Current user, project list. |
 | Register Project | GitHub or ZIP source details, project metadata. | Submit registration, cancel. | User permission, validation rules. |
 | Project Detail | Project summary, repository, dataset, latest job, tabs. | Start training, open config, open history. | Project access, latest job. |
@@ -72,6 +74,8 @@ Diagram: [information-architecture.mermaid](diagrams/information-architecture.me
 ## 6. Navigation Rules
 
 * The authenticated default route is `/projects`.
+* Unauthenticated users must land on `/login`.
+* `/register` is public in non-production only and must be disabled or replaced by SSO/OIDC onboarding in production.
 * Notification links should deep-link to `/projects/:projectId/jobs/:jobId`.
 * Project routes must enforce project membership or ownership.
 * Admin routes must be hidden and blocked for non-admin users.
@@ -85,4 +89,3 @@ Diagram: [information-architecture.mermaid](diagrams/information-architecture.me
 | Mobile | Top bar with menu drawer. | Single-column task flow; tables become stacked summaries. |
 | Tablet | Top bar or collapsible navigation. | Two-column panels only when content remains readable. |
 | Desktop | Persistent sidebar with top utility area. | Dense operational tables and split job-monitoring layout. |
-
