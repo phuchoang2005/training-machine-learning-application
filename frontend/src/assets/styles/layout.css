@@ -1,5 +1,7 @@
 @keyframes drift { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(28px,-18px,0) scale(1.06); } }
-@media (prefers-reduced-motion: reduce) { .celestial-bg span { animation: none; } * { scroll-behavior: auto !important; } }
+@keyframes fade-in-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes dialog-in { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .celestial-bg span, .page, .table-row, .dialog { animation: none; } * { scroll-behavior: auto !important; } }
 
 .app-shell { min-height: 100dvh; }
 .sidebar { display: none; }
@@ -7,7 +9,7 @@
 .topbar { position: sticky; top: 0; z-index: 20; height: var(--topbar-height); display: flex; align-items: center; gap: 12px; padding: 0 16px; border-bottom: 1px solid var(--border); background: color-mix(in srgb, var(--card) 90%, transparent); backdrop-filter: blur(18px); }
 .topbar-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 .page-frame { min-height: calc(100dvh - var(--topbar-height)); }
-.page { width: 100%; padding: 20px 16px 48px; }
+.page { width: 100%; padding: 20px 16px 48px; animation: fade-in-up 0.22s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .ops-content { max-width: 1600px; margin: 0 auto; }
 .form-content { max-width: 1120px; margin: 0 auto; }
 

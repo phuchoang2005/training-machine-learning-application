@@ -1,4 +1,4 @@
-# API Service Layer
+**# API Service Layer
 
 The frontend uses Axios as the shared REST transport and Redux Toolkit as the client-side state and synchronization layer.
 
@@ -68,15 +68,15 @@ frontend/src/
 
 ## Layer Responsibilities
 
-| Layer | Responsibility | Must Not Do |
-| --- | --- | --- |
-| `axios-client.ts` | Shared Axios instance, base URL, credentials, headers, interceptors, response normalization. | Contain feature-specific logic. |
-| `api-error.ts` | Convert backend error responses into `ApiError`. | Render UI messages directly. |
-| `download-client.ts` | Stream authorized log and artifact downloads. | Load large files fully into memory. |
-| Generated client/types | Provide OpenAPI-aligned request and response types. | Override backend contract manually. |
-| Entity service | Expose resource-specific Axios functions. | Store React state. |
-| Redux slices/thunks | Define state shape, request status, cache timestamps, invalidation, optimistic updates. | Implement raw Axios details. |
-| Feature components | Compose Redux selectors, thunks/actions, and UI states. | Build endpoint URLs manually. |
+| Layer                  | Responsibility                                                                               | Must Not Do                         |
+| ---------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------- |
+| `axios-client.ts`      | Shared Axios instance, base URL, credentials, headers, interceptors, response normalization. | Contain feature-specific logic.     |
+| `api-error.ts`         | Convert backend error responses into `ApiError`.                                             | Render UI messages directly.        |
+| `download-client.ts`   | Stream authorized log and artifact downloads.                                                | Load large files fully into memory. |
+| Generated client/types | Provide OpenAPI-aligned request and response types.                                          | Override backend contract manually. |
+| Entity service         | Expose resource-specific Axios functions.                                                    | Store React state.                  |
+| Redux slices/thunks    | Define state shape, request status, cache timestamps, invalidation, optimistic updates.      | Implement raw Axios details.        |
+| Feature components     | Compose Redux selectors, thunks/actions, and UI states.                                      | Build endpoint URLs manually.       |
 
 ## Axios Client Contract
 
@@ -121,14 +121,14 @@ export type ApiRequestConfig = AxiosRequestConfig & {
 
 ## Service Catalog
 
-| Service | Endpoint Coverage | Primary Consumers |
-| --- | --- | --- |
-| `authService` | `GET /auth/me`, `POST /auth/logout` | Route guards, app shell, user menu. |
-| `userService` | `GET /admin/users`, `POST /admin/users/{userId}/status` | Admin user management. |
-| `projectService` | `GET /projects`, `POST /projects`, `POST /projects/upload-zip`, `GET /projects/{projectId}` | Dashboard, registration, project detail. |
-| `configurationService` | `GET /projects/{projectId}/configs`, `GET /projects/{projectId}/configs/{configId}`, `POST /projects/{projectId}/configs/validate` | Config editor, start training dialog. |
-| `jobService` | `GET /projects/{projectId}/jobs`, `POST /projects/{projectId}/jobs`, `GET /jobs/{jobId}`, `POST /jobs/{jobId}/cancel`, `POST /jobs/{jobId}/retry`, `GET /jobs/queue` | Project history, job detail, admin queue. |
-| `logService` | `GET /jobs/{jobId}/logs`, `GET /jobs/{jobId}/logs/download` | Log viewer, log download. |
-| `artifactService` | `GET /jobs/{jobId}/artifacts`, `GET /artifacts/{artifactId}/download` | Job detail artifact list. |
-| `notificationService` | `GET /notifications`, `POST /notifications/{notificationId}/read` | Notification menu and list. |
-| `auditService` | `GET /audit-logs` | Admin or owner audit views when authorized. |
+| Service                | Endpoint Coverage                                                                                                                                                    | Primary Consumers                           |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `authService`          | `GET /auth/me`, `POST /auth/logout`                                                                                                                                  | Route guards, app shell, user menu.         |
+| `userService`          | `GET /admin/users`, `POST /admin/users/{userId}/status`                                                                                                              | Admin user management.                      |
+| `projectService`       | `GET /projects`, `POST /projects`, `POST /projects/upload-zip`, `GET /projects/{projectId}`                                                                          | Dashboard, registration, project detail.    |
+| `configurationService` | `GET /projects/{projectId}/configs`, `GET /projects/{projectId}/configs/{configId}`, `POST /projects/{projectId}/configs/validate`                                   | Config editor, start training dialog.       |
+| `jobService`           | `GET /projects/{projectId}/jobs`, `POST /projects/{projectId}/jobs`, `GET /jobs/{jobId}`, `POST /jobs/{jobId}/cancel`, `POST /jobs/{jobId}/retry`, `GET /jobs/queue` | Project history, job detail, admin queue.   |
+| `logService`           | `GET /jobs/{jobId}/logs`, `GET /jobs/{jobId}/logs/download`                                                                                                          | Log viewer, log download.                   |
+| `artifactService`      | `GET /jobs/{jobId}/artifacts`, `GET /artifacts/{artifactId}/download`                                                                                                | Job detail artifact list.                   |
+| `notificationService`  | `GET /notifications`, `POST /notifications/{notificationId}/read`                                                                                                    | Notification menu and list.                 |
+| `auditService`         | `GET /audit-logs`                                                                                                                                                    | Admin or owner audit views when authorized. |

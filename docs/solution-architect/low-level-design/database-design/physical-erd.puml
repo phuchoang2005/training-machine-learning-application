@@ -1,5 +1,13 @@
 @startuml physical_database_erd
-title Physical ERD - AI Training Management Platform PostgreSQL Schema
+title Collection Model - AI Training Management Platform MongoDB
+
+note as N1
+  MongoDB collection model. Each entity is a collection; <<PK>> is the
+  document `_id` (a UUID) and <<FK>> denotes a stored reference id, not an
+  enforced foreign key. Scalar types are indicative; enum-typed fields are
+  stored as their string names. Relationships are by reference (no embedding);
+  cascading deletes are performed by the backend, not the database.
+end note
 
 hide methods
 hide stereotypes
@@ -135,19 +143,6 @@ entity model_versions {
   * created_at : timestamptz
 }
 
-entity notifications {
-  * notification_id : uuid <<PK>>
-  --
-  * user_id : uuid <<FK users.user_id>>
-  job_id : uuid <<FK training_jobs.job_id>>
-  * type : varchar(80)
-  * channel : notification_channel
-  * status : notification_status
-  * message : text
-  * created_at : timestamptz
-  sent_at : timestamptz
-}
-
 entity audit_logs {
   * audit_id : uuid <<PK>>
   --
@@ -186,7 +181,6 @@ entity job_stream_events {
 
 users ||--o{ projects : owns
 users ||--o{ training_jobs : triggers
-users ||--o{ notifications : receives
 users ||--o{ audit_logs : performs
 users ||--o{ idempotency_keys : owns
 
@@ -206,7 +200,6 @@ training_jobs ||--o{ job_log_sessions : log_sessions
 training_jobs ||--o{ job_progress_events : progress
 training_jobs ||--o{ artifacts : generates
 training_jobs ||--o{ model_versions : creates
-training_jobs ||--o{ notifications : triggers
 training_jobs ||--o{ audit_logs : related
 training_jobs ||--o{ job_stream_events : streams
 training_jobs ||--o{ training_jobs : retry_chain

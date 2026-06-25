@@ -22,10 +22,15 @@ export function App() {
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const syncTheme = () => dispatch(actions.setTheme(media.matches ? "dark" : "light"));
+    const syncTheme = () =>
+      dispatch(actions.setTheme(media.matches ? "dark" : "light"));
     syncTheme();
     media.addEventListener("change", syncTheme);
     return () => media.removeEventListener("change", syncTheme);
+  }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(actions.fetchCurrentUser());
   }, [dispatch]);
 
   return (
@@ -33,9 +38,29 @@ export function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterAccountPage />} />
       <Route path="/login/callback" element={<LoginCallbackPage />} />
-      <Route element={<RequireAuth />}><Route element={<AppShell />}>{privateRoutes()}</Route></Route>
-      <Route path="/403" element={<ErrorPage code="403" title="Access restricted" message="This route is only available when the backend authorizes the current role or resource relationship." />} />
-      <Route path="*" element={<ErrorPage code="404" title="Route not found" message="The requested workspace route does not exist." />} />
+      <Route element={<RequireAuth />}>
+        <Route element={<AppShell />}>{privateRoutes()}</Route>
+      </Route>
+      <Route
+        path="/403"
+        element={
+          <ErrorPage
+            code="403"
+            title="Access restricted"
+            message="This route is only available when the backend authorizes the current role or resource relationship."
+          />
+        }
+      />
+      <Route
+        path="*"
+        element={
+          <ErrorPage
+            code="404"
+            title="Route not found"
+            message="The requested workspace route does not exist."
+          />
+        }
+      />
     </Routes>
   );
 }
@@ -47,13 +72,40 @@ function privateRoutes() {
       <Route path="/projects" element={<ProjectDashboardPage />} />
       <Route path="/projects/new" element={<RegisterProjectPage />} />
       <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
-      <Route path="/projects/:projectId/configs/:configId" element={<ProjectDetailPage initialTab="config" />} />
-      <Route path="/projects/:projectId/jobs/:jobId" element={<NestedJobRedirect />} />
+      <Route
+        path="/projects/:projectId/configs/:configId"
+        element={<ProjectDetailPage initialTab="config" />}
+      />
+      <Route
+        path="/projects/:projectId/jobs/:jobId"
+        element={<NestedJobRedirect />}
+      />
       <Route path="/jobs/:jobId" element={<JobDetailPage />} />
       <Route path="/notifications" element={<NotificationListPage />} />
-      <Route path="/admin/users" element={<AdminGuard><AdminUsersPage /></AdminGuard>} />
-      <Route path="/admin/queue" element={<AdminGuard><AdminQueuePage /></AdminGuard>} />
-      <Route path="/admin/audit" element={<AdminGuard><AdminAuditPage /></AdminGuard>} />
+      <Route
+        path="/admin/users"
+        element={
+          <AdminGuard>
+            <AdminUsersPage />
+          </AdminGuard>
+        }
+      />
+      <Route
+        path="/admin/queue"
+        element={
+          <AdminGuard>
+            <AdminQueuePage />
+          </AdminGuard>
+        }
+      />
+      <Route
+        path="/admin/audit"
+        element={
+          <AdminGuard>
+            <AdminAuditPage />
+          </AdminGuard>
+        }
+      />
     </>
   );
 }

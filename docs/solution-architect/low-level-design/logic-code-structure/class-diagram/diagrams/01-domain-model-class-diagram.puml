@@ -44,18 +44,6 @@ enum ArtifactType {
   OTHER
 }
 
-enum NotificationChannel {
-  IN_APP
-  EMAIL
-}
-
-enum NotificationStatus {
-  PENDING
-  SENT
-  FAILED
-  READ
-}
-
 class User {
   +UUID userId
   +String email
@@ -180,18 +168,6 @@ class ModelVersion {
   +Instant createdAt
 }
 
-class Notification {
-  +UUID notificationId
-  +UUID userId
-  +UUID jobId
-  +String type
-  +NotificationChannel channel
-  +NotificationStatus status
-  +String message
-  +Instant createdAt
-  +Instant sentAt
-}
-
 class AuditLog {
   +UUID auditId
   +UUID actorUserId
@@ -206,7 +182,6 @@ class AuditLog {
 
 User "1" --> "0..*" Project : owns
 User "1" --> "0..*" TrainingJob : triggers
-User "1" --> "0..*" Notification : receives
 User "1" --> "0..*" AuditLog : performs
 
 Project "1" --> "0..*" ProjectConfig : has
@@ -224,7 +199,6 @@ TrainingJob "1" --> "0..*" JobProgressEvent : progress
 TrainingJob "1" --> "0..*" Artifact : generates
 Artifact "1" --> "0..1" ModelVersion : registered as
 TrainingJob "0..1" --> "0..*" TrainingJob : retried as
-TrainingJob "1" --> "0..*" Notification : triggers
 TrainingJob "1" --> "0..*" AuditLog : audited
 
 @enduml

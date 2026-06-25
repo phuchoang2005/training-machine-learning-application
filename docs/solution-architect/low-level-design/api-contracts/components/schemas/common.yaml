@@ -16,9 +16,6 @@ StreamType:
 ArtifactType:
   type: string
   enum: [MODEL, CHECKPOINT, METRIC, OTHER]
-NotificationStatus:
-  type: string
-  enum: [PENDING, SENT, FAILED, READ]
 Page:
   type: object
   required: [limit, hasMore]

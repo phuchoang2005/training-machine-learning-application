@@ -1,206 +1,337 @@
 @startuml backend_service_class_diagram
 title Class Diagram - Spring Boot Backend Services
+skinparam groupInheritance 2
 
-interface Repository
+' ────────────────────────────────────────────────────────────────
+' PATTERN NOTES (per ADR-015)
+'   Template Method : AbstractTrainingRunner / DockerTrainingRunner
+'   Strategy        : TrainingRunner interface + DockerTrainingRunner
+'   Repository      : *Repository classes
+'   Observer        : JobStreamWebSocketHandler + WebSocket sessions
+'   Facade          : AuthorizationService
+'   Service Layer   : *Service classes
+'   Chain of Resp.  : WebConfig (OncePerRequestFilter)
+'   DTO             : *Dtos records (see 03-api-dto-class-diagram.puml)
+' ────────────────────────────────────────────────────────────────
+
+' ── Controllers ──────────────────────────────────────────────────
 
 class AuthController {
-  +CurrentUserResponse getCurrentUser()
-  +void logout()
+  +CurrentUser me()
+  +ResponseEntity<Void> logout()
 }
 
 class ProjectController {
-  +ProjectPage listProjects(ProjectFilter filter)
-  +CreateProjectResponse createGithubProject(CreateGithubProjectRequest request)
-  +CreateProjectResponse uploadZipProject(ZipProjectUploadRequest request)
-  +ProjectDetailResponse getProject(UUID projectId)
-  +void deleteProject(UUID projectId)
+  +ProjectPage list(query, limit)
+  +CreateProjectResponse createGithub(request)
+  +CreateProjectResponse uploadZip(metadata, file)
+  +ProjectDetail get(projectId)
+  +void delete(projectId)
 }
 
 class ConfigController {
-  +ProjectConfigListResponse listConfigs(UUID projectId)
-  +ProjectConfigContentResponse getConfig(UUID projectId, UUID configId)
-  +ValidateYamlResponse validateYaml(UUID projectId, ValidateYamlRequest request)
+  +ProjectConfigListResponse list(projectId)
+  +ProjectConfigContent get(projectId, configId)
+  +ValidateYamlResponse validate(projectId, request)
 }
 
 class JobController {
-  +StartJobResponse startJob(UUID projectId, StartJobRequest request)
-  +JobDetailResponse getJob(UUID jobId)
-  +JobPage listProjectJobs(UUID projectId, JobFilter filter)
-  +CancelJobResponse cancelJob(UUID jobId, CancelJobRequest request)
-  +RetryJobResponse retryJob(UUID jobId, RetryJobRequest request)
+  +JobPage list(projectId, status, limit)
+  +StartJobResponse start(projectId, request)
+  +JobDetail get(jobId)
+  +CancelJobResponse cancel(jobId, request)
+  +RetryJobResponse retry(jobId, request)
+  +QueueSnapshot queue()
 }
 
-class ArtifactController {
-  +ArtifactListResponse listJobArtifacts(UUID jobId)
-  +Resource downloadArtifact(UUID artifactId)
+class SupportController {
+  +LogEventPage logs(jobId, limit)
+  +ResponseEntity<String> downloadLogs(jobId)
+  +ArtifactListResponse artifacts(jobId)
+  +ResponseEntity<Resource> downloadArtifact(artifactId)
+  +AuditLogPage audit(limit)
 }
 
-class LogController {
-  +LogEventPage searchLogs(UUID jobId, LogSearchFilter filter)
-  +Resource downloadLogs(UUID jobId)
+class HealthController {
+  +Map<String,Object> health()
 }
+
+class UserController {
+  +UserPage list(limit)
+  +UserStatusResponse updateStatus(userId, request)
+}
+
+' ── Auth / Config ─────────────────────────────────────────────────
+
+class WebConfig {
+  ' Chain of Responsibility — bearer token filter
+  #void doFilterInternal(request, response, chain)
+  -boolean isPublicHealthCheck(request)
+}
+note right of WebConfig : Chain of Responsibility\n(OncePerRequestFilter)
+
+class CurrentUserContext {
+  ' ThreadLocal per-request user
+  +{static} void set(user)
+  +{static} User require()
+  +{static} void clear()
+}
+
+class ApiExceptionHandler {
+  +ResponseEntity unauthorized(ex)
+  +ResponseEntity forbidden(ex)
+  +ResponseEntity notFound(ex)
+  +ResponseEntity badRequest(ex)
+  +ResponseEntity conflict(ex)
+  +ResponseEntity invalid(ex)
+}
+
+' ── Facade ────────────────────────────────────────────────────────
 
 class AuthorizationService {
-  +void requireProjectOwner(CurrentUser user, UUID projectId)
-  +void requireJobStreamAccess(CurrentUser user, UUID jobId)
-  +boolean canCancel(CurrentUser user, TrainingJob job)
-  +boolean canRetry(CurrentUser user, TrainingJob job)
+  ' Facade — single surface for all RBAC decisions
+  +Project requireProjectOwner(user, projectId)
+  +Project requireProjectVisible(user, projectId)
+  +Project requireJobVisible(user, job)
+  +Project requireSensitiveJobOwner(user, job)
+  +void requireAdmin(user)
+}
+note right of AuthorizationService : Facade Pattern
+
+' ── Service Layer ─────────────────────────────────────────────────
+
+class JobService {
+  +StartJobResponse start(user, project, request)
+  +JobPage list(project, status, limit)
+  +JobDetail detail(job, project)
+  +CancelJobResponse cancel(user, project, job, reason)
+  +RetryJobResponse retry(user, project, original, request)
+  +QueueSnapshot queueSnapshot()
 }
 
-class ProjectApplicationService {
-  +CreateProjectResult registerGithubProject(CreateGithubProjectCommand command)
-  +CreateProjectResult registerZipProject(ZipProjectCommand command)
-  +ProjectDetail getProject(UUID projectId)
+class ProjectService {
+  +ProjectPage list(user, query, limit)
+  +CreateProjectResponse createGithub(user, request)
+  +CreateProjectResponse createZip(user, metadata, file)
+  +ProjectDetail detail(project)
+  +void delete(user, project)
 }
 
-class ConfigSnapshotService {
-  +YamlValidationResult validateYaml(String yamlContent)
-  +ConfigSnapshot createSnapshot(UUID projectId, UUID configId, String yamlContent)
-  +List<ProjectConfig> discoverConfigs(Project project)
+class ConfigService {
+  +ProjectConfigListResponse list(projectId)
+  +ProjectConfigContent get(projectId, configId)
+  +ValidateYamlResponse validate(yamlContent)
 }
 
-class TrainingJobApplicationService {
-  +StartJobResult startJob(StartJobCommand command)
-  +CancelJobResult cancelJob(CancelJobCommand command)
-  +RetryJobResult retryJob(RetryJobCommand command)
-  +void markRunning(UUID jobId)
-  +void markSuccess(UUID jobId)
-  +void markFailed(UUID jobId, String reason)
+class JobDispatcherService {
+  ' @Scheduled(fixedDelay=2000) — polls queue and dispatches jobs
+  +void dispatch()
+}
+note right of JobDispatcherService : Triggers TrainingRunner\n(Strategy context)
+
+class JobReconcilerService {
+  ' ApplicationRunner — runs once at startup
+  +void run(args)
+  -boolean isContainerAlive(jobId)
 }
 
-class JobStatusMachine {
-  +boolean canTransition(JobStatus fromStatus, JobStatus toStatus)
-  +void assertTransition(JobStatus fromStatus, JobStatus toStatus)
-  +boolean isTerminal(JobStatus status)
+class NotificationService {
+  +void notifyJobTerminal(job, project, ownerEmail)
+  -String buildBody(job, project, success)
 }
 
-class QueueScheduler {
-  +void dispatchWaitingJobs()
+class ArtifactService {
+  +void collectFromWorkspace(job, workspace)
+  -void registerFile(jobId, outputRoot, file, store)
+  -ArtifactType detectType(name)
+  -String sha256(file)
 }
 
-class QueueService {
-  +JobQueueEntry enqueue(UUID jobId)
-  +Optional<UUID> claimOldestWaitingJob()
-  +void cancelQueueEntry(UUID jobId)
+class DownloadService {
+  +Resource artifact(artifactId)
+  +Resource safeResource(path)
 }
 
-class DockerRunnerService {
-  +void runJob(UUID jobId)
-  +void stopContainer(UUID jobId)
-}
+' ── Strategy + Template Method ────────────────────────────────────
 
-class WorkspaceService {
-  +Path prepareWorkspace(TrainingJob job)
-  +void writeRuntimeConfig(ConfigSnapshot snapshot, Path workspace)
-  +void validateDiskCapacity()
+interface TrainingRunner {
+  ' Strategy interface
+  +void run(job, project)
 }
+note right of TrainingRunner : Strategy Pattern\n(pluggable execution engine)
 
-class LogCollector {
-  +void collectStdout(UUID jobId, InputStream stream)
-  +void collectStderr(UUID jobId, InputStream stream)
+abstract class AbstractTrainingRunner {
+  ' Template Method — sealed lifecycle
+  +{final} void run(job, project)
+  ' Hook — subclasses implement execution
+  #abstract boolean execute(job, workspace, sourcePath, entrypoint)
+  ' Helper — streams log lines to storage + WebSocket
+  #void logLine(jobId, streamType, line, seqNo)
+  ' Shared helpers called from template
+  #Path prepareSource(project)
+  #String parseEntrypoint(configYaml, fallback)
+  -void failPreLaunch(job, project, reason)
+  -void deleteQuietly(dir)
 }
+note right of AbstractTrainingRunner : Template Method Pattern\n(lifecycle skeleton)
+
+class DockerTrainingRunner {
+  ' Concrete Strategy — Docker execution engine
+  #boolean execute(job, workspace, sourcePath, entrypoint)
+  -void streamLines(reader, jobId, streamType, seqNo)
+  -List<String> buildDockerCommand(jobId, workspace, sourcePath, entrypoint)
+}
+note right of DockerTrainingRunner : Concrete Strategy
 
 class ProgressParser {
-  +Optional<ProgressEvent> parse(String stdoutLine)
+  +{static} Optional<Progress> parse(line)
 }
 
-class ArtifactScannerService {
-  +void registerArtifacts(UUID jobId)
+class ZipExtractor {
+  +{static} void extract(zipFile, targetDir)
+  -void validateEntry(entry)
+  -void copyEntry(src, dest)
 }
 
-class NotificationWorker {
-  +void processPendingNotifications()
+TrainingRunner <|.. AbstractTrainingRunner
+AbstractTrainingRunner <|-- DockerTrainingRunner
+
+' ── Observer ──────────────────────────────────────────────────────
+
+class JobStreamWebSocketHandler {
+  ' Observer — subject; WebSocket sessions are observers
+  +void afterConnectionEstablished(session)
+  +void afterConnectionClosed(session, status)
+  +void publish(jobId, type, payload)
+  -void send(session, envelope)
+}
+note right of JobStreamWebSocketHandler : Observer Pattern\n(subject / event bus)
+
+' ── Repository Pattern ────────────────────────────────────────────
+
+interface RepositoryMarker <<Repository>>
+
+class JobRepository {
+  +TrainingJob create(projectId, userId, snapshotId, retryOfJobId, retryAttempt)
+  +TrainingJob get(jobId)
+  +List<TrainingJob> listByProject(projectId, status, limit)
+  +List<TrainingJob> findByStatus(status)
+  +TrainingJob transitionToRunning(jobId)
+  +TrainingJob transitionToTerminal(jobId, status, reason)
+  +void transitionToRetrying(jobId)
+  +TrainingJob cancel(jobId, reason)
+  +ProgressResponse latestProgress(jobId)
 }
 
-class AuditService {
-  +void record(AuditCommand command)
+class JobQueueRepository {
+  +void enqueue(jobId)
+  +UUID claimNext()
+  +int runningCount()
+  +int queuedCount()
+  +List<QueueItem> items()
+  +void refreshPositions()
 }
 
-class StorageService {
-  +Path resolveSourcePath(UUID projectId)
-  +Path resolveWorkspacePath(UUID jobId)
-  +Path resolveArtifactPath(UUID projectId, UUID jobId)
-  +void rejectUnsafePath(String path)
+class ProjectRepository {
+  +Project create(ownerId, name, description, sourceType, repositoryUrl, localPath, entrypoint)
+  +Project get(projectId)
+  +List<Project> listVisible(userId, admin, query, limit)
+  +void delete(projectId)
 }
 
-class JobStreamHandler {
-  +void afterConnectionEstablished(WebSocketSession session)
-  +void handleMessage(WebSocketSession session, String payload)
-  +void afterConnectionClosed(WebSocketSession session)
+class ConfigRepository {
+  +ProjectConfig createDefault(projectId, entrypoint)
+  +List<ProjectConfig> list(projectId)
+  +ProjectConfig get(projectId, configId)
+  +UUID createSnapshot(projectId, configId, yamlContent)
+  +String getSnapshotYaml(snapshotId)
+  +String contentHash(yamlContent)
 }
 
-class JobStreamPublisher {
-  +void publishJobStatus(UUID jobId, JobStatus status)
-  +void publishLog(UUID jobId, LogPayload payload)
-  +void publishProgress(UUID jobId, ProgressPayload payload)
-  +void publishArtifactRegistered(UUID jobId, Artifact artifact)
+class SupportRepository {
+  +void audit(actorId, projectId, jobId, action, resourceType, resourceId)
+  +void appendLog(jobId, streamType, message, sequenceNo)
+  +void appendProgress(jobId, progressValue, epoch, totalEpoch)
+  +void registerArtifact(jobId, name, type, filePath, sizeBytes, checksum)
+  +boolean claimNotification(jobId, event)
+  +List<LogEventResponse> logs(jobId, limit)
+  +List<ArtifactResponse> artifacts(jobId)
+  +String artifactPath(artifactId)
+  +UUID artifactJobId(artifactId)
+  +List<AuditLogResponse> auditLogs(admin, actorId, limit)
 }
 
-class UserRepository
-class ProjectRepository
-class ConfigRepository
-class TrainingJobRepository
-class QueueRepository
-class LogRepository
-class ProgressRepository
-class ArtifactRepository
-class NotificationRepository
-class AuditRepository
+class UserRepository {
+  +Optional<User> findActiveByToken(token)
+  +User get(userId)
+  +List<User> list(limit)
+  +User updateStatus(userId, status)
+}
 
-Repository <|.. UserRepository
-Repository <|.. ProjectRepository
-Repository <|.. ConfigRepository
-Repository <|.. TrainingJobRepository
-Repository <|.. QueueRepository
-Repository <|.. LogRepository
-Repository <|.. ProgressRepository
-Repository <|.. ArtifactRepository
-Repository <|.. NotificationRepository
-Repository <|.. AuditRepository
+RepositoryMarker <|.. JobRepository
+RepositoryMarker <|.. JobQueueRepository
+RepositoryMarker <|.. ProjectRepository
+RepositoryMarker <|.. ConfigRepository
+RepositoryMarker <|.. SupportRepository
+RepositoryMarker <|.. UserRepository
 
-AuthController --> UserRepository
-ProjectController --> ProjectApplicationService
-ConfigController --> ConfigSnapshotService
-JobController --> TrainingJobApplicationService
-LogController --> LogRepository
-ArtifactController --> ArtifactScannerService
+' ── Relationships ─────────────────────────────────────────────────
 
-ProjectApplicationService --> AuthorizationService
-ProjectApplicationService --> ProjectRepository
-ProjectApplicationService --> StorageService
-ProjectApplicationService --> ConfigSnapshotService
-ProjectApplicationService --> AuditService
+WebConfig --> UserRepository
+WebConfig --> CurrentUserContext
 
-TrainingJobApplicationService --> AuthorizationService
-TrainingJobApplicationService --> JobStatusMachine
-TrainingJobApplicationService --> TrainingJobRepository
-TrainingJobApplicationService --> QueueService
-TrainingJobApplicationService --> ConfigSnapshotService
-TrainingJobApplicationService --> AuditService
-TrainingJobApplicationService --> JobStreamPublisher
+AuthController --> CurrentUserContext
+ProjectController --> ProjectService
+ProjectController --> AuthorizationService
+ConfigController --> ConfigService
+ConfigController --> AuthorizationService
+JobController --> JobService
+JobController --> JobRepository
+JobController --> AuthorizationService
+SupportController --> SupportRepository
+SupportController --> JobRepository
+SupportController --> AuthorizationService
+SupportController --> DownloadService
+UserController --> UserRepository
+UserController --> AuthorizationService
 
-QueueScheduler --> QueueService
-QueueScheduler --> TrainingJobApplicationService
-QueueScheduler --> DockerRunnerService
+AuthorizationService --> ProjectRepository
 
-DockerRunnerService --> WorkspaceService
-DockerRunnerService --> LogCollector
-DockerRunnerService --> ProgressParser
-DockerRunnerService --> TrainingJobApplicationService
+JobService --> JobRepository
+JobService --> JobQueueRepository
+JobService --> ConfigRepository
+JobService --> UserRepository
+JobService --> SupportRepository
 
-LogCollector --> LogRepository
-LogCollector --> JobStreamPublisher
-ProgressParser --> ProgressRepository
-ProgressParser --> JobStreamPublisher
+ProjectService --> ProjectRepository
+ProjectService --> ConfigRepository
+ProjectService --> JobRepository
+ProjectService --> UserRepository
+ProjectService --> SupportRepository
+ProjectService --> ZipExtractor
 
-ArtifactScannerService --> ArtifactRepository
-ArtifactScannerService --> StorageService
-ArtifactScannerService --> NotificationRepository
-ArtifactScannerService --> JobStreamPublisher
+ConfigService --> ConfigRepository
 
-NotificationWorker --> NotificationRepository
-NotificationWorker --> AuditService
-JobStreamHandler --> AuthorizationService
-JobStreamHandler --> JobStreamPublisher
+JobDispatcherService --> JobQueueRepository
+JobDispatcherService --> JobRepository
+JobDispatcherService --> ProjectRepository
+JobDispatcherService --> TrainingRunner
+
+JobReconcilerService --> JobRepository
+JobReconcilerService --> JobQueueRepository
+
+AbstractTrainingRunner --> JobRepository
+AbstractTrainingRunner --> JobQueueRepository
+AbstractTrainingRunner --> ConfigRepository
+AbstractTrainingRunner --> SupportRepository
+AbstractTrainingRunner --> UserRepository
+AbstractTrainingRunner --> ArtifactService
+AbstractTrainingRunner --> NotificationService
+AbstractTrainingRunner --> JobStreamWebSocketHandler
+AbstractTrainingRunner --> ProgressParser
+
+ArtifactService --> SupportRepository
+NotificationService --> SupportRepository
+DownloadService --> SupportRepository
 
 @enduml

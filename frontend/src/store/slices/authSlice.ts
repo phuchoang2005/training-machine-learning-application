@@ -1,6 +1,15 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { CurrentUser } from "../../shared/api/types";
+import { authService } from "../../shared/api/services/auth";
 import { sampleAccounts, storedAccount, toCurrentUser, type LoginAccount } from "../session";
+
+/**
+ * Rehydrates the authenticated user from the backend on app startup.
+ * On success updates `currentUser` with the authoritative backend record.
+ * On failure (backend unreachable) silently keeps the dev-mock account already in state
+ * so the app stays usable during local development without the backend running.
+ */
+export const fetchCurrentUser = createAsyncThunk("auth/me", () => authService.getMe());
 
 const account = storedAccount();
 
@@ -9,7 +18,7 @@ export const authSlice = createSlice({
   initialState: {
     currentUser: account ? toCurrentUser(account) : null as CurrentUser | null,
     accounts: sampleAccounts,
-    status: "idle" as "idle" | "authenticated" | "failed",
+    status: "idle" as "idle" | "loading" | "authenticated" | "failed",
     error: undefined as string | undefined,
   },
   reducers: {
@@ -39,6 +48,20 @@ export const authSlice = createSlice({
     setRole(state, action: PayloadAction<CurrentUser["role"]>) {
       if (state.currentUser) state.currentUser.role = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchCurrentUser.pending, (state) => { state.status = "loading"; })
+      .addCase(fetchCurrentUser.fulfilled, (state, action) => {
+        state.currentUser = action.payload;
+        state.status = "authenticated";
+        state.error = undefined;
+      })
+      .addCase(fetchCurrentUser.rejected, (state) => {
+        // Backend unreachable — keep the dev-mock account already in state
+        if (state.currentUser) state.status = "authenticated";
+        else state.status = "idle";
+      });
   },
 });
 

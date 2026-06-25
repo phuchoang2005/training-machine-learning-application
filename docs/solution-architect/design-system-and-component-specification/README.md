@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-This document defines the design system and reusable UI component specification for the Future frontend. It supports the React, TypeScript, Vite, Redux, TailwindCSS, Radix UI, shadcn/ui, and Framer Motion architecture described in `docs/solution-architect/frontend-architecture-document/README.md`.
+This document defines the design system and reusable UI component specification for the Future frontend. It supports the React, TypeScript, Vite, Redux, TailwindCSS (with hand-authored semantic CSS), Radix UI, and CSS-based motion architecture described in `docs/solution-architect/frontend-architecture-document/README.md`.
 
 The design system is optimized for operational workflows: project discovery, configuration review, training launch, real-time job monitoring, log inspection, artifact download, notifications, and administrator queue or user management.
 
@@ -121,7 +121,7 @@ Use a 4px spacing base.
 
 ### Motion Tokens
 
-Use Framer Motion (`framer-motion`) for frontend motion. Motion should make transitions feel calm, vivid, and hopeful without reducing scanability or slowing operational work.
+Use plain CSS keyframe animations for frontend motion. Motion should make transitions feel calm, vivid, and hopeful without reducing scanability or slowing operational work.
 
 | Token | Value | Usage |
 | --- | --- | --- |
@@ -137,11 +137,11 @@ Use Framer Motion (`framer-motion`) for frontend motion. Motion should make tran
 
 | Area | Requirement |
 | --- | --- |
-| Library | Use `framer-motion`; do not introduce another animation library for React components. |
-| Scope | Keep reusable variants under `src/shared/motion/` and consume them from shared UI or page-level components. |
+| Library | Use plain CSS keyframes; do not introduce a JavaScript animation library for React components. |
+| Scope | Keep reusable keyframes in `src/assets/styles/layout.css` and apply them through semantic classes (`.page`, `.table-row`, `.dialog`). |
 | Purpose | Use motion to preserve spatial orientation, show live system state, soften loading, and support the Pleiades/Sirius celestial direction. |
 | Performance | Animate `opacity`, `transform`, lightweight SVG accents, and small visible lists. Do not animate table layout, log stream rows, or large DOM collections. |
-| Reduced motion | Honor `prefers-reduced-motion` and Framer Motion `useReducedMotion()`. Replace movement with opacity changes or static state. |
+| Reduced motion | Honor `prefers-reduced-motion`; disable the keyframe animations and fall back to static state. |
 | Timing | Keep workflow motion under `450ms`; long ambient background motion must be subtle and non-blocking. |
 | Data integrity | Never delay status, error, or security feedback for animation completion. |
 
@@ -240,7 +240,7 @@ Use Framer Motion (`framer-motion`) for frontend motion. Motion should make tran
 | `Banner` | Persistent page-level state. | Info, warning, danger, degraded. | Visible, dismissible when safe. |
 | `EmptyState` | Explain empty resource collections. | No projects, no jobs, no artifacts, no notifications. | Static with optional action. |
 | `LoadingState` | Indicate pending data. | Skeleton, spinner, inline. | Loading. |
-| `MotionPresence` | Shared Framer Motion wrapper for route, dialog, and panel enter/exit transitions. | Page, panel, dialog, list. | Entering, visible, exiting, reduced-motion. |
+| Motion classes | Shared CSS keyframe classes (`fade-in-up`, `dialog-in`) for route, dialog, and panel enter transitions. | Page, panel, dialog, list. | Entering, visible, reduced-motion. |
 
 ### Navigation Components
 
@@ -440,7 +440,7 @@ Use Framer Motion (`framer-motion`) for frontend motion. Motion should make tran
 | Errors | Validation messages must be associated with fields and summarized in complex forms. |
 | Dialogs | Focus must move into dialog on open and return to trigger on close. |
 | Logs | Log viewer must expose text content and should not trap keyboard focus. |
-| Motion | Framer Motion transitions must respect reduced-motion preferences and must not hide or delay critical status, error, or permission feedback. |
+| Motion | CSS keyframe transitions must respect reduced-motion preferences and must not hide or delay critical status, error, or permission feedback. |
 
 ## 10. Security and Permission UX
 

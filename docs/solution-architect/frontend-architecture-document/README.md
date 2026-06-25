@@ -30,10 +30,10 @@ Diagram: [frontend-architecture-context.mermaid](diagrams/frontend-architecture-
 | Routing | React Router |
 | State management | Redux Toolkit with typed slices, async thunks or listener middleware |
 | HTTP client | Axios shared instance with request and response interceptors |
-| Styling | TailwindCSS |
-| UI primitives | Radix UI |
-| Component baseline | shadcn/ui components owned in the repository |
-| Motion library | Framer Motion (`framer-motion`) for route, panel, dialog, list, and live-state transitions |
+| Styling | Hand-authored semantic CSS classes (`src/assets/styles/*.css`) with TailwindCSS v4 wired up for the remaining shadcn-style primitive |
+| UI primitives | Radix UI (`@radix-ui/react-tabs`) for the tabs primitive |
+| Component baseline | shadcn-style `Tabs` owned in the repository; other primitives are plain semantic-CSS components |
+| Motion | Plain CSS keyframes (`fade-in-up`, `dialog-in`) for route, dialog, and list transitions, gated behind `prefers-reduced-motion` |
 | Theme | System-driven light mode and dark mode through `prefers-color-scheme` |
 | Form state | Controlled React state or a lightweight form helper integrated with Redux actions where needed |
 | Schema validation | Runtime validators generated from or aligned with OpenAPI when needed |
@@ -170,11 +170,10 @@ frontend/
 | Folder | Responsibility |
 | --- | --- |
 | `app/` | Application route table, route guards, shell layout, navigation, and top bar composition. |
-| `shared/api/` | Axios client, generated OpenAPI types, error normalization, request correlation handling. |
+| `shared/api/` | Axios client, hand-authored domain types, error normalization, request correlation handling. |
 | `shared/realtime/` | WebSocket connection lifecycle, reconnect, duplicate-event protection, polling fallback helpers. |
 | `shared/components/` | App-specific reusable UI composition such as badges, feedback, page frames, and dialogs. |
-| `shared/ui/` | shadcn/Radix primitive wrappers owned by the repository. |
-| `shared/motion/` | Framer Motion route/list/dialog variants and reduced-motion helpers. |
+| `shared/ui/` | shadcn-style `Tabs` primitive (Radix) owned by the repository. |
 | `store/` | Redux root store, typed hooks, domain slices, development session helpers, and fixture data. |
 | `pages/` | Route-level pages split by workflow and further decomposed into small widgets. |
 | `tests/` | Frontend test fixtures and API mocks. |
@@ -183,11 +182,11 @@ frontend/
 
 The frontend package applies the documented stack through:
 
-* TailwindCSS v4 via `@tailwindcss/vite` and `src/assets/styles/tailwind.css`.
-* Radix UI primitives and shadcn/ui-owned wrappers under `src/shared/ui/`.
-* React 19 with TypeScript, Vite, Redux Toolkit, Axios, React Router, and Framer Motion.
+* Hand-authored semantic CSS in `src/assets/styles/*.css` (aggregated by `global.css`), with TailwindCSS v4 via `@tailwindcss/vite` and theme tokens in `src/assets/styles/tailwind.css`.
+* The Radix-based shadcn-style `Tabs` wrapper under `src/shared/ui/`.
+* React 19 with TypeScript, Vite, Redux Toolkit, Axios, and React Router.
 * ESLint flat config, Vitest/jsdom component tests, MSW-ready API mocking dependencies, and Playwright E2E configuration.
-* OpenAPI type generation through `npm run generate:api`, writing to `src/shared/api/generated/types.ts`.
+* Hand-authored domain types under `src/shared/api/types/`, kept aligned with the OpenAPI contract by hand.
 * Browser WebSocket client scaffolding under `src/shared/realtime/job-stream-client.ts`.
 * Focused source modules: route pages live under `src/pages`, layout under `src/app/layout`, reusable UI composition under `src/shared/components`, Redux slices under `src/store/slices`, and CSS is split into small files imported by `global.css`.
 
@@ -428,8 +427,8 @@ Primary components:
 
 * Keep backend DTOs and frontend types aligned with OpenAPI.
 * Keep Redux slices small, domain-scoped, and selector-driven.
-* Use TailwindCSS utilities and shadcn/ui components for common UI before adding custom component styles.
-* Use Framer Motion for frontend motion patterns that improve orientation, perceived responsiveness, or emotional warmth; do not animate high-frequency log lines or large tables.
+* Reuse the existing semantic CSS classes in `src/assets/styles/*.css` before adding new component styles.
+* Use CSS keyframe transitions for motion patterns that improve orientation, perceived responsiveness, or emotional warmth; do not animate high-frequency log lines or large tables.
 * Initialize light or dark mode from `prefers-color-scheme` and update when the system preference changes.
 * Use route-level code splitting for large feature areas such as job detail and admin console.
 * Keep large log streams virtualized or windowed to avoid slow browser rendering.
@@ -459,49 +458,40 @@ Frontend behavior:
 * Authenticated API calls should use the selected account email as the development bearer token when calling the current backend.
 * Production builds must replace this phase with company SSO/OIDC and backend-managed sessions.
 
-## 14. Framer Motion Integration
+## 14. Motion (CSS)
 
-Use Framer Motion as a small shared motion layer, not as page-specific one-off animation code. Motion should support the Pleiades/Sirius visual direction while keeping the product usable for dense engineering workflows.
+Motion is implemented with plain CSS keyframes defined alongside the rest of the styles, not a JavaScript animation library. Motion should support the Pleiades/Sirius visual direction while keeping the product usable for dense engineering workflows.
 
-### Dependency and Ownership
+### Ownership and Constraints
 
 | Concern | Requirement |
 | --- | --- |
-| Package | Install `framer-motion` in the frontend package. |
-| Owner module | Keep reusable variants in `src/shared/motion/`. |
-| Component boundary | Wrap shadcn/ui or Radix primitives with motion only in shared components or page-level layout components. |
-| Reduced motion | Use Framer Motion's `useReducedMotion()` and CSS `prefers-reduced-motion`; replace movement with opacity changes or static states. |
-| Performance | Animate `opacity`, `transform`, and lightweight SVG/background layers only. Avoid animating layout-heavy table rows, log lines, or thousands of DOM nodes. |
+| Definition | Keep shared keyframes (`fade-in-up`, `dialog-in`, `drift`) in `src/assets/styles/layout.css`; apply them through the existing semantic classes (`.page`, `.table-row`, `.dialog`). |
+| Reduced motion | Disable animations under `@media (prefers-reduced-motion: reduce)`; movement falls back to static states. |
+| Performance | Animate `opacity`, `transform`, and lightweight background layers only. Avoid animating layout-heavy table rows in bulk, log lines, or thousands of DOM nodes. |
 
 ### Recommended Motion Patterns
 
 | Pattern | Use Cases | Guidance |
 | --- | --- | --- |
-| Route fade and lift | Login, dashboard, project detail, job detail route changes. | `opacity: 0 -> 1`, `y: 8 -> 0`, `duration: 0.22s`. |
-| Panel reveal | Cards, side panels, configuration validation result, artifact panel. | Stagger child panels by `0.04s` to `0.07s`; keep total reveal under `0.45s`. |
-| Dialog spring | Start training, cancel, retry confirmations. | Use a subtle spring scale from `0.98 -> 1`; never bounce destructive confirmations. |
-| Status pulse | `RUNNING`, reconnecting WebSocket, live log tail. | Use low-opacity pulse; disable or simplify when reduced motion is requested. |
-| Background drift | Light-mode aurora and star-field accents. | Very slow transform or opacity drift only; must not compete with data surfaces. |
-| List enter/exit | Notifications, artifacts, project cards on filtered views. | Animate only visible rows; use `AnimatePresence` for small lists. |
+| Route fade and lift | Login, dashboard, project detail, job detail route changes. | `fade-in-up`: `opacity: 0 -> 1`, `translateY: 8px -> 0`, `duration: 0.22s`. |
+| Dialog fade-scale | Start training, cancel, retry confirmations. | `dialog-in`: subtle scale from `0.98 -> 1` with fade; never bounce destructive confirmations. |
+| Background drift | Light-mode aurora and star-field accents. | `drift`: very slow transform drift only; must not compete with data surfaces. |
+| List enter | Notifications, artifacts, project cards on filtered views. | Reuse `fade-in-up` on rows; keep durations short on dense tables. |
 
-### Shared Variant Example
+### Keyframe Example
 
-```typescript
-import type { Variants } from 'framer-motion';
+```css
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
 
-export const pageVariants: Variants = {
-  initial: { opacity: 0, y: 8 },
-  enter: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] },
-  },
-  exit: {
-    opacity: 0,
-    y: -4,
-    transition: { duration: 0.14, ease: [0.4, 0, 1, 1] },
-  },
-};
+.page { animation: fade-in-up 0.22s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .page, .table-row, .dialog { animation: none; }
+}
 ```
 
 ## 15. Open Decisions
@@ -509,8 +499,8 @@ export const pageVariants: Variants = {
 | Decision | Recommendation |
 | --- | --- |
 | Auth storage mode | Prefer secure HTTP-only session cookie if backend supports it; otherwise keep bearer tokens out of local storage. |
-| Generated API client | Generate TypeScript types from OpenAPI during frontend build or CI. |
+| Generated API client | Hand-authored types in `src/shared/api/types/` are the current source; revisit OpenAPI codegen only if drift becomes a maintenance burden. |
 | Log rendering library | Use virtualization once log size exceeds normal DOM rendering limits. |
 | YAML editor | Use a lightweight code editor with YAML syntax support and validation feedback. |
 | WebSocket protocol shape | Define event schema for status, progress, log, terminal, heartbeat, and error events before implementation. |
-| Motion depth | Start with shared Framer Motion variants for pages, dialogs, panels, and status indicators; expand only after usability testing confirms value. |
+| Motion depth | Start with shared CSS keyframes for pages, dialogs, and lists; expand only after usability testing confirms value. |

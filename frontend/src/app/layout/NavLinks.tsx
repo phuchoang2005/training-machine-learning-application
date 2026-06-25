@@ -14,7 +14,15 @@ export function NavLinks({ role }: { role: "USER" | "ADMIN" }) {
       {items.map((item) => {
         const Icon = item.icon;
         return (
-          <Link key={item.to} className={location.pathname.startsWith(item.to) ? "nav-link active" : "nav-link"} to={item.to}>
+          <Link
+            key={item.to}
+            className={
+              location.pathname.startsWith(item.to)
+                ? "nav-link active"
+                : "nav-link"
+            }
+            to={item.to}
+          >
             <Icon size={18} />
             <span>{item.label}</span>
           </Link>

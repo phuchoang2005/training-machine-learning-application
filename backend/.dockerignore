@@ -1,5 +1,14 @@
-target
-storage
-.mvn
+# Build output (rebuilt inside the image)
+target/
+
+# Runtime data — must never be baked into the image; mounted at runtime instead
+storage/
+workspaces/
+sources/
+
+# Local/IDE noise
+.idea/
+*.iml
+.DS_Store
 ._*
 **/._*

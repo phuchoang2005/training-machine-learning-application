@@ -108,15 +108,15 @@ Version-sensitive decisions were reviewed on 2026-06-06. Use the newest LTS rele
 
 ## ADR-004: Database
 
-**Status:** Accepted
+**Status:** Accepted (revised — supersedes the original PostgreSQL decision)
 
-**Decision:** Use PostgreSQL as the primary relational database.
+**Decision:** Use MongoDB as the primary database, accessed from the backend through Spring Data MongoDB (`MongoTemplate`). Documents use `UUID` `_id`s; relationships are stored by reference and resolved in the service/repository layer.
 
-**Version Target:** PostgreSQL 18 latest supported major release.
+**Version Target:** MongoDB 8.
 
-**Rationale:** The platform requires durable records for users, projects, config snapshots, jobs, queue entries, logs metadata, artifacts, model versions, notifications, and audit logs. PostgreSQL provides strong consistency and mature indexing for job history and access-control queries.
+**Rationale:** The platform stores documents for users, projects, config snapshots, jobs, queue entries, logs metadata, artifacts, and audit logs. A document model fits the per-aggregate access patterns, removes the need for SQL migrations, and keeps the schema flexible for the MVP. Strong cross-document transactions are not required; ownership/access checks are enforced in the backend.
 
-**Consequences:** Queue state is persisted in PostgreSQL for MVP. A dedicated message broker can be introduced later if multi-worker scaling is required.
+**Consequences:** Queue state is persisted in MongoDB for the MVP and queue positions are recomputed in the application layer. There are no foreign keys, so cascading deletes are performed by the backend (`ProjectRepository.delete`). A dedicated message broker can still be introduced later if multi-worker scaling is required. The earlier PostgreSQL/Flyway/JDBC approach is retired.
 
 ---
 
@@ -124,9 +124,9 @@ Version-sensitive decisions were reviewed on 2026-06-06. Use the newest LTS rele
 
 **Status:** Accepted
 
-**Decision:** Implement the MVP queue as a persistent FIFO queue in PostgreSQL, managed by the Spring Boot scheduler.
+**Decision:** Implement the MVP queue as a persistent FIFO queue in MongoDB, managed by the Spring Boot scheduler.
 
-**Version Target:** Spring Boot 4.0.x, PostgreSQL 18.
+**Version Target:** Spring Boot 4.0.x, MongoDB 8.
 
 **Rationale:** The MVP has one training server, 2 concurrent running jobs, and up to 50 queued jobs. A database-backed queue is simpler to operate and satisfies restart recovery requirements.
 
@@ -204,6 +204,38 @@ Version-sensitive decisions were reviewed on 2026-06-06. Use the newest LTS rele
 
 ---
 
+## ADR-015: Backend Design Patterns
+
+**Status:** Accepted
+
+**Decision:** Formally adopt eight GoF and enterprise design patterns for the Spring Boot backend, with the Template Method pattern added structurally via `AbstractTrainingRunner` and the remaining seven patterns codified as naming and layering conventions.
+
+**Patterns adopted:**
+
+| # | Pattern | Category | Where |
+|---|---|---|---|
+| 1 | **Template Method** | GoF Behavioral | `AbstractTrainingRunner.run()` — defines the fixed job lifecycle; `execute()` is the abstract hook |
+| 2 | **Strategy** | GoF Behavioral | `TrainingRunner` interface + `DockerTrainingRunner`; `JobDispatcherService` is the context |
+| 3 | **Repository** | Enterprise | All six `*Repository` classes in `com.example.aitraining.repo` |
+| 4 | **Observer** | GoF Behavioral | `JobStreamWebSocketHandler` broadcasts events; WebSocket sessions are observers |
+| 5 | **Facade** | GoF Structural | `AuthorizationService` — single surface for all RBAC decisions |
+| 6 | **Service Layer** | Enterprise | All `*Service` classes separate business logic from persistence and presentation |
+| 7 | **Chain of Responsibility** | GoF Behavioral | `WebConfig extends OncePerRequestFilter` in Spring's servlet filter chain |
+| 8 | **DTO** | Enterprise | All `*Dtos.java` record files carry data across the API layer boundary |
+
+**Rationale:**
+The Template Method pattern was introduced to address a specific structural problem: `DockerTrainingRunner` previously implemented the entire job lifecycle (workspace, config, source prep, execution, artifact collection, notification, cleanup) in one class. Extracting `AbstractTrainingRunner` makes the lifecycle explicit and allows future execution engines (Kubernetes, local process) to be added by only implementing the `execute()` hook — no lifecycle code needs to change.
+
+The remaining seven patterns reflect naming and layering conventions already present in the code; formalising them in an ADR makes the conventions explicit for future contributors and reviewers.
+
+**Consequences:**
+- `runner/AbstractTrainingRunner.java` is the lifecycle owner; it must remain the sole entry point for status transitions, WebSocket events, artifact collection, and cleanup within the runner subsystem.
+- Adding a new runner (e.g., `KubernetesTrainingRunner`) requires only: create a class that `extends AbstractTrainingRunner`, implement `execute()`, and register it as a Spring `@Component`. No dispatcher or service changes are needed.
+- The Strategy pattern means the active runner is determined by which `TrainingRunner`-typed bean is in the Spring context; only one should be active at a time in the MVP.
+- Deviating from the Repository pattern (i.e., writing queries in service classes) is not permitted; all MongoDB queries must live in `*Repository` classes.
+
+---
+
 ## Version References
 
 * Spring Boot stable version reference: https://docs.spring.io/spring-boot/appendix/dependency-versions/index.html
@@ -215,4 +247,4 @@ Version-sensitive decisions were reviewed on 2026-06-06. Use the newest LTS rele
 * TailwindCSS documentation: https://tailwindcss.com/
 * Radix UI documentation: https://www.radix-ui.com/
 * shadcn/ui documentation: https://ui.shadcn.com/
-* PostgreSQL supported release reference: https://www.postgresql.org/
+* MongoDB documentation: https://www.mongodb.com/docs/

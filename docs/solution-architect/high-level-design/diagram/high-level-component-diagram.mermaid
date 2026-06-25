@@ -12,7 +12,6 @@ flowchart TB
         RUNNER[Docker Runner Module]
         LOG[Log & Progress Module]
         ARTIFACT[Artifact & Model Versioning Module]
-        NOTI[Notification Module]
         AUDIT[Audit Logging Module]
         ADMIN[Admin Management Module]
     end
@@ -26,11 +25,10 @@ flowchart TB
     CONTAINER --> LOG
     CONTAINER --> ARTIFACT
 
-    BE --> DB[(Relational Database)]
+    BE --> DB[(MongoDB)]
     BE --> FS[(File Storage)]
 
     LOG --> FE
-    NOTI --> EMAIL[Google Workspace Email]
 
     DB --- AUTH
     DB --- PROJECT
@@ -38,7 +36,6 @@ flowchart TB
     DB --- JOB
     DB --- QUEUE
     DB --- ARTIFACT
-    DB --- NOTI
     DB --- AUDIT
 
     FS --- PROJECT

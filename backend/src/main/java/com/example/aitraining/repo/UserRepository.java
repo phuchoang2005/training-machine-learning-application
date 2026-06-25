@@ -1,55 +1,92 @@
 package com.example.aitraining.repo;
 
-import com.example.aitraining.domain.Enums.UserRole;
 import com.example.aitraining.domain.Enums.UserStatus;
 import com.example.aitraining.domain.Models.User;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
+/**
+ * <b>Repository Pattern</b> — all persistence operations for {@link User} documents in the
+ * {@code users} collection.
+ *
+ * <p>There is no create/delete method here because user management is handled at the infrastructure
+ * level (seeded by {@link com.example.aitraining.config.MongoSeedConfig}); the API only supports
+ * reading and status updates.
+ */
 @Repository
 public class UserRepository {
-    private final JdbcTemplate jdbc;
+  private final MongoTemplate mongo;
 
-    public UserRepository(JdbcTemplate jdbc) {
-        this.jdbc = jdbc;
-    }
+  public UserRepository(MongoTemplate mongo) {
+    this.mongo = mongo;
+  }
 
-    public Optional<User> findActiveByToken(String token) {
-        String sql = """
-                SELECT * FROM users
-                WHERE status = 'ACTIVE' AND (lower(email) = lower(?) OR user_id::text = ?)
-                """;
-        return jdbc.query(sql, this::map, token, token).stream().findFirst();
+  /**
+   * Resolves the caller from an HTTP bearer token.
+   *
+   * <p>The token is matched case-insensitively against {@code email}, and also tried as a
+   * UUID against {@code _id}.  Returns only {@code ACTIVE} accounts; a {@code DISABLED}
+   * account returns {@link Optional#empty()} so the filter can reject it.
+   *
+   * @param token the raw value extracted from the {@code Authorization: Bearer} header
+   */
+  public Optional<User> findActiveByToken(String token) {
+    List<Criteria> identityMatches = new ArrayList<>();
+    identityMatches.add(Criteria.where("email").regex("^" + Pattern.quote(token) + "$", "i"));
+    try {
+      identityMatches.add(Criteria.where("_id").is(UUID.fromString(token)));
+    } catch (IllegalArgumentException ignored) {
+      // Token is not a UUID; the email match still applies.
     }
+    Query query = Query.query(new Criteria().andOperator(
+        Criteria.where("status").is(UserStatus.ACTIVE),
+        new Criteria().orOperator(identityMatches.toArray(new Criteria[0]))));
+    return Optional.ofNullable(mongo.findOne(query, User.class));
+  }
 
-    public User get(UUID userId) {
-        return jdbc.queryForObject("SELECT * FROM users WHERE user_id = ?", this::map, userId);
-    }
+  /**
+   * Loads a user by ID.
+   *
+   * @throws org.springframework.dao.EmptyResultDataAccessException if not found
+   */
+  public User get(UUID userId) {
+    return required(mongo.findById(userId, User.class));
+  }
 
-    public List<User> list(int limit) {
-        return jdbc.query("SELECT * FROM users ORDER BY created_at LIMIT ?", this::map, limit);
-    }
+  public List<User> list(int limit) {
+    return mongo.find(new Query().with(Sort.by(Sort.Direction.ASC, "createdAt")).limit(limit), User.class);
+  }
 
-    public User updateStatus(UUID userId, UserStatus status) {
-        return jdbc.queryForObject("""
-                UPDATE users SET status = ?::user_status WHERE user_id = ? RETURNING *
-                """, this::map, status.name(), userId);
-    }
+  /**
+   * Atomically sets the user's status and returns the updated document.
+   * Used by admin endpoints to enable or disable accounts.
+   *
+   * @throws org.springframework.dao.EmptyResultDataAccessException if the user is not found
+   */
+  public User updateStatus(UUID userId, UserStatus status) {
+    return required(mongo.findAndModify(
+        Query.query(Criteria.where("_id").is(userId)),
+        new Update().set("status", status),
+        FindAndModifyOptions.options().returnNew(true),
+        User.class));
+  }
 
-    private User map(ResultSet rs, int rowNum) throws SQLException {
-        return new User(
-                rs.getObject("user_id", UUID.class),
-                rs.getString("email"),
-                rs.getString("full_name"),
-                UserRole.valueOf(rs.getString("role")),
-                UserStatus.valueOf(rs.getString("status")),
-                rs.getTimestamp("created_at").toInstant(),
-                rs.getTimestamp("last_login_at") == null ? null : rs.getTimestamp("last_login_at").toInstant());
+  private static User required(User user) {
+    if (user == null) {
+      throw new EmptyResultDataAccessException(1);
     }
+    return user;
+  }
 }

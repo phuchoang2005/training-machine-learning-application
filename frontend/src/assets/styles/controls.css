@@ -14,7 +14,7 @@
 .data-table { display: grid; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--card); }
 .table-head, .table-row { display: grid; gap: 12px; align-items: center; padding: 12px; border-bottom: 1px solid var(--border); }
 .table-head { display: none; background: var(--muted); color: var(--muted-foreground); font-size: 12px; font-weight: 700; text-transform: uppercase; }
-.table-row { grid-template-columns: 1fr; }
+.table-row { grid-template-columns: 1fr; animation: fade-in-up 0.22s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .table-row:last-child { border-bottom: 0; }
 .table-row small { display: block; margin-top: 4px; color: var(--muted-foreground); }
 .status-badge, .badge, .connection { width: fit-content; display: inline-flex; align-items: center; gap: 6px; border: 1px solid currentColor; border-radius: 999px; padding: 4px 9px; font-size: 12px; font-weight: 700; }

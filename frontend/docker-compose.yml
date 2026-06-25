@@ -1,8 +1,13 @@
+# Standalone frontend stack — serves the host-built dist/ via Nginx for frontend-only work.
+#   (npm ci && npm run build) then  docker compose up -d --build
+# Opens on http://localhost:5173/ and proxies /api/ to a backend running on the host
+# (mvn spring-boot:run) at host.docker.internal:8080. Override API_UPSTREAM to point
+# elsewhere, e.g. API_UPSTREAM=http://my-host:8080 docker compose up -d.
 services:
   frontend:
     build: .
     environment:
-      API_UPSTREAM: http://host.docker.internal:8080
+      API_UPSTREAM: ${API_UPSTREAM:-http://host.docker.internal:8080}
     ports:
       - "5173:80"
     extra_hosts:

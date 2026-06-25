@@ -1,6 +1,20 @@
 import type { JobStreamClientOptions, JobStreamEvent, JobStreamState } from "./job-stream-types";
 export type { JobStreamClientOptions, JobStreamEvent, JobStreamState };
 
+/**
+ * Opens a WebSocket connection to the job event stream and auto-reconnects on failure.
+ *
+ * State transitions:
+ *   connecting → connected (on open)
+ *   connected  → unavailable (on error/abnormal close) → reconnecting → ...
+ *   connected  → unauthorized (close code 1008) — permanent, no retry
+ *   *          → closed (caller invoked `.close()`)
+ *
+ * Pass `options.lastEventId` on reconnect to resume from the last processed event
+ * and avoid replaying duplicate events.
+ *
+ * @returns An object with a `close()` method to terminate the connection cleanly.
+ */
 export function createJobStreamClient(options: JobStreamClientOptions) {
   let socket: WebSocket | undefined;
   let closedByCaller = false;
@@ -34,6 +48,7 @@ export function createJobStreamClient(options: JobStreamClientOptions) {
   connect();
 
   return {
+    /** Cleanly closes the connection and suppresses auto-reconnect. */
     close() {
       closedByCaller = true;
       if (reconnectTimer) window.clearTimeout(reconnectTimer);

@@ -2,7 +2,7 @@
 
 ## 1. Purpose and Scope
 
-This document defines low-level non-functional requirements for the AI Training Management Platform MVP. It covers runtime quality attributes for the React frontend, Spring Boot backend, PostgreSQL database, Docker-based training execution, WebSocket monitoring, local storage, notification delivery, and operational support.
+This document defines low-level non-functional requirements for the AI Training Management Platform MVP. It covers runtime quality attributes for the React frontend, Spring Boot backend, MongoDB database, Docker-based training execution, WebSocket monitoring, local storage, and operational support.
 
 ## 2. Capacity and Scalability
 
@@ -45,7 +45,7 @@ Future scalability targets include multi-worker execution, Kubernetes orchestrat
 | --- | --- |
 | NFR-AVL-001 | MVP target availability during business hours should be at least 99.0%, excluding planned maintenance. |
 | NFR-AVL-002 | Planned maintenance should be announced before backend restart when running jobs may be requeued. |
-| NFR-AVL-003 | Health checks shall cover backend, PostgreSQL, local storage, Docker Engine, and email integration. |
+| NFR-AVL-003 | Health checks shall cover backend, MongoDB, local storage, and Docker Engine. |
 | NFR-AVL-004 | The frontend shall show degraded states when WebSocket, Docker, storage, or email services are unavailable. |
 
 ## 6. Security
@@ -66,7 +66,7 @@ Future scalability targets include multi-worker execution, Kubernetes orchestrat
 | Requirement ID | Requirement |
 | --- | --- |
 | NFR-DATA-001 | Training configuration snapshots shall be immutable once a job is created. |
-| NFR-DATA-002 | Job queue entries and job status changes shall be persisted in PostgreSQL. |
+| NFR-DATA-002 | Job queue entries and job status changes shall be persisted in MongoDB. |
 | NFR-DATA-003 | The scheduler shall claim queued jobs using database locking to prevent duplicate dispatch. |
 | NFR-DATA-004 | Retry shall always create a new job ID and preserve the original job relationship. |
 | NFR-DATA-005 | Audit records shall be append-only from application code. |
@@ -98,7 +98,7 @@ Future scalability targets include multi-worker execution, Kubernetes orchestrat
 | Requirement ID | Requirement |
 | --- | --- |
 | NFR-TEST-001 | Unit tests shall cover job status transitions, authorization decisions, YAML validation, path validation, ZIP validation, and progress parsing. |
-| NFR-TEST-002 | Integration tests shall cover PostgreSQL repositories, queue claim locking, migrations, and idempotency keys. |
+| NFR-TEST-002 | Integration tests shall cover MongoDB repositories, queue position management, and seeding. |
 | NFR-TEST-003 | Contract tests should validate API behavior against the OpenAPI specification. |
 | NFR-TEST-004 | WebSocket tests shall cover authorization, reconnect, resume, duplicate event handling, and fallback behavior. |
 | NFR-TEST-005 | End-to-end tests should cover project registration, job start, live monitoring, cancel, retry, and artifact download. |
@@ -120,7 +120,7 @@ Future scalability targets include multi-worker execution, Kubernetes orchestrat
 | NFR-STO-001 | Local storage shall use stable paths under `/data` for sources, uploads, workspaces, logs, artifacts, and config snapshots. |
 | NFR-STO-002 | The runner shall validate at least 5 GB free disk space before starting a training job. |
 | NFR-STO-003 | Artifacts shall be copied from workspace/container output to platform-managed artifact storage before registration. |
-| NFR-STO-004 | PostgreSQL and local file storage backups shall be restorable from a consistent point in time. |
+| NFR-STO-004 | MongoDB and local file storage backups shall be restorable from a consistent point in time. |
 | NFR-STO-005 | Database-only restore is insufficient because logs and artifacts are stored on the filesystem. |
 
 ## 13. Compatibility and Technology Constraints
@@ -129,7 +129,7 @@ Future scalability targets include multi-worker execution, Kubernetes orchestrat
 | --- | --- |
 | NFR-COMP-001 | Backend implementation shall target Spring Boot and Java according to the ADR baseline. |
 | NFR-COMP-002 | Frontend implementation shall target ReactJS, TypeScript, Vite, Redux, Axios, TailwindCSS, Radix UI, and shadcn/ui according to the ADR baseline. |
-| NFR-COMP-003 | The MVP shall use PostgreSQL as the primary database. |
+| NFR-COMP-003 | The MVP shall use MongoDB as the primary database. |
 | NFR-COMP-004 | Training jobs shall run inside Docker containers, not directly on the host OS. |
 | NFR-COMP-005 | WebSocket shall be the primary real-time mechanism, with REST polling as fallback. |
 
@@ -143,4 +143,4 @@ The NFRs are considered implemented for MVP when:
 * Dashboard and job monitoring meet the defined latency targets under MVP load.
 * Project ownership is enforced for REST and WebSocket access.
 * Logs, progress, artifacts, notifications, and audit records are persisted.
-* PostgreSQL migrations, OpenAPI contract, and docs-as-code diagrams are versioned with the repository.
+* The OpenAPI contract and docs-as-code diagrams are versioned with the repository.

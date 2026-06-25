@@ -1,5 +1,5 @@
+# dist/ is intentionally NOT ignored: the image serves the host-built bundle.
 node_modules
-dist
 coverage
 playwright-report
 test-results

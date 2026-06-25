@@ -23,7 +23,7 @@ export const logsByJobId: Record<string, LogEvent[]> = {
 export const artifactsByJobId: Record<string, Artifact[]> = {
   "j-10190": [
     { artifactId: "a-1", artifactName: "model.onnx", artifactType: "MODEL", fileSizeBytes: 83123302, checksum: "sha256:cafebabe", createdAt: iso(360) },
-    { artifactId: "a-2", artifactName: "metrics.json", artifactType: "METRICS", fileSizeBytes: 12344, checksum: "sha256:91ab", createdAt: iso(360) },
+    { artifactId: "a-2", artifactName: "metrics.json", artifactType: "METRIC", fileSizeBytes: 12344, checksum: "sha256:91ab", createdAt: iso(360) },
   ],
 };
 

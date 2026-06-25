@@ -2,14 +2,14 @@
 
 ## Purpose
 
-This folder contains the low-level physical database design for the AI Training Management Platform MVP. It expands the logical ERD into PostgreSQL-oriented table structures, constraints, indexes, and operational rules.
+This folder contains the low-level physical database design for the AI Training Management Platform MVP. It expands the logical model into MongoDB collections, document shapes, indexes, and operational rules.
 
 ## Files
 
 | File | Description |
 | --- | --- |
-| [physical-erd.puml](./physical-erd.puml) | PlantUML physical ERD with PostgreSQL tables, columns, keys, and relationships |
-| [physical-schema-design.md](./physical-schema-design.md) | Detailed schema notes, enum definitions, constraints, indexes, and migration guidance |
+| [physical-erd.puml](./physical-erd.puml) | PlantUML collection model with document fields, ids, and references |
+| [physical-schema-design.md](./physical-schema-design.md) | Detailed collection notes, enum values, indexes, and retention rules |
 
 ## Render Command
 

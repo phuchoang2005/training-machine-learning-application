@@ -163,16 +163,6 @@ class ArtifactResponse {
   +ModelVersionSummary modelVersion
 }
 
-class NotificationResponse {
-  +UUID notificationId
-  +UUID jobId
-  +String type
-  +NotificationChannel channel
-  +NotificationStatus status
-  +String message
-  +Instant createdAt
-}
-
 class AuditLogResponse {
   +UUID auditId
   +UserSummary actor

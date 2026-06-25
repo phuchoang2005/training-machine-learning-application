@@ -1,20 +1,10 @@
-import { motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
-import { pageVariants } from "../motion/variants";
 
 export function Page({ children, width = "ops" }: { children: ReactNode; width?: "ops" | "form" }) {
-  const reduceMotion = useReducedMotion();
-
   return (
-    <motion.div
-      className={`page ${width === "form" ? "form-content" : "ops-content"}`}
-      variants={reduceMotion ? undefined : pageVariants}
-      initial="initial"
-      animate="enter"
-      exit="exit"
-    >
+    <div className={`page ${width === "form" ? "form-content" : "ops-content"}`}>
       {children}
-    </motion.div>
+    </div>
   );
 }
 

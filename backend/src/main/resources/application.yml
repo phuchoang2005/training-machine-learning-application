@@ -5,14 +5,37 @@ server:
 spring:
   application:
     name: ai-training-backend
-  datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/ai_training}
-    username: ${SPRING_DATASOURCE_USERNAME:ai_training}
-    password: ${SPRING_DATASOURCE_PASSWORD:ai_training}
-  flyway:
-    enabled: true
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/ai_training}
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:25}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
 
 app:
   storage-root: ${APP_STORAGE_ROOT:./storage}
   queue:
     running-limit: ${APP_QUEUE_RUNNING_LIMIT:2}
+  docker:
+    image: ${APP_DOCKER_IMAGE:python:3.11-slim}
+    workspace-root: ${APP_DOCKER_WORKSPACE_ROOT:./workspaces}
+    sources-root: ${APP_DOCKER_SOURCES_ROOT:./sources}
+    min-disk-bytes: ${APP_DOCKER_MIN_DISK_BYTES:5368709120}
+  notification:
+    enabled: ${APP_NOTIFICATION_ENABLED:false}
+    from: ${APP_NOTIFICATION_FROM:noreply@localhost}
+    base-url: ${APP_NOTIFICATION_BASE_URL:http://localhost}

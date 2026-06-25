@@ -1,20 +1,20 @@
 # Training Machine Learning Application
 
-Training Machine Learning Application is a full-stack web application for configuring, running, monitoring, and administering training jobs. The repository contains the product and architecture documentation plus an implemented React frontend, Spring Boot backend, PostgreSQL persistence, and Docker-based runtime topology.
+Training Machine Learning Application is a full-stack web application for configuring, running, monitoring, and administering training jobs. The repository contains the product and architecture documentation plus an implemented React frontend, Spring Boot backend, MongoDB persistence, and Docker-based runtime topology.
 
 ## Tech Stack
 
-- Frontend: React 19, TypeScript, Vite, Redux Toolkit, React Router, TailwindCSS v4, Radix UI, shadcn-style shared UI wrappers, Framer Motion, Axios.
-- Backend: Java 25, Spring Boot 4, Spring Web, Spring WebSocket, Spring JDBC, Flyway, PostgreSQL.
+- Frontend: React 19, TypeScript, Vite, Redux Toolkit, React Router, TailwindCSS v4 with hand-authored semantic CSS, Radix UI tabs primitive, Axios.
+- Backend: OpenJDK 21, Spring Boot 4, Spring Web, Spring WebSocket, Spring Data MongoDB (MongoTemplate), MongoDB.
 - Testing and quality: ESLint, TypeScript type checking, Vitest, Testing Library, Playwright, Maven tests.
-- Runtime: Docker Compose, Nginx frontend proxy, Nginx backend load balancer, PostgreSQL 18.
-- API contract: OpenAPI at `docs/solution-architect/low-level-design/api-contracts/openapi.yaml`, with generated frontend types.
+- Runtime: Docker Compose, Nginx frontend proxy, MongoDB 8. The frontend image serves a host-built bundle and contains no Node.js runtime.
+- API contract: OpenAPI at `docs/solution-architect/low-level-design/api-contracts/openapi.yaml`; frontend types are hand-authored to match it.
 
 ## Repository Layout
 
 ```text
 .
-|-- backend/          # Spring Boot API, backend Docker setup, backend load balancer
+|-- backend/          # Spring Boot API (runs on host), MongoDB-only Docker setup
 |-- docs/             # Product, UX, architecture, API, security, and delivery docs
 |-- frontend/         # React/Vite app, frontend Docker setup, tests, shared UI
 |-- docker-compose.yml
@@ -37,22 +37,24 @@ This workspace is mounted from `ssh my-ec2`. Follow the local agent convention a
 rtk ssh my-ec2 'cd ~/training-machine-learning-application && docker compose ps'
 ```
 
-Frontend local tooling requires Node.js 24 or newer. Backend local tooling requires Java 25 and Maven. Docker builds provide the expected runtime versions.
+Frontend local tooling requires Node.js 24 or newer. Backend local tooling requires OpenJDK 21 and Maven. Docker provides only MongoDB (plus the static frontend image); the backend Spring Boot app runs on the host with Maven, not in a container. The frontend Docker image no longer bundles a Node.js runtime: it serves the static bundle that you build on the host with `npm run build`, so produce `frontend/dist/` before building the frontend image.
 
 ## Run the Full Stack
 
-From the repository root on the EC2 host:
+Build the frontend bundle on the host first (the frontend image only serves `frontend/dist/`), then bring up the Docker services from the repository root and run the backend on the host:
 
 ```bash
+rtk ssh my-ec2 'cd ~/training-machine-learning-application/frontend && npm ci && npm run build'
 rtk ssh my-ec2 'cd ~/training-machine-learning-application && docker compose up -d --build'
+rtk ssh my-ec2 'cd ~/training-machine-learning-application/backend && mvn spring-boot:run'
 ```
 
 The root Compose stack starts:
 
-- `postgres`: PostgreSQL database.
-- `api`: Spring Boot backend.
-- `backend-load-balancer`: Nginx proxy for backend API and WebSocket traffic.
-- `frontend`: Nginx-hosted frontend with `/api/` and WebSocket proxying to the backend load balancer.
+- `mongodb`: MongoDB database.
+- `frontend`: Nginx-hosted frontend that proxies `/api/` and WebSocket traffic to the host-run backend (`host.docker.internal:8080`).
+
+The backend Spring Boot app runs on the host (`mvn spring-boot:run`), not in a container, so start it for the frontend to have an API to reach.
 
 Default entry points:
 
@@ -68,18 +70,19 @@ rtk ssh my-ec2 'cd ~/training-machine-learning-application && docker compose dow
 
 ## Run Backend Only
 
-The backend owns its standalone database, API container, and backend load balancer setup.
+The backend's Docker setup provides only MongoDB; run the Spring Boot app on the host with Maven.
 
 ```bash
-rtk ssh my-ec2 'cd ~/training-machine-learning-application/backend && docker compose up -d --build'
+rtk ssh my-ec2 'cd ~/training-machine-learning-application/backend && docker compose up -d'   # start MongoDB on :27017
+rtk ssh my-ec2 'cd ~/training-machine-learning-application/backend && mvn spring-boot:run'     # run the API on the host
 ```
 
 Default backend entry points:
 
-- Backend load balancer: `http://localhost:8080/`
+- API (host-run Spring Boot): `http://localhost:8080/`
 - API health: `http://localhost:8080/api/v1/health`
 
-Stop the backend stack:
+Stop MongoDB:
 
 ```bash
 rtk ssh my-ec2 'cd ~/training-machine-learning-application/backend && docker compose down'
@@ -87,9 +90,10 @@ rtk ssh my-ec2 'cd ~/training-machine-learning-application/backend && docker com
 
 ## Run Frontend Only
 
-The frontend has its own Docker setup. By default it proxies API traffic to `http://host.docker.internal:8080`, so run the backend stack first when API calls are needed.
+The frontend has its own Docker setup that serves the host-built `dist/` through Nginx. By default it proxies API traffic to `http://host.docker.internal:8080`, so run the backend stack first when API calls are needed. Build the bundle before bringing the image up:
 
 ```bash
+rtk ssh my-ec2 'cd ~/training-machine-learning-application/frontend && npm ci && npm run build'
 rtk ssh my-ec2 'cd ~/training-machine-learning-application/frontend && docker compose up -d --build'
 ```
 
@@ -111,7 +115,6 @@ Frontend commands require Node.js 24 or newer on the machine running them. If th
 Frontend commands with a Node 24 host:
 
 ```bash
-rtk ssh my-ec2 'cd ~/training-machine-learning-application/frontend && npm run generate:api'
 rtk ssh my-ec2 'cd ~/training-machine-learning-application/frontend && npm run typecheck'
 rtk ssh my-ec2 'cd ~/training-machine-learning-application/frontend && npm run lint'
 rtk ssh my-ec2 'cd ~/training-machine-learning-application/frontend && npm run test'

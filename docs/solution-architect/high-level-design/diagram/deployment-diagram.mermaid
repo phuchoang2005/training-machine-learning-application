@@ -9,7 +9,7 @@ flowchart TB
             STREAM["WebSocket Log and Progress Streaming"]
         end
 
-        DB[("Relational Database<br/>Users, Projects, Jobs, Queue,<br/>Logs Metadata, Artifacts,<br/>Model Versions, Audit Logs")]
+        DB[("MongoDB<br/>Users, Projects, Jobs, Queue,<br/>Logs Metadata, Artifacts,<br/>Model Versions, Audit Logs")]
 
         subgraph Docker["Docker Engine"]
             TC1["Training Container #1<br/>Project Code<br/>main.py<br/>requirements.txt"]
@@ -30,13 +30,11 @@ flowchart TB
             Runner["Docker Runner"]
             LogCollector["Log Collector"]
             ArtifactScanner["Artifact Scanner"]
-            NotificationWorker["Notification Worker"]
         end
     end
 
     subgraph External["External Services"]
         GitHub["GitHub Public Repository"]
-        GoogleEmail["Google Workspace Email"]
     end
 
     User --> FE
@@ -60,4 +58,3 @@ flowchart TB
     LogCollector --> Logs
 
     ArtifactScanner --> Artifacts
-    NotificationWorker --> GoogleEmail

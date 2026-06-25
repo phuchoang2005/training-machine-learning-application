@@ -119,18 +119,6 @@ erDiagram
         datetime created_at
     }
 
-    NOTIFICATIONS {
-        uuid notification_id PK
-        uuid user_id FK
-        uuid job_id FK
-        string type
-        string channel "IN_APP, EMAIL"
-        string status "PENDING, SENT, FAILED, READ"
-        text message
-        datetime created_at
-        datetime sent_at
-    }
-
     AUDIT_LOGS {
         uuid audit_id PK
         uuid actor_user_id FK
@@ -145,7 +133,6 @@ erDiagram
 
     USERS ||--o{ PROJECTS : owns
     USERS ||--o{ TRAINING_JOBS : triggers
-    USERS ||--o{ NOTIFICATIONS : receives
     USERS ||--o{ AUDIT_LOGS : performs
 
     PROJECTS ||--o{ PROJECT_CONFIGS : has_configs
@@ -164,7 +151,6 @@ erDiagram
     TRAINING_JOBS ||--o{ JOB_PROGRESS_EVENTS : reports
     TRAINING_JOBS ||--o{ ARTIFACTS : generates
     TRAINING_JOBS ||--o{ MODEL_VERSIONS : creates
-    TRAINING_JOBS ||--o{ NOTIFICATIONS : triggers
     TRAINING_JOBS ||--o{ AUDIT_LOGS : related_to
     TRAINING_JOBS ||--o{ TRAINING_JOBS : retried_as
 

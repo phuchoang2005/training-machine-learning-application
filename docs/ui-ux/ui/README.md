@@ -116,9 +116,9 @@ To align with the project design system (`docs/solution-architect/design-system-
 * **Component Interactions**:
   - All interactive elements must maintain a minimum touch target size of `44px x 44px` on mobile viewports.
   - Key focus rings must be visible for keyboard navigating users.
-* **Framer Motion Interaction Layer**:
-  - Use `framer-motion` for route fades, panel reveals, dialog enter/exit transitions, small list item transitions, and live-state indicators.
-  - Keep motion subtle: route and panel transitions should use opacity plus `y: 8px -> 0` and complete in roughly `220ms`.
+* **CSS Motion Interaction Layer**:
+  - Use plain CSS keyframe animations for route fades, panel reveals, dialog enter transitions, small list item transitions, and live-state indicators.
+  - Keep motion subtle: route and panel transitions should use opacity plus `translateY: 8px -> 0` and complete in roughly `220ms`.
   - Use ambient motion only for the light-mode celestial background, such as slow aurora drift or star opacity changes; it must sit behind all data surfaces.
   - Do not animate high-volume log lines, large tables, YAML editor text, or any status update that must appear immediately.
   - Respect `prefers-reduced-motion`; use static or opacity-only states when reduced motion is requested.
