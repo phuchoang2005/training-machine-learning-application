@@ -175,3 +175,7 @@ rtk wget <url>                  # Download, strip progress bars
 rtk summary <long command>      # Heuristic summary
 rtk proxy <command>             # Raw passthrough + tracking
 ```
+
+```bash
+rtk mvn *
+```

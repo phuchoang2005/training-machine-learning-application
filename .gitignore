@@ -65,3 +65,12 @@ temp/
 
 # Project scratch notes
 inspired.md
+gmail.md
+
+# Local tooling version pins
+.python-version
+
+# Obsidian auto-generated and scratch files
+docs/.obsidian/graph.json
+*.canvas
+docs/????-??-??.md

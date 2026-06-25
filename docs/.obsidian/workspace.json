@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "c5ee87875f80a74a",
+        "id": "687791b72f79aa22",
         "type": "tabs",
         "children": [
           {
-            "id": "d9e8580915ac968c",
+            "id": "12f7d26a0feb55a9",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "solution-architect/api-integration-and-client-side-caching-strategy/api-service-layer.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "api-service-layer"
+              "title": "New tab"
             }
           }
         ]
@@ -183,11 +179,21 @@
       "bases:Create new base": false
     }
   },
-  "active": "d9e8580915ac968c",
+  "active": "369a242d4dca4fa3",
   "lastOpenFiles": [
+    "2026-06-25.md",
+    "Untitled.canvas",
+    "_index.md",
+    "architecture-moc.md",
+    "CLAUDE.md",
+    "CLAUDE.md.tmp.84271.43b2c8c15f78",
+    "frontend-moc.md",
+    "ba-refine.md",
+    "Untitled.base",
+    "solution-architect/high-level-design/diagram/recovery-flow-diagram.md",
+    "solution-architect/api-integration-and-client-side-caching-strategy/api-service-layer.md",
     "solution-architect/low-level-design/README.md.tmp.19233.08d140a7f54a",
     "solution-architect/md/design-patterns.md",
-    "solution-architect/api-integration-and-client-side-caching-strategy/api-service-layer.md",
     "solution-architect/high-level-design/failure-handling-matrix.md",
     "solution-architect/high-level-design/access-control-matrix.md",
     "solution-architect/frontend-architecture-document/README.md",

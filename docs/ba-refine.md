@@ -1,3 +1,9 @@
+---
+title: "Business Requirement Specification"
+tags: [requirement, ba, brs, business]
+aliases: [BRS, Business Requirements, ba-refine]
+---
+
 # AI Training Management Platform
 
 ## Business Requirement Specification (BRS)

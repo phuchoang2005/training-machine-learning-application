@@ -1,3 +1,14 @@
+---
+title: "Class Diagrams"
+tags: [lld, diagram, class-diagram, plantuml]
+aliases: [Class Diagrams, class-diagrams]
+related:
+  - "[[design-patterns]]"
+  - "[[ADR-015]]"
+  - "[[low-level-design]]"
+  - "[[sequence-diagrams]]"
+---
+
 # Class Diagrams
 
 ## Purpose

@@ -1,3 +1,14 @@
+---
+title: "Database Design"
+tags: [lld, database, mongodb, schema]
+aliases: [Database Design, MongoDB Design, database-design]
+related:
+  - "[[erd]]"
+  - "[[physical-schema-design]]"
+  - "[[ADR-004]]"
+  - "[[low-level-design]]"
+---
+
 # Physical Database Design
 
 ## Purpose

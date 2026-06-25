@@ -1,3 +1,11 @@
+---
+title: "Architectural Decision Records (Monolith)"
+tags: [adr, architecture]
+aliases: [ADR Monolith, architectural-decision-records]
+---
+
+> **Note:** This file is preserved as the original ADR monolith. For Zettelkasten navigation, use the individual ADR files in [[adr-index]].
+
 # Architectural Decision Records - ADR
 
 ## Context

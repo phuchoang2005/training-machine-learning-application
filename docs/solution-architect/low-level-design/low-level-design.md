@@ -1,3 +1,15 @@
+---
+title: "Low-Level Design — Index"
+tags: [lld, architecture, design, index]
+aliases: [LLD, Low-Level Design, low-level-design]
+related:
+  - "[[adr-index]]"
+  - "[[design-moc]]"
+  - "[[database-design]]"
+  - "[[frontend-architecture]]"
+  - "[[non-functional-requirements]]"
+---
+
 # Low-Level Design - AI Training Management Platform
 
 ## Purpose
@@ -104,8 +116,8 @@ Adding a new execution engine (Kubernetes, local process, etc.) requires only a 
 
 ## Key References
 
-* HLD diagrams: `docs/solution-architect/high-level-design/diagram/`
-* ADR: `docs/solution-architect/md/architectural-decision-records.md`
-* Design patterns: `docs/solution-architect/md/design-patterns.md`
-* Architecture refinement: `docs/solution-architect/md/sa-refinement.md`
-* Product and BA requirements: `docs/po-requirement.md`, `docs/ba-refine.md`
+* HLD diagrams: [[system-context-diagram]], [[high-level-component-diagram]], [[deployment-diagram]], [[erd]], [[job-lifecycle-state-diagram]]
+* ADR: [[adr-index]]
+* Design patterns: [[design-patterns]]
+* Architecture refinement: [[sa-refinement]]
+* Product and BA requirements: [[po-requirement]], [[ba-refine]]

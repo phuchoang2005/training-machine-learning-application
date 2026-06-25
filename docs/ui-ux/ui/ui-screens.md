@@ -1,3 +1,15 @@
+---
+title: "UI Screens Index"
+tags: [ui, wireframes, screens]
+aliases: [UI Screens, Wireframes, ui-screens]
+related:
+  - "[[user-screens]]"
+  - "[[admin-screens]]"
+  - "[[ux-overview]]"
+  - "[[design-system]]"
+  - "[[po-requirement]]"
+---
+
 # UI Wireframe Specification
 
 This directory contains the detailed user interface wireframes and layout specifications for the AI Training Management Platform. The designs are structured around the product requirements (`docs/po-requirement.md`), business refinements (`docs/ba-refine.md`), and the component specification (`docs/solution-architect/design-system-and-component-specification/README.md`).

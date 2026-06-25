@@ -1,3 +1,14 @@
+---
+title: "User Flows"
+tags: [ux, user-flows, workflows]
+aliases: [User Flows, Task Flows, user-flows]
+related:
+  - "[[primary-user-flow-diagram]]"
+  - "[[journey-maps]]"
+  - "[[ux-overview]]"
+  - "[[job-lifecycle-state-diagram]]"
+---
+
 # User Flows
 
 ## 1. Overview

@@ -1,3 +1,14 @@
+---
+title: "User Journey Maps"
+tags: [ux, journey-maps, users]
+aliases: [Journey Maps, User Journeys, journey-maps]
+related:
+  - "[[personas]]"
+  - "[[user-flows]]"
+  - "[[primary-user-flow-diagram]]"
+  - "[[ux-overview]]"
+---
+
 # User Journey Maps
 
 ## 1. AI Engineer Journey: Launch and Monitor Training

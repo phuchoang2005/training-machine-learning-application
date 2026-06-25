@@ -1,3 +1,9 @@
+---
+title: "GitHub Commit Strategy (Conventional Commits)"
+tags: [operations, git, commit, conventions]
+aliases: [Commit Strategy, Conventional Commits, github-commit-strategy]
+---
+
 # Viết Commit chuẩn Github
 
 Trong môi trường phát triển phần mềm chuyên nghiệp, chuẩn mực phổ biến nhất để viết commit message là **Conventional Commits**. Việc tuân thủ chuẩn này giúp lịch sử dự án (git log) sạch sẽ, dễ tra cứu và hỗ trợ các công cụ tự động hóa (như tự động tạo Changelog).

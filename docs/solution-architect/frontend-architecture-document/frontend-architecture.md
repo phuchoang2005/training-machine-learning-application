@@ -1,3 +1,22 @@
+---
+title: "Frontend Architecture"
+tags: [frontend, architecture, react, redux, vite]
+aliases: [Frontend Architecture, SPA Architecture, frontend-architecture]
+related:
+  - "[[ADR-002]]"
+  - "[[ADR-003]]"
+  - "[[ADR-008]]"
+  - "[[ADR-011]]"
+  - "[[ADR-012]]"
+  - "[[ADR-013]]"
+  - "[[ADR-014]]"
+  - "[[frontend-architecture-context]]"
+  - "[[api-integration-flow]]"
+  - "[[realtime-state-flow]]"
+  - "[[route-guard-flow]]"
+  - "[[ux-overview]]"
+---
+
 # Frontend Architecture Document
 
 ## 1. Purpose
@@ -19,7 +38,7 @@ The frontend provides authenticated web workflows for:
 
 Backend authorization remains authoritative for all REST endpoints and WebSocket subscriptions. The frontend must hide unavailable actions based on user role and resource ownership, but it must never treat UI checks as security enforcement.
 
-Diagram: [frontend-architecture-context.mermaid](diagrams/frontend-architecture-context.mermaid)
+Diagram: [[frontend-architecture-context]]
 
 ## 3. Technology Baseline
 
@@ -192,7 +211,7 @@ The frontend package applies the documented stack through:
 
 ## 5. Frontend Module Model
 
-Diagram: [frontend-module-model.puml](diagrams/frontend-module-model.puml)
+Diagram: [[frontend-module-model]] (`diagrams/frontend-module-model.puml`)
 
 ## 6. State Management Design
 
@@ -249,7 +268,7 @@ type JobSliceState = {
 
 ### Real-Time State Flow
 
-Diagram: [realtime-state-flow.mermaid](diagrams/realtime-state-flow.mermaid)
+Diagram: [[realtime-state-flow]]
 
 ### Job Stream Event Handling
 
@@ -308,7 +327,7 @@ Routes are grouped by authentication requirement, ownership-sensitive resources,
 
 ### Route Guard Flow
 
-Diagram: [route-guard-flow.mermaid](diagrams/route-guard-flow.mermaid)
+Diagram: [[route-guard-flow]]
 
 ### URL State
 
@@ -339,7 +358,7 @@ The API client must be generated from or manually aligned with the OpenAPI contr
 * Correlation ID extraction from error responses.
 * Standard handling for `401`, `403`, `404`, `409`, `413`, `415`, and platform-busy responses.
 
-Diagram: [api-integration-flow.mermaid](diagrams/api-integration-flow.mermaid)
+Diagram: [[api-integration-flow]]
 
 ## 9. Authorization and UI Permission Design
 

@@ -1,3 +1,13 @@
+---
+title: "Backend Design Patterns"
+tags: [architecture, design-patterns, backend, spring-boot]
+aliases: [Design Patterns, Backend Patterns, design-patterns]
+related:
+  - "[[ADR-015]]"
+  - "[[adr-index]]"
+  - "[[low-level-design]]"
+---
+
 # Backend Design Patterns
 
 ## Status
@@ -183,8 +193,8 @@ DockerTrainingRunner   (concrete strategy — Docker engine)
 
 ## Diagram
 
-See `docs/solution-architect/low-level-design/logic-code-structure/class-diagram/diagrams/02-backend-service-class-diagram.puml` for the PlantUML class diagram annotated with pattern roles.
+See `low-level-design/logic-code-structure/class-diagram/diagrams/02-backend-service-class-diagram.puml` for the PlantUML class diagram annotated with pattern roles. See also [[class-diagrams]].
 
 ## ADR Reference
 
-ADR-015 in `docs/solution-architect/md/architectural-decision-records.md`.
+[[ADR-015]] in [[adr-index]].

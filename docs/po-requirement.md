@@ -1,3 +1,13 @@
+---
+title: "Product Requirements"
+tags: [requirement, product, user-stories, po]
+aliases: [Product Requirements, PO Requirements, po-requirement]
+related:
+  - "[[ba-refine]]"
+  - "[[sa-refinement]]"
+  - "[[non-functional-requirements]]"
+---
+
 # Future – Product Requirements
 
 ## Background

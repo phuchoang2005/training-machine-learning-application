@@ -1,3 +1,15 @@
+---
+title: "Access Control Matrix"
+tags: [security, rbac, authorization, matrix]
+aliases: [Access Control, Permission Matrix, access-control-matrix]
+related:
+  - "[[security-model]]"
+  - "[[security-architecture-diagram]]"
+  - "[[request-authorization-flow]]"
+  - "[[ADR-007]]"
+  - "[[non-functional-requirements]]"
+---
+
 | Chức năng / Tài nguyên |        User |         Admin | Ghi chú bảo mật                   |
 | ---------------------- | ----------: | ------------: | --------------------------------- |
 | Đăng nhập / đăng xuất  |           ✅ |             ✅ | Ghi audit log                     |

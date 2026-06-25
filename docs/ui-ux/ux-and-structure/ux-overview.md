@@ -1,3 +1,16 @@
+---
+title: "UX Overview"
+tags: [ux, frontend, navigation, design]
+aliases: [UX Overview, UX Structure, ux-overview]
+related:
+  - "[[po-requirement]]"
+  - "[[ba-refine]]"
+  - "[[frontend-architecture]]"
+  - "[[design-system]]"
+  - "[[information-architecture-diagram]]"
+  - "[[primary-user-flow-diagram]]"
+---
+
 # UX and Structure Diagram Document
 
 ## 1. Purpose
@@ -6,10 +19,10 @@ This documentation package defines the user experience structure for the AI Trai
 
 The UX model is aligned with:
 
-* Product requirements in `docs/po-requirement.md`.
-* Business refinement in `docs/ba-refine.md`.
-* Frontend architecture in `docs/solution-architect/frontend-architecture-document/README.md`.
-* Design system guidance in `docs/solution-architect/design-system-and-component-specification/README.md`.
+* Product requirements in [[po-requirement]].
+* Business refinement in [[ba-refine]].
+* Frontend architecture in [[frontend-architecture]].
+* Design system guidance in [[design-system]].
 
 ## 2. UX Scope
 
@@ -43,8 +56,8 @@ The UX model is aligned with:
 | [User Journey Maps](journey-maps.md) | Maps end-to-end workflows, user expectations, pain points, and UX opportunities. |
 | [Information Architecture](information-architecture.md) | Defines navigation hierarchy, route groups, page ownership, and content relationships. |
 | [User Flows](user-flows.md) | Defines task-level flows for launch, monitor, cancel, retry, artifact review, and admin operations. |
-| [IA Diagram](diagrams/information-architecture.mermaid) | Mermaid structure diagram for product navigation. |
-| [Primary User Flow Diagram](diagrams/primary-user-flow.mermaid) | Mermaid flow diagram for the core training workflow. |
+| [[information-architecture-diagram]] | Mermaid structure diagram for product navigation. |
+| [[primary-user-flow-diagram]] | Mermaid flow diagram for the core training workflow. |
 
 ## 4. UX Principles
 

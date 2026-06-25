@@ -1,6 +1,4 @@
-# Training Machine Learning Application
-
-Training Machine Learning Application is a full-stack web application for configuring, running, monitoring, and administering training jobs. The repository contains the product and architecture documentation plus an implemented React frontend, Spring Boot backend, MongoDB persistence, and Docker-based runtime topology.
+# Training Machine Learning Application Training Machine Learning Application is a full-stack web application for configuring, running, monitoring, and administering training jobs. The repository contains the product and architecture documentation plus an implemented React frontend, Spring Boot backend, MongoDB persistence, and Docker-based runtime topology
 
 ## Tech Stack
 
@@ -14,10 +12,11 @@ Training Machine Learning Application is a full-stack web application for config
 
 ```text
 .
-|-- backend/          # Spring Boot API (runs on host), MongoDB-only Docker setup
-|-- docs/             # Product, UX, architecture, API, security, and delivery docs
-|-- frontend/         # React/Vite app, frontend Docker setup, tests, shared UI
-|-- docker-compose.yml
+|-- backend/              # Spring Boot API and backend Docker setup
+|-- docs/                 # Product, UX, architecture, API, security, and delivery docs
+|-- frontend/             # React/Vite app, frontend Docker setup, tests, shared UI
+|-- docker-compose.yml    # Full-stack (MongoDB + backend + frontend containers)
+|-- docker-compose.dev.yml  # Dev mode (MongoDB + DB GUI only; app runs on host)
 `-- README.md
 ```
 
@@ -25,136 +24,179 @@ Key documentation:
 
 - `docs/po-requirement.md`: product requirements.
 - `docs/ba-refine.md`: business analysis refinements.
-- `docs/solution-architect/low-level-design/README.md`: backend/runtime design and Docker topology.
-- `docs/solution-architect/frontend-architecture-document/README.md`: frontend architecture and applied tooling.
+- `docs/solution-architect/low-level-design/low-level-design.md`: backend/runtime design and Docker topology.
+- `docs/solution-architect/frontend-architecture-document/frontend-architecture.md`: frontend architecture and applied tooling.
 - `docs/solution-architect/low-level-design/api-contracts/openapi.yaml`: canonical API contract.
 
-## Runtime Notes
+---
 
-This workspace is mounted from `ssh my-ec2`. Follow the local agent convention and run shell commands through `rtk`; runtime commands for this project should execute on the EC2 host:
+## Local Development (recommended)
+
+Runs the backend and frontend directly on the host with hot-reload. Docker provides only MongoDB.
+
+**Prerequisites**: Java 21, Maven, Node.js ≥ 24, Docker.
 
 ```bash
-rtk ssh my-ec2 'cd ~/training-machine-learning-application && docker compose ps'
+# 1. Start MongoDB (and optional Mongo Express UI on http://localhost:8081)
+docker compose -f docker-compose.dev.yml up -d
+
+# 2. Run the backend (auto-restarts on class changes via Spring DevTools)
+cd backend && mvn spring-boot:run
+
+# 3. In a separate terminal — run the frontend with HMR
+cd frontend && npm run dev
 ```
 
-Frontend local tooling requires Node.js 24 or newer. Backend local tooling requires OpenJDK 21 and Maven. Docker provides only MongoDB (plus the static frontend image); the backend Spring Boot app runs on the host with Maven, not in a container. The frontend Docker image no longer bundles a Node.js runtime: it serves the static bundle that you build on the host with `npm run build`, so produce `frontend/dist/` before building the frontend image.
+Entry points:
 
-## Run the Full Stack
+| Service                | URL                                 |
+| ---------------------- | ----------------------------------- |
+| Frontend (Vite HMR)    | <http://localhost:5173/>              |
+| Backend API            | <http://localhost:8080/api/v1/health> |
+| Mongo Express (DB GUI) | <http://localhost:8081/>              |
 
-Build the frontend bundle on the host first (the frontend image only serves `frontend/dist/`), then bring up the Docker services from the repository root and run the backend on the host:
+Stop infrastructure:
 
 ```bash
-rtk ssh my-ec2 'cd ~/training-machine-learning-application/frontend && npm ci && npm run build'
-rtk ssh my-ec2 'cd ~/training-machine-learning-application && docker compose up -d --build'
-rtk ssh my-ec2 'cd ~/training-machine-learning-application/backend && mvn spring-boot:run'
+docker compose -f docker-compose.dev.yml down
+```
+
+---
+
+## Run the Full Stack (containerised)
+
+All three services run as containers. No local Java or Node required to serve the app.
+
+Build the frontend bundle on the host first (the image only serves the pre-built `dist/`), then start the compose stack and the host-run backend:
+
+```bash
+# 1. Build frontend bundle
+(cd frontend && npm ci && npm run build)
+
+# 2. Start MongoDB + backend container + frontend Nginx container
+docker compose up -d --build
+
+# 3. (optional) Follow logs
+docker compose logs -f
 ```
 
 The root Compose stack starts:
 
 - `mongodb`: MongoDB database.
-- `frontend`: Nginx-hosted frontend that proxies `/api/` and WebSocket traffic to the host-run backend (`host.docker.internal:8080`).
-
-The backend Spring Boot app runs on the host (`mvn spring-boot:run`), not in a container, so start it for the frontend to have an API to reach.
+- `backend`: Containerised Spring Boot API on :8080, drives the host Docker daemon to launch training containers.
+- `frontend`: Nginx-hosted frontend on :80 that proxies `/api/` and WebSocket traffic to the backend container.
 
 Default entry points:
 
-- Frontend: `http://localhost/`
-- Frontend health: `http://localhost/healthz`
-- Backend API health through the frontend proxy: `http://localhost/api/v1/health`
+| Service                     | URL                                 |
+| --------------------------- | ----------------------------------- |
+| Frontend                    | <http://localhost/>                   |
+| Frontend health             | <http://localhost/healthz>            |
+| Backend API (through proxy) | <http://localhost/api/v1/health>      |
+| Backend API (direct)        | <http://localhost:8080/api/v1/health> |
 
 Stop the full stack:
 
 ```bash
-rtk ssh my-ec2 'cd ~/training-machine-learning-application && docker compose down'
+docker compose down
 ```
+
+---
 
 ## Run Backend Only
 
-The backend's Docker setup provides only MongoDB; run the Spring Boot app on the host with Maven.
+Bring up MongoDB and run Spring Boot on the host. Useful for backend-focused work without a frontend.
 
 ```bash
-rtk ssh my-ec2 'cd ~/training-machine-learning-application/backend && docker compose up -d'   # start MongoDB on :27017
-rtk ssh my-ec2 'cd ~/training-machine-learning-application/backend && mvn spring-boot:run'     # run the API on the host
+cd backend
+docker compose up -d        # MongoDB on :27017
+mvn spring-boot:run         # API on :8080
 ```
 
-Default backend entry points:
+Entry points:
 
-- API (host-run Spring Boot): `http://localhost:8080/`
-- API health: `http://localhost:8080/api/v1/health`
+- API: <http://localhost:8080/api/v1/health>
 
-Stop MongoDB:
+Stop:
 
 ```bash
-rtk ssh my-ec2 'cd ~/training-machine-learning-application/backend && docker compose down'
+cd backend && docker compose down
 ```
 
-## Run Frontend Only
+---
 
-The frontend has its own Docker setup that serves the host-built `dist/` through Nginx. By default it proxies API traffic to `http://host.docker.internal:8080`, so run the backend stack first when API calls are needed. Build the bundle before bringing the image up:
+## Run Frontend Only (Nginx + pre-built dist)
+
+Serves the host-built `dist/` through Nginx. By default it proxies API traffic to `http://host.docker.internal:8080`, so run the backend first when API calls are needed.
 
 ```bash
-rtk ssh my-ec2 'cd ~/training-machine-learning-application/frontend && npm ci && npm run build'
-rtk ssh my-ec2 'cd ~/training-machine-learning-application/frontend && docker compose up -d --build'
+cd frontend
+npm ci && npm run build
+docker compose up -d --build
 ```
 
-Default frontend-only entry points:
+Entry points:
 
-- Frontend: `http://localhost:5173/`
-- Health: `http://localhost:5173/healthz`
+- Frontend: <http://localhost:5173/>
+- Health: <http://localhost:5173/healthz>
 
-Stop the frontend stack:
+Stop:
 
 ```bash
-rtk ssh my-ec2 'cd ~/training-machine-learning-application/frontend && docker compose down'
+cd frontend && docker compose down
 ```
+
+---
 
 ## Development Commands
 
-Frontend commands require Node.js 24 or newer on the machine running them. If the EC2 host is still on an older Node.js version, run these inside a Node 24 container or use the Docker build path instead.
-
-Frontend commands with a Node 24 host:
+**Frontend** (requires Node.js ≥ 24):
 
 ```bash
-rtk ssh my-ec2 'cd ~/training-machine-learning-application/frontend && npm run typecheck'
-rtk ssh my-ec2 'cd ~/training-machine-learning-application/frontend && npm run lint'
-rtk ssh my-ec2 'cd ~/training-machine-learning-application/frontend && npm run test'
-rtk ssh my-ec2 'cd ~/training-machine-learning-application/frontend && npm run build'
-rtk ssh my-ec2 'cd ~/training-machine-learning-application/frontend && npm run e2e'
+cd frontend
+npm run dev          # Vite HMR on :5173
+npm run typecheck
+npm run lint
+npm run test
+npm run build
+npm run e2e          # Playwright (auto-builds + previews on :4173)
 ```
 
-Frontend validation without installing Node 24 on the EC2 host:
+**Backend** (requires Java 21 + Maven; needs MongoDB on :27017):
 
 ```bash
-rtk ssh my-ec2 'cd ~/training-machine-learning-application/frontend && docker run --rm -v "$PWD":/app -w /app node:24-bookworm-slim sh -lc "npm ci && npm run typecheck && npm run lint && npm run test && npm run build"'
+cd backend
+mvn spring-boot:run
+mvn package          # build + tests
 ```
 
-Backend commands:
+**Docker config check**:
 
 ```bash
-rtk ssh my-ec2 'cd ~/training-machine-learning-application/backend && mvn test'
+docker compose config --quiet
+docker compose -f docker-compose.dev.yml config --quiet
+(cd backend  && docker compose config --quiet)
+(cd frontend && docker compose config --quiet)
 ```
 
-Docker configuration checks:
-
-```bash
-rtk ssh my-ec2 'cd ~/training-machine-learning-application && docker compose config --quiet'
-rtk ssh my-ec2 'cd ~/training-machine-learning-application/backend && docker compose config --quiet'
-rtk ssh my-ec2 'cd ~/training-machine-learning-application/frontend && docker compose config --quiet'
-```
+---
 
 ## Smoke Test
 
-After the root stack is running:
+After any stack is running:
 
 ```bash
-rtk ssh my-ec2 'curl -fsS http://localhost/healthz && curl -fsS http://localhost/api/v1/health'
+curl -fsS http://localhost/healthz
+curl -fsS http://localhost/api/v1/health
 ```
 
-For an authenticated development request, the current backend accepts a bearer token containing the email identity:
+For an authenticated development request (bearer token is the user's email in dev):
 
 ```bash
-rtk ssh my-ec2 'curl -fsS -H "Authorization: Bearer admin@example.com" http://localhost/api/v1/auth/me'
+curl -fsS -H "Authorization: Bearer admin@example.com" http://localhost/api/v1/auth/me
 ```
+
+---
 
 ## Documentation Rules
 

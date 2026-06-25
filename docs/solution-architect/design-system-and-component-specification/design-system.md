@@ -1,3 +1,15 @@
+---
+title: "Design System and Component Specification"
+tags: [frontend, design-system, components, ui]
+aliases: [Design System, Component Spec, design-system]
+related:
+  - "[[frontend-architecture]]"
+  - "[[ADR-013]]"
+  - "[[ADR-014]]"
+  - "[[ux-overview]]"
+  - "[[user-screens]]"
+---
+
 # Design System and Component Specification
 
 ## 1. Purpose

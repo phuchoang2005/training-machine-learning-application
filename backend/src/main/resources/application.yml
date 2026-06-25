@@ -5,9 +5,8 @@ server:
 spring:
   application:
     name: ai-training-backend
-  data:
-    mongodb:
-      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/ai_training}
+  mongodb:
+    uri: ${SPRING_MONGODB_URI:mongodb://localhost:27017/ai_training}
   mail:
     host: ${MAIL_HOST:localhost}
     port: ${MAIL_PORT:25}

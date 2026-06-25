@@ -1,3 +1,13 @@
+---
+title: "Performance and UX Optimization Design"
+tags: [frontend, performance, optimization, ux]
+aliases: [Performance Optimization, performance-optimization]
+related:
+  - "[[frontend-architecture]]"
+  - "[[non-functional-requirements]]"
+  - "[[ADR-013]]"
+---
+
 # Performance and UX Optimization Design
 
 ## Document Index

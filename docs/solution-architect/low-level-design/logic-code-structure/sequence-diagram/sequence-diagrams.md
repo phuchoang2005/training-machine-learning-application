@@ -1,3 +1,14 @@
+---
+title: "Sequence Diagrams"
+tags: [lld, diagram, sequence-diagram, plantuml]
+aliases: [Sequence Diagrams, sequence-diagrams]
+related:
+  - "[[class-diagrams]]"
+  - "[[low-level-design]]"
+  - "[[training-execution-sequence-diagram]]"
+  - "[[api-interaction-diagram]]"
+---
+
 # Sequence Diagrams
 
 ## Purpose

@@ -1,3 +1,14 @@
+---
+title: "API Integration and Client-Side Caching Strategy"
+tags: [frontend, api, caching, redux]
+aliases: [API Caching Strategy, api-caching-strategy]
+related:
+  - "[[frontend-architecture]]"
+  - "[[ADR-011]]"
+  - "[[ADR-012]]"
+  - "[[api-integration-flow]]"
+---
+
 # API Integration and Client-Side Caching Strategy
 
 ## Document Index

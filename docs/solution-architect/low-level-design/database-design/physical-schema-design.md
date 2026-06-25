@@ -1,3 +1,13 @@
+---
+title: "Physical Schema Design"
+tags: [lld, database, mongodb, schema, collections]
+aliases: [Physical Schema, MongoDB Collections, physical-schema-design]
+related:
+  - "[[erd]]"
+  - "[[database-design]]"
+  - "[[ADR-004]]"
+---
+
 # Physical Schema Design
 
 ## Database Baseline

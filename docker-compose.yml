@@ -28,7 +28,7 @@ services:
       mongodb:
         condition: service_healthy
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/ai_training
+      SPRING_MONGODB_URI: mongodb://mongodb:27017/ai_training
       APP_STORAGE_ROOT: ${PWD}/backend/storage
       APP_DOCKER_WORKSPACE_ROOT: ${PWD}/backend/storage/workspaces
       APP_DOCKER_SOURCES_ROOT: ${PWD}/backend/storage/sources

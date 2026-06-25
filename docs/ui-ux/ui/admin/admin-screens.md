@@ -1,3 +1,14 @@
+---
+title: "Admin Screens"
+tags: [ui, wireframes, admin, screens]
+aliases: [Admin Screens, Admin Wireframes, admin-screens]
+related:
+  - "[[ui-screens]]"
+  - "[[user-screens]]"
+  - "[[access-control-matrix]]"
+  - "[[information-architecture-diagram]]"
+---
+
 # Admin Wireframe Specification (SVG Format)
 
 This directory contains administrator-role visual SVG wireframes for Future. The screens intentionally match the user-role UI direction in `docs/ui-ux/ui/user/`: the same 1280px by 800px desktop canvas, persistent app shell, Pleiades/Sirius light and dark themes, translucent operational panels, status badges, and WebSocket utility header.

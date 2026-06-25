@@ -1,0 +1,43 @@
+# Dev infrastructure only — MongoDB (and optional DB GUI).
+# The backend and frontend run directly on the host; no image builds, no containers for app code.
+#
+# Usage:
+#   docker compose -f docker-compose.dev.yml up -d
+#   cd backend  && mvn spring-boot:run    # API on :8080, auto-restarts on class changes
+#   cd frontend && npm run dev            # Vite HMR on :5173, proxies /api -> :8080
+#
+# Stop:
+#   docker compose -f docker-compose.dev.yml down
+#
+# Named volume "mongo-data-dev" is separate from the prod "mongo-data" volume so the
+# two stacks do not share data even when both run on the same machine.
+
+services:
+  mongodb:
+    image: mongo:8
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data-dev:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Mongo web UI — browse and edit documents without a separate client.
+  # Open http://localhost:8081 after the stack is up.
+  mongo-express:
+    image: mongo-express:1
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_BASICAUTH: "false"
+    restart: unless-stopped
+
+volumes:
+  mongo-data-dev:

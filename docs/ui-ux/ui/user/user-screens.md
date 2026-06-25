@@ -1,3 +1,15 @@
+---
+title: "User Screens"
+tags: [ui, wireframes, user, screens]
+aliases: [User Screens, User Wireframes, user-screens]
+related:
+  - "[[ui-screens]]"
+  - "[[admin-screens]]"
+  - "[[primary-user-flow-diagram]]"
+  - "[[information-architecture-diagram]]"
+  - "[[ADR-014]]"
+---
+
 # User Wireframe Specification (SVG Format)
 
 This directory contains the user-role specific user interface wireframes for Future, rendered as visual SVGs. These wireframes are tailored for the standard user roles (**AI Engineer / Data Scientist** and **Project Owner**) and intentionally omit any administrative features or the global "Admin Console" menu link from the App Shell navigation menu.

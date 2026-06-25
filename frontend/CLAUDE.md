@@ -20,8 +20,6 @@ Run from `frontend/`. Requires Node.js >= 24.
 - `npm run e2e` — Playwright; auto-starts `npm run preview` on `:4173` (build first).
 - `npm run build` — typecheck + Vite production build.
 
-The repo runtime is hosted on an EC2 host; the user's shell hook prefixes commands with `rtk`, and full-stack/Docker runs happen via `rtk ssh my-ec2 '...'`. See `../README.md` for Docker Compose topology and stack entry points (`http://localhost/`, health at `/healthz`, API at `/api/v1/health`).
-
 ## Architecture
 
 ### Mock-driven state (important)

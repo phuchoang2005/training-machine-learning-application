@@ -1,3 +1,14 @@
+---
+title: "Information Architecture"
+tags: [ux, navigation, information-architecture]
+aliases: [Information Architecture, IA, information-architecture]
+related:
+  - "[[information-architecture-diagram]]"
+  - "[[ux-overview]]"
+  - "[[route-guard-flow]]"
+  - "[[frontend-architecture]]"
+---
+
 # Information Architecture
 
 ## 1. IA Goals

@@ -1,3 +1,13 @@
+---
+title: "User Personas"
+tags: [ux, personas, users]
+aliases: [Personas, User Personas, personas]
+related:
+  - "[[ux-overview]]"
+  - "[[journey-maps]]"
+  - "[[po-requirement]]"
+---
+
 # User Personas
 
 ## 1. Overview

@@ -1,3 +1,14 @@
+---
+title: "Non-Functional Requirements"
+tags: [requirement, nfr, performance, security, reliability]
+aliases: [NFR, Non-Functional Requirements, non-functional-requirements]
+related:
+  - "[[ba-refine]]"
+  - "[[po-requirement]]"
+  - "[[adr-index]]"
+  - "[[failure-handling-matrix]]"
+---
+
 # Detailed Non-Functional Requirements
 
 ## 1. Purpose and Scope

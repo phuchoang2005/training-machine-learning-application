@@ -1,3 +1,16 @@
+---
+title: "HLD Planning — Questions and Diagram Inventory"
+tags: [architecture, hld, planning]
+aliases: [HLD Planning, high-level-design-planning]
+related:
+  - "[[architecture-moc]]"
+  - "[[system-context-diagram]]"
+  - "[[high-level-component-diagram]]"
+  - "[[deployment-diagram]]"
+  - "[[job-lifecycle-state-diagram]]"
+  - "[[erd]]"
+---
+
 Dựa trên tài liệu hiện có , để viết **High Level Design**, nên hỏi thêm theo bảng này:
 
 | Nhóm cần làm rõ                | Câu hỏi cần trả lời thêm                                                                                                                                   | Có thể vẽ/tạo ra được gì                                  |

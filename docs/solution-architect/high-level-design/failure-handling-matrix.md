@@ -1,3 +1,14 @@
+---
+title: "Failure Handling Matrix"
+tags: [architecture, failure, error-handling, matrix]
+aliases: [Failure Matrix, Error Handling, failure-handling-matrix]
+related:
+  - "[[error-flow-diagram]]"
+  - "[[job-lifecycle-state-diagram]]"
+  - "[[recovery-flow-diagram]]"
+  - "[[non-functional-requirements]]"
+---
+
 # Failure Handling Matrix
 
 | Failure Scenario | Detection Point | Platform Action | Job Status | User Notification |

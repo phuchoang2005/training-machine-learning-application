@@ -1,0 +1,179 @@
+---
+title: "Entity-Relationship Diagram"
+tags: [diagram, hld, database, erd, schema]
+diagram-type: mermaid
+aliases: [ERD, Data Model, Entity Relationship]
+---
+
+# Entity-Relationship Diagram
+
+Full logical data model for the platform. All collections are in MongoDB; relationships are stored by reference (UUID) and resolved in the service/repository layer.
+
+```mermaid
+erDiagram
+    USERS {
+        uuid user_id PK
+        string email UK
+        string full_name
+        string role "USER, ADMIN"
+        string status
+        datetime created_at
+        datetime last_login_at
+    }
+
+    PROJECTS {
+        uuid project_id PK
+        uuid owner_user_id FK
+        string project_name
+        text description
+        string source_type "GITHUB, ZIP"
+        string repository_url
+        string local_source_path
+        string training_entrypoint
+        string status
+        datetime created_at
+        datetime updated_at
+    }
+
+    PROJECT_CONFIGS {
+        uuid config_id PK
+        uuid project_id FK
+        string config_name
+        string config_path
+        text yaml_content
+        boolean is_default
+        datetime updated_at
+    }
+
+    CONFIG_SNAPSHOTS {
+        uuid snapshot_id PK
+        uuid project_id FK
+        uuid config_id FK
+        text yaml_content
+        string content_hash
+        datetime created_at
+    }
+
+    TRAINING_JOBS {
+        uuid job_id PK
+        uuid project_id FK
+        uuid triggered_by_user_id FK
+        uuid config_snapshot_id FK
+        uuid retry_of_job_id FK
+        string status "CREATED, QUEUED, RUNNING, SUCCESS, FAILED, CANCELLED, RETRYING"
+        int retry_attempt
+        int queue_position
+        datetime queued_at
+        datetime started_at
+        datetime ended_at
+        string container_id
+        string log_path
+        string artifact_base_path
+        text failure_reason
+        datetime created_at
+    }
+
+    JOB_QUEUE_ENTRIES {
+        uuid queue_entry_id PK
+        uuid job_id FK
+        string queue_status "WAITING, DISPATCHED, CANCELLED"
+        datetime enqueued_at
+        datetime dispatched_at
+    }
+
+    JOB_LOG_SESSIONS {
+        uuid log_session_id PK
+        uuid job_id FK
+        string stdout_log_path
+        string stderr_log_path
+        datetime created_at
+    }
+
+    JOB_LOG_EVENTS {
+        uuid log_event_id PK
+        uuid log_session_id FK
+        string stream_type "STDOUT, STDERR"
+        text message
+        datetime emitted_at
+        int sequence_no
+    }
+
+    JOB_PROGRESS_EVENTS {
+        uuid progress_event_id PK
+        uuid job_id FK
+        int progress_value
+        int epoch
+        int total_epoch
+        text raw_payload
+        datetime emitted_at
+    }
+
+    ARTIFACTS {
+        uuid artifact_id PK
+        uuid project_id FK
+        uuid job_id FK
+        string artifact_name
+        string artifact_type "MODEL, CHECKPOINT, METRIC, OTHER"
+        string file_path
+        bigint file_size_bytes
+        string checksum
+        datetime created_at
+    }
+
+    MODEL_VERSIONS {
+        uuid model_version_id PK
+        uuid project_id FK
+        uuid job_id FK
+        uuid artifact_id FK
+        uuid config_snapshot_id FK
+        string model_name
+        string version_number
+        datetime created_at
+    }
+
+    AUDIT_LOGS {
+        uuid audit_id PK
+        uuid actor_user_id FK
+        uuid project_id FK
+        uuid job_id FK
+        string action
+        string resource_type
+        string resource_id
+        text metadata_json
+        datetime created_at
+    }
+
+    USERS ||--o{ PROJECTS : owns
+    USERS ||--o{ TRAINING_JOBS : triggers
+    USERS ||--o{ AUDIT_LOGS : performs
+
+    PROJECTS ||--o{ PROJECT_CONFIGS : has_configs
+    PROJECTS ||--o{ CONFIG_SNAPSHOTS : has_snapshots
+    PROJECTS ||--o{ TRAINING_JOBS : has_jobs
+    PROJECTS ||--o{ ARTIFACTS : owns
+    PROJECTS ||--o{ MODEL_VERSIONS : has_versions
+    PROJECTS ||--o{ AUDIT_LOGS : audited_under
+
+    PROJECT_CONFIGS ||--o{ CONFIG_SNAPSHOTS : snapshotted_from
+    CONFIG_SNAPSHOTS ||--o{ TRAINING_JOBS : used_by
+    CONFIG_SNAPSHOTS ||--o{ MODEL_VERSIONS : reproduces
+
+    TRAINING_JOBS ||--o| JOB_QUEUE_ENTRIES : queued_as
+    TRAINING_JOBS ||--o{ JOB_LOG_SESSIONS : has_log_sessions
+    TRAINING_JOBS ||--o{ JOB_PROGRESS_EVENTS : reports
+    TRAINING_JOBS ||--o{ ARTIFACTS : generates
+    TRAINING_JOBS ||--o{ MODEL_VERSIONS : creates
+    TRAINING_JOBS ||--o{ AUDIT_LOGS : related_to
+    TRAINING_JOBS ||--o{ TRAINING_JOBS : retried_as
+
+    JOB_LOG_SESSIONS ||--o{ JOB_LOG_EVENTS : contains
+    ARTIFACTS ||--o| MODEL_VERSIONS : registered_as
+```
+
+## Related
+- [[physical-schema-design]] — Physical MongoDB collection shapes and indexes
+- [[database-design]] — Database design overview
+- [[ADR-004]] — MongoDB decision
+- [[configuration-management-flow-diagram]] — CONFIG_SNAPSHOTS lifecycle
+- [[artifact-flow-diagram]] — ARTIFACTS and MODEL_VERSIONS creation
+- [[job-lifecycle-state-diagram]] — TRAINING_JOBS status field

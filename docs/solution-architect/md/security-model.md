@@ -1,3 +1,14 @@
+---
+title: "Security Model — RBAC + Ownership"
+tags: [security, rbac, authorization, architecture]
+aliases: [Security Model, RBAC, Ownership Model, security-model]
+related:
+  - "[[ADR-007]]"
+  - "[[security-architecture-diagram]]"
+  - "[[access-control-matrix]]"
+  - "[[request-authorization-flow]]"
+---
+
 Mô hình **RBAC + Ownership-Based Access Control** (Phân quyền dựa trên Vai trò kết hợp Quyền sở hữu) là một mô hình kiểm soát truy cập lai (Hybrid Access Control). Nó được tạo ra bằng cách kết hợp hai phương pháp phân quyền phổ biến để giải quyết bài toán quản lý tài nguyên một cách linh hoạt và bảo mật hơn.
 
 Dưới đây là chi tiết về đặc tính, cách hoạt động và thế mạnh lớn nhất của mô hình này.
