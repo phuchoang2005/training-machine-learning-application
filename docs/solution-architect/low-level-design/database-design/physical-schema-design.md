@@ -80,9 +80,9 @@ Recommended additional indexes for scale (not created automatically in the MVP):
 | Collection | Retention |
 | --- | --- |
 | `users` | Disable instead of delete for active history |
-| `projects` | Deleted only through the backend service, which cascades to the project's configs, snapshots, jobs, queue entries, logs, progress, and artifacts |
+| `projects` | Deleted only through the backend service, which cascades to the project's configs, snapshots, jobs, queue entries, logs, progress, and artifacts. The service (`ProjectService.delete`) also removes the project's on-disk source tree and each job's on-disk artifact files (`storageRoot/artifacts/{jobId}`) and the Docker image/containers (best-effort, never failing the delete) |
 | `training_jobs` | Removed when the parent project is deleted; otherwise retained |
 | `config_snapshots` | Immutable; retained with job history (removed on project delete) |
-| `job_log_events` / `job_progress_events` | Removed on project/job delete |
-| `artifacts` | Removed on project delete |
+| `job_log_events` / `job_progress_events` | Removed on project/job delete (matched by the project's `jobId`s) |
+| `artifacts` | Removed on project delete. Artifact documents carry only `jobId` (no `projectId`), so the cascade removes them by the project's `jobId`s; the corresponding on-disk artifact files are deleted by the service |
 | `audit_logs` | Append-only and retained indefinitely |

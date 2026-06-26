@@ -162,10 +162,11 @@ describe("RegisterProjectPage", () => {
     expect(screen.getByRole("button", { name: /Create Project/i })).not.toBeDisabled();
   });
 
-  it("shows an error banner when the zip upload fails", async () => {
-    // In jsdom there is no real network so apiClient rejects with a Network Error,
-    // which the page maps to an error banner.
-    renderRegisterPage();
+  it("registers an optimistic build and marks it FAILED when the zip upload fails", async () => {
+    // Submitting now navigates away and tracks the build in the store: a pending
+    // build appears immediately, then flips to FAILED when the request rejects
+    // (jsdom has no network, so apiClient rejects with a Network Error).
+    const store = renderRegisterPage();
     await userEvent.click(screen.getByRole("button", { name: /ZIP Upload/i }));
 
     const inputs = screen.getAllByRole("textbox");
@@ -176,12 +177,18 @@ describe("RegisterProjectPage", () => {
     fireEvent.drop(zone, { dataTransfer: { files: [file] } });
 
     await userEvent.click(screen.getByRole("button", { name: /Create Project/i }));
+
+    // Optimistic record is added synchronously on click.
+    const pending = store.getState().projects.pendingBuilds;
+    expect(pending).toHaveLength(1);
+    expect(pending[0].projectName).toBe("Failing Project");
+    expect(pending[0].status).toBe("BUILDING");
+
+    // Once the request rejects, the build flips to FAILED (and is not created).
     await waitFor(() => {
-      // The banner element has class "danger"; any non-empty text in it confirms error display.
-      const banner = document.querySelector(".banner.danger");
-      expect(banner).toBeInTheDocument();
-      expect(banner!.textContent!.trim().length).toBeGreaterThan(0);
+      expect(store.getState().projects.pendingBuilds[0].status).toBe("FAILED");
     });
+    expect(store.getState().projects.items).toHaveLength(0);
   });
 });
 

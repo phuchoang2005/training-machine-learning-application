@@ -118,9 +118,12 @@ public class JobService {
     if (original.status() != JobStatus.FAILED && original.status() != JobStatus.CANCELLED) {
       throw new IllegalStateException("Only failed or cancelled jobs can be retried");
     }
-    UUID snapshotId = configs.createSnapshot(project.projectId(), null,
-        request.yamlContent() == null || request.yamlContent().isBlank() ? "retryOf: " + original.jobId()
-            : request.yamlContent());
+    // Reuse the exact config the original job ran with, so the retry is a faithful re-run; an
+    // explicit override YAML on the request still takes precedence.
+    String yaml = request.yamlContent() == null || request.yamlContent().isBlank()
+        ? configs.getSnapshotYaml(original.configSnapshotId())
+        : request.yamlContent();
+    UUID snapshotId = configs.createSnapshot(project.projectId(), null, yaml);
     TrainingJob retry = jobs.create(project.projectId(), user.userId(), snapshotId, original.jobId(),
         original.retryAttempt() + 1);
     queue.enqueue(retry.jobId());

@@ -90,6 +90,8 @@ class JobServiceTest {
     UUID newJobId = UUID.randomUUID();
     UUID snapshotId = UUID.randomUUID();
 
+    // Retry reuses the original job's config snapshot YAML rather than a placeholder.
+    when(configRepository.getSnapshotYaml(failed.configSnapshotId())).thenReturn("training:\n  epochs: 10\n");
     when(configRepository.createSnapshot(eq(projectId), isNull(), anyString())).thenReturn(snapshotId);
     TrainingJob retryJob = new TrainingJob(newJobId, projectId, ownerId, snapshotId, jobId,
         JobStatus.QUEUED, 1, 1, Instant.now(), null, null, null, Instant.now());

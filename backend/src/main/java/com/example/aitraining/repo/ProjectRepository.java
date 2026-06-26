@@ -91,11 +91,12 @@ public class ProjectRepository {
       mongo.remove(byJob, "job_queue_entries");
       mongo.remove(byJob, "job_log_events");
       mongo.remove(byJob, "job_progress_events");
+      // Artifact documents carry only jobId (no projectId), so they must be removed by jobId.
+      mongo.remove(byJob, "artifacts");
     }
     mongo.remove(Query.query(Criteria.where("projectId").is(projectId)), TrainingJob.class);
     mongo.remove(Query.query(Criteria.where("projectId").is(projectId)), ProjectConfig.class);
     mongo.remove(Query.query(Criteria.where("projectId").is(projectId.toString())), "config_snapshots");
-    mongo.remove(Query.query(Criteria.where("projectId").is(projectId.toString())), "artifacts");
     mongo.remove(Query.query(Criteria.where("_id").is(projectId)), Project.class);
   }
 }

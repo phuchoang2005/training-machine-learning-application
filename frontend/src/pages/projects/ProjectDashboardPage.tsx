@@ -14,6 +14,7 @@ const statusOrder: Array<JobStatus | "ALL"> = ["ALL", "CREATED", "QUEUED", "RUNN
 export function ProjectDashboardPage() {
   const dispatch = useAppDispatch();
   const projects = useAppSelector((state) => state.projects.items);
+  const pendingBuilds = useAppSelector((state) => state.projects.pendingBuilds);
   const filter = useAppSelector((state) => state.projects.activeStatusFilter);
   const loading = useAppSelector((state) => state.projects.loading);
   const error = useAppSelector((state) => state.projects.error);
@@ -25,6 +26,10 @@ export function ProjectDashboardPage() {
     `${project.projectName} ${project.description}`.toLowerCase().includes(query.toLowerCase()) &&
     (filter === "ALL" || project.latestJobStatus === filter),
   );
+  // In-flight builds have no job status yet, so they only show under the "ALL" filter.
+  const visibleBuilds = filter === "ALL"
+    ? pendingBuilds.filter((build) => `${build.projectName} ${build.description}`.toLowerCase().includes(query.toLowerCase()))
+    : [];
 
   return (
     <Page>
@@ -36,12 +41,12 @@ export function ProjectDashboardPage() {
           {statusOrder.map((status) => <button key={status} className={filter === status ? "active" : ""} onClick={() => dispatch(actions.setStatusFilter(status))}>{status}</button>)}
         </div>
       </Toolbar>
-      {loading && projects.length === 0 ? (
+      {loading && projects.length === 0 && visibleBuilds.length === 0 ? (
         <EmptyState title="Loading projects…" message="Fetching authorized projects from the API." />
-      ) : visibleProjects.length === 0 ? (
+      ) : visibleProjects.length === 0 && visibleBuilds.length === 0 ? (
         <EmptyState icon={<FolderKanban />} title="No authorized projects" message="No projects match the current filters." />
       ) : (
-        <ProjectTable projects={visibleProjects} />
+        <ProjectTable projects={visibleProjects} pendingBuilds={visibleBuilds} onDismissBuild={(tempId) => dispatch(actions.dismissBuild(tempId))} />
       )}
     </Page>
   );

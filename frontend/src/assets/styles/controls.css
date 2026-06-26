@@ -23,10 +23,15 @@
 .created { color: var(--muted-foreground); }
 .queued, .retrying { color: var(--warning); }
 .running { color: var(--info); }
+.building { color: var(--info); }
 .success { color: var(--success); }
 .failed { color: var(--destructive); }
 .cancelled, .neutral { color: var(--disabled); }
 .status-dot { width: 8px; height: 8px; border-radius: 999px; display: inline-block; background: currentColor; }
+.muted-text { color: var(--muted-foreground); font-size: 12px; }
+.spin { animation: spin 1s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .hyperparam-form { display: grid; gap: 20px; }
 .hyperparam-section { display: grid; gap: 10px; }

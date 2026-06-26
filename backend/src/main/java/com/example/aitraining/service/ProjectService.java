@@ -11,6 +11,7 @@ import com.example.aitraining.repo.JobRepository;
 import com.example.aitraining.repo.ProjectRepository;
 import com.example.aitraining.repo.SupportRepository;
 import com.example.aitraining.repo.UserRepository;
+import com.example.aitraining.runner.SourceLayout;
 import com.example.aitraining.runner.ZipExtractor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -103,9 +104,11 @@ public class ProjectService {
       }
     } catch (IllegalArgumentException e) {
       projects.delete(project.projectId());
+      deleteRecursively(extractTarget);
       throw new IllegalArgumentException("ZIP file rejected: " + e.getMessage());
     } catch (IOException e) {
       projects.delete(project.projectId());
+      deleteRecursively(extractTarget);
       throw new IllegalStateException("Failed to extract ZIP file: " + e.getMessage(), e);
     }
 
@@ -163,6 +166,12 @@ public class ProjectService {
   }
 
   public void delete(User user, Project project) {
+    // Capture the project's job IDs before the cascade removes them, so we can also delete each
+    // job's on-disk artifact tree (artifacts/{jobId}) — the DB records are removed by projects.delete.
+    List<UUID> jobIds = jobs.listByProject(project.projectId(), null, Integer.MAX_VALUE).stream()
+        .map(com.example.aitraining.domain.Models.TrainingJob::jobId)
+        .toList();
+
     projects.delete(project.projectId());
     // Best-effort: remove the project's Docker image and any of its job containers so they don't
     // leak after the project record is gone. Never fails the delete.
@@ -172,6 +181,11 @@ public class ProjectService {
       deleteRecursively(Path.of(props.storageRoot()).resolve(project.localSourcePath()).toAbsolutePath());
     }
     deleteRecursively(Path.of(props.docker().sourcesRoot()).resolve(project.projectId().toString()).toAbsolutePath());
+    // Remove each job's stored artifact files (storageRoot/artifacts/{jobId}).
+    Path artifactsRoot = Path.of(props.storageRoot()).resolve("artifacts");
+    for (UUID jobId : jobIds) {
+      deleteRecursively(artifactsRoot.resolve(jobId.toString()).toAbsolutePath());
+    }
     support.audit(user.userId(), project.projectId(), null, "PROJECT_DELETED", "PROJECT",
         cleanup);
   }
@@ -216,25 +230,12 @@ public class ProjectService {
   }
 
   /**
-   * Returns the effective project root inside {@code dir}: if it contains a single non-hidden
-   * wrapper directory (ignoring {@code __MACOSX} and {@code .git}), returns that directory;
-   * otherwise returns {@code dir} itself. Handles the common macOS ZIP wrapper layout.
+   * Returns the effective project root inside {@code dir} (handling the macOS ZIP wrapper layout).
+   * Delegates to {@link SourceLayout#resolveProjectRoot} so the build context resolved here matches
+   * the {@code /source} root the runner mounts and rebuilds from at job time.
    */
   private static Path findProjectRoot(Path dir) {
-    try (var entries = Files.list(dir)) {
-      List<Path> visible = entries
-          .filter(p -> {
-            String name = p.getFileName().toString();
-            return !name.startsWith(".") && !name.equals("__MACOSX");
-          })
-          .toList();
-      if (visible.size() == 1 && Files.isDirectory(visible.get(0))) {
-        return visible.get(0);
-      }
-    } catch (IOException ignored) {
-      // fall through
-    }
-    return dir;
+    return SourceLayout.resolveProjectRoot(dir);
   }
 
   /** Recursively deletes a directory tree, suppressing all errors (best-effort cleanup). */

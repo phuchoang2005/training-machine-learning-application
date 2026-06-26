@@ -1,6 +1,23 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { JobStatus, ProjectConfigContent, ProjectDetail, ProjectSummary } from "../../shared/api/types";
+import type { JobStatus, ProjectConfigContent, ProjectDetail, ProjectSummary, SourceType } from "../../shared/api/types";
 import { projectService } from "../../shared/api/services/projects";
+
+/**
+ * Client-side optimistic record for a project whose Docker image is being built.
+ * The backend builds the image synchronously inside the create request, so the
+ * create thunk does not resolve until the build finishes. To let the user leave
+ * the form and watch progress in the dashboard, we add one of these the moment
+ * the build starts, then drop it on success (the real project takes its place)
+ * or flip it to FAILED on error. `tempId` correlates the thunk arg to its record.
+ */
+export type PendingBuild = {
+  tempId: string;
+  projectName: string;
+  description: string;
+  sourceType: SourceType;
+  status: "BUILDING" | "FAILED";
+  error?: string;
+};
 
 /** Loads all projects visible to the current user into `state.items`. */
 export const fetchProjects = createAsyncThunk("projects/fetchAll", () =>
@@ -23,7 +40,7 @@ export const fetchProjectById = createAsyncThunk("projects/fetchById", (projectI
  */
 export const createProjectAsync = createAsyncThunk(
   "projects/create",
-  async (body: { projectName: string; description?: string; sourceType: "GITHUB" | "ZIP"; repositoryUrl?: string; trainingEntrypoint: string }) => {
+  async (body: { tempId?: string; projectName: string; description?: string; sourceType: "GITHUB" | "ZIP"; repositoryUrl?: string; trainingEntrypoint: string }) => {
     const { repositoryUrl, trainingEntrypoint, projectName, description } = body;
     const { projectId, buildLog } = await projectService.createGithub({ projectName, description, repositoryUrl: repositoryUrl!, trainingEntrypoint });
     const detail = await projectService.get(projectId);
@@ -38,9 +55,9 @@ export const createProjectAsync = createAsyncThunk(
  */
 export const createZipProjectAsync = createAsyncThunk(
   "projects/createZip",
-  async (body: { projectName: string; description?: string; trainingEntrypoint: string; file: File }) => {
-    const { file, ...metadata } = body;
-    const { projectId, buildLog } = await projectService.createZip(metadata, file);
+  async (body: { tempId?: string; projectName: string; description?: string; trainingEntrypoint: string; file: File }) => {
+    const { file, projectName, description, trainingEntrypoint } = body;
+    const { projectId, buildLog } = await projectService.createZip({ projectName, description, trainingEntrypoint }, file);
     const detail = await projectService.get(projectId);
     return { ...detail, buildLog };
   },
@@ -104,6 +121,8 @@ type ProjectsState = {
   detailByProjectId: Record<string, ProjectDetail>;
   /** Active YAML config keyed by projectId; configId here is the real UUID for job start. */
   configsByProjectId: Record<string, ProjectConfigContent>;
+  /** Optimistic in-flight image builds shown in the dashboard while the create request runs. */
+  pendingBuilds: PendingBuild[];
   activeStatusFilter: JobStatus | "ALL";
   loading: boolean;
   error?: string;
@@ -115,6 +134,7 @@ export const projectSlice = createSlice({
     items: [],
     detailByProjectId: {},
     configsByProjectId: {},
+    pendingBuilds: [],
     activeStatusFilter: "ALL",
     loading: false,
     error: undefined,
@@ -122,6 +142,14 @@ export const projectSlice = createSlice({
   reducers: {
     setStatusFilter(state, action: PayloadAction<JobStatus | "ALL">) {
       state.activeStatusFilter = action.payload;
+    },
+    /** Optimistically register an in-flight image build so it appears in the dashboard immediately. */
+    startProjectBuild(state, action: PayloadAction<{ tempId: string; projectName: string; description: string; sourceType: SourceType }>) {
+      state.pendingBuilds.unshift({ ...action.payload, status: "BUILDING" });
+    },
+    /** Remove a pending build (used to dismiss a failed build card). */
+    dismissBuild(state, action: PayloadAction<string>) {
+      state.pendingBuilds = state.pendingBuilds.filter((b) => b.tempId !== action.payload);
     },
   },
   extraReducers: (builder) => {
@@ -140,11 +168,21 @@ export const projectSlice = createSlice({
       .addCase(createProjectAsync.fulfilled, (state, action) => {
         state.detailByProjectId[action.payload.projectId] = action.payload;
         state.items.unshift(action.payload);
+        state.pendingBuilds = state.pendingBuilds.filter((b) => b.tempId !== action.meta.arg.tempId);
+      })
+      .addCase(createProjectAsync.rejected, (state, action) => {
+        const build = state.pendingBuilds.find((b) => b.tempId === action.meta.arg.tempId);
+        if (build) { build.status = "FAILED"; build.error = action.error.message; }
       })
 
       .addCase(createZipProjectAsync.fulfilled, (state, action) => {
         state.detailByProjectId[action.payload.projectId] = action.payload;
         state.items.unshift(action.payload);
+        state.pendingBuilds = state.pendingBuilds.filter((b) => b.tempId !== action.meta.arg.tempId);
+      })
+      .addCase(createZipProjectAsync.rejected, (state, action) => {
+        const build = state.pendingBuilds.find((b) => b.tempId === action.meta.arg.tempId);
+        if (build) { build.status = "FAILED"; build.error = action.error.message; }
       })
 
       .addCase(fetchProjectConfig.fulfilled, (state, action) => {

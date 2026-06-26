@@ -17,6 +17,7 @@ related:
 | GitHub clone failure | Project validation | Stop before execution | FAILED or not created | In-app notification |
 | Invalid ZIP package | Project registration | Reject upload | Not created | In-app error |
 | Missing `main.py`, `requirements.txt`, or `configs/` | Project validation | Reject registration or job start | FAILED or not created | In-app notification |
+| Per-project image missing and not rebuildable | Runner image resolution | Rebuild from project source; if source is unavailable, fail (never fall back to the dependency-less base image) | FAILED | Failure notification |
 | Disk space below 5 GB | Pre-run capacity check | Do not launch container | FAILED | In-app notification |
 | Docker container start failure | Runner service | Persist runner error | FAILED | Failure notification |
 | Training script exits non-zero | Docker runner | Persist stderr/stdout logs | FAILED | Failure email |

@@ -44,8 +44,8 @@ Terminal job statuses are `SUCCESS`, `FAILED`, and `CANCELLED`. Active job statu
 
 | Mutation | Refresh | Direct Redux Update |
 | --- | --- | --- |
-| Create GitHub project | Project list | Add created project to first dashboard page only when filters allow it. |
-| Upload ZIP project | Project list | Do not store upload body in Redux. |
+| Create GitHub project | Project list | Add optimistic "building" placeholder on submit; replace with created project on success, flip to "build failed" on error. |
+| Upload ZIP project | Project list | Add optimistic "building" placeholder on submit; do not store upload body in Redux. Replace with created project on success, flip to "build failed" on error. |
 | Validate YAML | None | Store validation result in form state, not Redux domain state. |
 | Start training job | Project detail, project job history, job detail, queue snapshot | Seed new job detail from start response. |
 | Cancel job | Job detail, project job history, queue snapshot | Mark cancel request pending until backend confirms status. |

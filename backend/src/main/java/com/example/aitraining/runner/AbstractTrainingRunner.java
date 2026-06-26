@@ -199,7 +199,13 @@ public abstract class AbstractTrainingRunner implements TrainingRunner {
    *   <li>{@code ZIP} — resolves {@code localSourcePath} under {@code app.storage-root}.</li>
    * </ul>
    *
-   * @return path to the source directory, or {@code null} if no source is available
+   * <p>The returned path is run through {@link SourceLayout#resolveProjectRoot} so the directory
+   * mounted at {@code /source} (and rebuilt from, if the per-project image is missing) is the same
+   * project root the image was originally built from at registration. Without this, a ZIP wrapped
+   * in a single top-level folder would mount/rebuild from the outer directory, skipping
+   * {@code pip install} and resurfacing {@code ModuleNotFoundError}.
+   *
+   * @return path to the project root, or {@code null} if no source is available
    */
   protected Path prepareSource(Project project) throws IOException, InterruptedException {
     if (project.sourceType() == SourceType.GITHUB && project.repositoryUrl() != null) {
@@ -216,11 +222,11 @@ public abstract class AbstractTrainingRunner implements TrainingRunner {
           throw new IOException("git clone failed for " + project.repositoryUrl() + ": " + out);
         }
       }
-      return sourceDir;
+      return SourceLayout.resolveProjectRoot(sourceDir);
     }
     if (project.sourceType() == SourceType.ZIP && project.localSourcePath() != null) {
       Path sourceDir = Path.of(props.storageRoot()).resolve(project.localSourcePath()).toAbsolutePath();
-      return Files.exists(sourceDir) ? sourceDir : null;
+      return Files.exists(sourceDir) ? SourceLayout.resolveProjectRoot(sourceDir) : null;
     }
     return null;
   }

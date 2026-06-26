@@ -160,10 +160,11 @@ public class DockerTrainingRunner extends AbstractTrainingRunner {
    * image is absent — e.g. a project created before per-project builds existed, or whose image was
    * pruned — it is built now (one time) from the project source and the build log is streamed to the
    * job. Running the dependency-less base image instead would resurface {@code ModuleNotFoundError},
-   * so a failed build fails the job rather than silently falling back.
+   * so the job is failed (rather than silently falling back) whenever the image is missing and either
+   * the source is unavailable or the rebuild fails.
    *
    * @return the image tag to run on
-   * @throws IOException if the project image is missing and cannot be built
+   * @throws IOException if the project image is missing and cannot be (re)built
    */
   private String ensureImage(TrainingJob job, Path sourcePath, AtomicInteger seqNo) throws IOException {
     String tag = ImageBuildService.imageTag(job.projectId());
@@ -172,9 +173,9 @@ public class DockerTrainingRunner extends AbstractTrainingRunner {
     }
     if (sourcePath == null) {
       logLine(job.jobId(), StreamType.STDERR,
-          ">>> [image] no project image and no source available — using base image " + props.docker().image(),
-          seqNo.incrementAndGet());
-      return props.docker().image();
+          ">>> [image] project image " + tag + " is missing and no project source is available to rebuild it. "
+              + "Re-register the project so its dependency image can be built.", seqNo.incrementAndGet());
+      throw new IOException("Project image " + tag + " missing and no source available to rebuild");
     }
 
     logLine(job.jobId(), StreamType.STDOUT,

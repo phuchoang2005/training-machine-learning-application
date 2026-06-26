@@ -257,8 +257,8 @@ type JobSliceState = {
 
 | Mutation | Endpoint | Redux Effect | Navigation Effect |
 | --- | --- | --- | --- |
-| Register GitHub project | `POST /projects` | Refresh project list slice | Open created project detail |
-| Upload ZIP project | `POST /projects/upload-zip` | Refresh project list slice | Open created project detail |
+| Register GitHub project | `POST /projects` | Add optimistic "building" entry to project list, replace with created project on success / flip to "build failed" on error | Return to project dashboard immediately to watch build status |
+| Upload ZIP project | `POST /projects/upload-zip` | Add optimistic "building" entry to project list, replace with created project on success / flip to "build failed" on error | Return to project dashboard immediately to watch build status |
 | Validate config | `POST /projects/{projectId}/configs/validate` | Store validation result in form-local state | Show validation result inline |
 | Start training | `POST /projects/{projectId}/jobs` | Upsert new job, refresh project jobs and queue | Open job detail |
 | Cancel job | `POST /jobs/{jobId}/cancel` | Set local cancel-requested state, then refresh job and queue | Stay on job detail |
