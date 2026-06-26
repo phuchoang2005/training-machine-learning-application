@@ -1,5 +1,4 @@
-# Training Machine Learning Application Training Machine Learning Application is a full-stack web application for configuring, running, monitoring, and administering training jobs. The repository contains the product and architecture documentation plus an implemented React frontend, Spring Boot backend, MongoDB persistence, and Docker-based runtime topology
-
+# Future-Training Machine Learning Application
 ## Tech Stack
 
 - Frontend: React 19, TypeScript, Vite, Redux Toolkit, React Router, TailwindCSS v4 with hand-authored semantic CSS, Radix UI tabs primitive, Axios.
