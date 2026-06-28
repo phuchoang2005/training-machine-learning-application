@@ -3,12 +3,13 @@ import type { JobStatus, ProjectConfigContent, ProjectDetail, ProjectSummary, So
 import { projectService } from "../../shared/api/services/projects";
 
 /**
- * Client-side optimistic record for a project whose Docker image is being built.
- * The backend builds the image synchronously inside the create request, so the
- * create thunk does not resolve until the build finishes. To let the user leave
- * the form and watch progress in the dashboard, we add one of these the moment
- * the build starts, then drop it on success (the real project takes its place)
- * or flip it to FAILED on error. `tempId` correlates the thunk arg to its record.
+ * Client-side optimistic record bridging the brief gap between submitting the
+ * register form and the real project landing in `items`. The backend builds the
+ * Docker image off the request thread, so the create thunk resolves quickly with
+ * a `BUILDING` project; the dashboard then polls until `buildStatus` becomes
+ * `READY`/`FAILED`. We add one of these the moment the form is submitted, then
+ * drop it once the real project is upserted (success) or flip it to FAILED if the
+ * create request itself fails. `tempId` correlates the thunk arg to its record.
  */
 export type PendingBuild = {
   tempId: string;
@@ -35,31 +36,31 @@ export const fetchProjectById = createAsyncThunk("projects/fetchById", (projectI
 
 /**
  * Registers a new GitHub project.
- * Makes two sequential API calls: POST /projects (creates, returns projectId)
- * then GET /projects/{id} (fetches full detail) so the return value is a usable `ProjectDetail`.
+ * Makes two sequential API calls: POST /projects (creates, returns projectId) then
+ * GET /projects/{id} (fetches the full `BUILDING` detail). The image build runs in the
+ * background; the dashboard polls until `buildStatus` leaves `BUILDING`.
  */
 export const createProjectAsync = createAsyncThunk(
   "projects/create",
   async (body: { tempId?: string; projectName: string; description?: string; sourceType: "GITHUB" | "ZIP"; repositoryUrl?: string; trainingEntrypoint: string }) => {
     const { repositoryUrl, trainingEntrypoint, projectName, description } = body;
-    const { projectId, buildLog } = await projectService.createGithub({ projectName, description, repositoryUrl: repositoryUrl!, trainingEntrypoint });
-    const detail = await projectService.get(projectId);
-    return { ...detail, buildLog };
+    const { projectId } = await projectService.createGithub({ projectName, description, repositoryUrl: repositoryUrl!, trainingEntrypoint });
+    return projectService.get(projectId);
   },
 );
 
 /**
  * Uploads a ZIP archive and registers it as a new project.
- * Makes two sequential API calls: POST /projects/upload-zip (creates, returns projectId)
- * then GET /projects/{id} (fetches full detail) so the return value is a usable `ProjectDetail`.
+ * Makes two sequential API calls: POST /projects/upload-zip (creates, returns projectId) then
+ * GET /projects/{id} (fetches the full `BUILDING` detail). The image build runs in the background;
+ * the dashboard polls until `buildStatus` leaves `BUILDING`.
  */
 export const createZipProjectAsync = createAsyncThunk(
   "projects/createZip",
   async (body: { tempId?: string; projectName: string; description?: string; trainingEntrypoint: string; file: File }) => {
     const { file, projectName, description, trainingEntrypoint } = body;
-    const { projectId, buildLog } = await projectService.createZip({ projectName, description, trainingEntrypoint }, file);
-    const detail = await projectService.get(projectId);
-    return { ...detail, buildLog };
+    const { projectId } = await projectService.createZip({ projectName, description, trainingEntrypoint }, file);
+    return projectService.get(projectId);
   },
 );
 

@@ -11,6 +11,8 @@ ProjectSummary:
       type: string
     sourceType:
       $ref: "./common.yaml#/SourceType"
+    buildStatus:
+      $ref: "./common.yaml#/BuildStatus"
     latestJobStatus:
       anyOf:
         - $ref: "./common.yaml#/JobStatus"
@@ -62,7 +64,7 @@ ZipProjectMetadata:
       default: main.py
 CreateProjectResponse:
   type: object
-  required: [projectId, projectName, sourceType, status, createdAt]
+  required: [projectId, projectName, sourceType, status, buildStatus, createdAt]
   properties:
     projectId:
       type: string
@@ -74,20 +76,27 @@ CreateProjectResponse:
     status:
       type: string
       example: ACTIVE
+    buildStatus:
+      $ref: "./common.yaml#/BuildStatus"
     createdAt:
       type: string
       format: date-time
     buildLog:
-      type: string
+      type: [string, "null"]
       description: >-
-        Combined `docker build` output from baking the per-project image at registration.
-        Returned so the client can display the build. On build failure the project is not
-        created and the build log is returned in the error response message (HTTP 400).
+        Always null on creation: the per-project image is built off the request thread, so the
+        response returns immediately with `buildStatus: BUILDING`. Poll `GET /projects/{projectId}`
+        for the terminal build state (`READY`/`FAILED`); the persisted build log is returned there.
 ProjectDetail:
   allOf:
     - $ref: "#/ProjectSummary"
     - type: object
       properties:
+        buildLog:
+          type: [string, "null"]
+          description: >-
+            Combined `docker build` output, persisted with the project. Populated once the build
+            reaches READY or FAILED; null while BUILDING.
         repositoryUrl:
           type: [string, "null"]
           format: uri

@@ -43,13 +43,13 @@ public class ProjectController {
   }
 
   @PostMapping("/projects")
-  @ResponseStatus(HttpStatus.CREATED)
+  @ResponseStatus(HttpStatus.ACCEPTED)
   CreateProjectResponse createGithub(@Valid @RequestBody CreateGithubProjectRequest request) {
     return service.createGithub(CurrentUserContext.require(), request);
   }
 
   @PostMapping("/projects/upload-zip")
-  @ResponseStatus(HttpStatus.CREATED)
+  @ResponseStatus(HttpStatus.ACCEPTED)
   CreateProjectResponse uploadZip(
       @Valid @RequestPart("metadata") ZipProjectMetadata metadata,
       @RequestPart("file") MultipartFile file) {

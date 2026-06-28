@@ -25,6 +25,11 @@ projects:
   post:
     tags: [Projects]
     summary: Register a public GitHub project
+    description: >-
+      Creates the project and kicks off the per-project Docker image build off the request thread,
+      returning immediately with `buildStatus: BUILDING`. Poll `GET /projects/{projectId}` until the
+      build reaches `READY` or `FAILED`. The build is decoupled from this request, so it completes
+      even if the client disconnects.
     operationId: createGithubProject
     parameters:
       - $ref: "../components/parameters.yaml#/IdempotencyKey"
@@ -35,8 +40,8 @@ projects:
           schema:
             $ref: "../components/schemas/projects.yaml#/CreateGithubProjectRequest"
     responses:
-      "201":
-        description: Project created
+      "202":
+        description: Project created; image build accepted and running in the background
         content:
           application/json:
             schema:
@@ -49,6 +54,10 @@ projectZipUpload:
   post:
     tags: [Projects]
     summary: Upload and register a ZIP project
+    description: >-
+      Extracts the upload and kicks off the per-project Docker image build off the request thread,
+      returning immediately with `buildStatus: BUILDING`. Poll `GET /projects/{projectId}` until the
+      build reaches `READY` or `FAILED`.
     operationId: uploadZipProject
     parameters:
       - $ref: "../components/parameters.yaml#/IdempotencyKey"
@@ -66,8 +75,8 @@ projectZipUpload:
                 type: string
                 format: binary
     responses:
-      "201":
-        description: Project created
+      "202":
+        description: Project created; image build accepted and running in the background
         content:
           application/json:
             schema:

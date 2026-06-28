@@ -55,7 +55,8 @@ class JobServiceTest {
     service = new JobService(jobRepository, queueRepository, configRepository, userRepository, supportRepository, appProperties);
     owner = new User(ownerId, "owner@example.com", "Owner", UserRole.USER, UserStatus.ACTIVE, Instant.now(), null);
     project = new Project(projectId, ownerId, "Test Project", null, SourceType.GITHUB,
-        "https://github.com.phuchoang2005/repo", null, "train.py", "ACTIVE", Instant.now(), Instant.now());
+        "https://github.com.phuchoang2005/repo", null, "train.py", "ACTIVE", "READY", null,
+        Instant.now(), Instant.now());
   }
 
   @Test

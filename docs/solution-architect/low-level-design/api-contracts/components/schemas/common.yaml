@@ -7,6 +7,13 @@ UserStatus:
 SourceType:
   type: string
   enum: [GITHUB, ZIP]
+BuildStatus:
+  type: string
+  description: >-
+    State of a project's per-project Docker image build. The image is built off the request thread
+    at registration, so a project is BUILDING until it finalizes; jobs may only be started once it is
+    READY. FAILED projects keep their record so the build log can be inspected.
+  enum: [BUILDING, READY, FAILED]
 JobStatus:
   type: string
   enum: [CREATED, QUEUED, RUNNING, SUCCESS, FAILED, CANCELLED, RETRYING]

@@ -122,13 +122,15 @@ Stop:
 cd backend && docker compose down
 ```
 
-> **Project registration builds a Docker image synchronously.** When a project is registered the
-> backend bakes its dependencies into a `project-{projectId}` image (`docker build`) before the
-> request returns, so the host needs a running Docker daemon and the first registration can take a
-> few minutes on a cold cache. The bound is `app.docker.build-timeout-seconds` (default 600). The
-> Nginx `/api/` proxy timeout is raised above this so the request survives the build; if you front
-> the API with another proxy, raise its read timeout too. A failed build returns HTTP 400 with the
-> full build log and does not create the project.
+> **Project registration builds a Docker image in the background.** When a project is registered the
+> backend bakes its dependencies into a `project-{projectId}` image (`docker build`), so the host
+> needs a running Docker daemon and the first registration can take a few minutes on a cold cache.
+> The build runs **off the request thread**: the create request returns immediately (HTTP 202) with
+> the project in `buildStatus: BUILDING`, and the UI polls `GET /projects/{id}` until it becomes
+> `READY` or `FAILED`. Because the build is decoupled from the request, closing the browser tab
+> mid-build does not affect it. The build is bounded by `app.docker.build-timeout-seconds`
+> (default 600). A failed build leaves the project in `FAILED` with the full build log attached
+> (inspectable on the project detail page); jobs can only be started once the project is `READY`.
 
 ---
 

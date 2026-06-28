@@ -1,5 +1,8 @@
 import { apiClient } from "../axios-client";
-import type { ProjectDetail, ProjectSummary, ProjectConfigContent } from "../types";
+import type { BuildStatus, ProjectDetail, ProjectSummary, ProjectConfigContent } from "../types";
+
+/** Immediate response from project creation; the image build continues in the background. */
+type CreateProjectResult = { projectId: string; buildStatus: BuildStatus; buildLog?: string };
 
 /** Cursor-based page envelope used by all list endpoints. */
 type ApiPage<T> = { data: T[]; page: { limit: number; nextCursor?: string | null; hasMore: boolean } };
@@ -27,11 +30,12 @@ export const projectService = {
     apiClient.delete<void>(`/projects/${projectId}`).then((r) => r.data),
 
   /**
-   * Registers a public GitHub repository as a project.
-   * Returns only the generated `projectId`; call `get()` to fetch the full record.
+   * Registers a public GitHub repository as a project. Returns immediately with the new `projectId`
+   * and `buildStatus: "BUILDING"` — the image build runs in the background; poll `get()` until the
+   * build reaches `READY`/`FAILED`.
    */
   createGithub: (body: { projectName: string; description?: string; repositoryUrl: string; trainingEntrypoint: string }) =>
-    apiClient.post<{ projectId: string; buildLog?: string }>("/projects", body).then((r) => r.data),
+    apiClient.post<CreateProjectResult>("/projects", body).then((r) => r.data),
 
   /**
    * Lists config summaries for a project.
@@ -58,13 +62,13 @@ export const projectService = {
   /**
    * Uploads a ZIP archive and registers it as a new project.
    * Sends multipart/form-data with a JSON `metadata` part and the `file` part.
-   * Returns only the generated `projectId`; call `get()` to fetch the full record.
+   * Returns immediately with `buildStatus: "BUILDING"`; poll `get()` for the terminal build state.
    */
   createZip: (body: { projectName: string; description?: string; trainingEntrypoint: string }, file: File) => {
     const form = new FormData();
     form.append("metadata", new Blob([JSON.stringify(body)], { type: "application/json" }));
     form.append("file", file);
-    return apiClient.post<{ projectId: string; buildLog?: string }>("/projects/upload-zip", form).then((r) => r.data);
+    return apiClient.post<CreateProjectResult>("/projects/upload-zip", form).then((r) => r.data);
   },
 
   /**

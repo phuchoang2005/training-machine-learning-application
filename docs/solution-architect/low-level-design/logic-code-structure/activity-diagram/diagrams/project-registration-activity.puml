@@ -76,36 +76,37 @@ partition "Project Service" {
 }
 
 if (Required project files exist?) then (yes)
-  partition "Image Build Service" {
-    :Generate Dockerfile FROM base image\n(bake requirements.txt / pyproject.toml deps);
-    :docker build -t project-{projectId}\n(synchronous, capture build log);
+  partition "Spring Boot API" {
+    :Persist project (buildStatus = BUILDING);
+    :Submit image build to imageBuildExecutor\n(fire-and-forget, off the request thread);
+    :Return 202 with buildStatus BUILDING\n(request returns immediately);
   }
 
-  if (Image build succeeded?) then (yes)
-    partition "Config Service" {
-      :Discover YAML files under configs/;
-      :Register project config metadata;
-    }
-
-    partition "MongoDB" {
-      :Persist projects;
-      :Persist project_configs;
-      :Persist audit_logs PROJECT_CREATED;
-    }
-
+  fork
     partition "React Frontend" {
-      :Show build log;
-      :Navigate to Project Detail page;
-      :Show project ready for training;
+      :Navigate to Project Dashboard;
+      :Poll GET /projects/{id}\nuntil buildStatus leaves BUILDING;
+      :Show READY (trainable) or FAILED (with build log);
     }
-    stop
-  else (no)
-    partition "Spring Boot API" {
-      :Delete project and cloned/extracted source;
-      :Return 400 with build log;
+  fork again
+    partition "Image Build Service (background)" {
+      :Generate Dockerfile FROM base image\n(bake requirements.txt / pyproject.toml deps);
+      :docker build -t project-{projectId}\n(capture build log);
     }
-    stop
-  endif
+    if (Image build succeeded?) then (yes)
+      partition "MongoDB" {
+        :Mark project READY + store build log;
+        :Persist project_configs (default);
+        :Persist audit_logs PROJECT_CREATED;
+      }
+    else (no)
+      partition "Project Service (background)" {
+        :Mark project FAILED + store build log\n(keep record so user can inspect);
+        :Delete cloned/extracted source;
+      }
+    endif
+  end fork
+  stop
 else (no)
   partition "Spring Boot API" {
     :Reject registration;

@@ -44,7 +44,15 @@ export function ProjectTable({
       {projects.map((project) => (
         <div key={project.projectId} className="table-row">
           <div><strong>{project.projectName}</strong><small>{project.description}</small></div>
-          {project.latestJobStatus ? <StatusBadge status={project.latestJobStatus} /> : <span className="badge neutral">No jobs</span>}
+          {project.buildStatus === "BUILDING" ? (
+            <span className="status-badge building" title="Building the project's Docker image">
+              <Loader2 size={14} className="spin" /> Building image…
+            </span>
+          ) : project.buildStatus === "FAILED" ? (
+            <span className="status-badge failed" title="Image build failed — open to view the log">
+              <AlertTriangle size={14} /> Build failed
+            </span>
+          ) : project.latestJobStatus ? <StatusBadge status={project.latestJobStatus} /> : <span className="badge neutral">No jobs</span>}
           <span>{project.sourceType}</span>
           <span>{formatDate(project.lastTrainingTime)}</span>
           <span>{project.lastTrainingOwner ?? "Not trained"}</span>

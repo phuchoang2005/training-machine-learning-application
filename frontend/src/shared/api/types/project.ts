@@ -4,6 +4,13 @@ import type { UserSummary } from "./user";
 export type SourceType = "GITHUB" | "ZIP";
 
 /**
+ * State of a project's per-project Docker image build. The image is built off the request thread
+ * at registration, so a project is `BUILDING` until it finalizes; jobs may only be started once
+ * it is `READY`. `FAILED` projects keep their record so the build log can be inspected.
+ */
+export type BuildStatus = "BUILDING" | "READY" | "FAILED";
+
+/**
  * Lightweight project record returned in paginated list responses.
  * `latestJobStatus` is null/undefined for projects that have never been trained.
  */
@@ -12,6 +19,8 @@ export type ProjectSummary = {
   projectName: string;
   description: string;
   sourceType: SourceType;
+  /** Image-build state; polled by the dashboard until it leaves `BUILDING`. */
+  buildStatus?: BuildStatus;
   /** Null/undefined when the project has never had a training job. */
   latestJobStatus?: JobStatus | null;
   lastTrainingTime?: string;
@@ -30,8 +39,8 @@ export type ProjectDetail = ProjectSummary & {
   createdAt: string;
   updatedAt: string;
   /**
-   * Combined `docker build` log from baking the per-project image at registration.
-   * Only present on the immediate create response — not persisted or returned by GET.
+   * Combined `docker build` log from baking the per-project image at registration. Persisted with
+   * the project and returned by GET; populated once the build reaches `READY` or `FAILED`.
    */
   buildLog?: string;
 };

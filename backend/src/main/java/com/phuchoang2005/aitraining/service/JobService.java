@@ -56,6 +56,13 @@ public class JobService {
    * @return the job in {@code QUEUED} state with its initial queue position
    */
   public StartJobResponse start(User user, Project project, StartJobRequest request) {
+    // Reject jobs while the per-project image is still building or failed to build. A null
+    // buildStatus means a legacy project that predates build-state tracking — its image was built
+    // under the old synchronous flow, so it is treated as ready.
+    if (project.buildStatus() != null && !"READY".equals(project.buildStatus())) {
+      throw new IllegalStateException(
+          "Project image is not ready (build status: " + project.buildStatus() + "); cannot start a job");
+    }
     ProjectConfig config = configs.get(project.projectId(), request.configId());
     String yaml = request.yamlContent() == null || request.yamlContent().isBlank()
         ? config.yamlContent()

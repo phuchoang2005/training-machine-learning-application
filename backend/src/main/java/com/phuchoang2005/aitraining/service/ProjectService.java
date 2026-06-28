@@ -13,6 +13,8 @@ import com.phuchoang2005.aitraining.repo.SupportRepository;
 import com.phuchoang2005.aitraining.repo.UserRepository;
 import com.phuchoang2005.aitraining.runner.SourceLayout;
 import com.phuchoang2005.aitraining.runner.ZipExtractor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -23,8 +25,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 /**
  * <b>Service Layer Pattern</b> — manages the lifecycle of ML training projects: creation
@@ -36,6 +36,8 @@ import java.util.concurrent.Future;
  */
 @Service
 public class ProjectService {
+  private static final Logger log = LoggerFactory.getLogger(ProjectService.class);
+
   private final ProjectRepository projects;
   private final ConfigRepository configs;
   private final UserRepository users;
@@ -178,8 +180,9 @@ public class ProjectService {
     User owner = users.get(project.ownerUserId());
     ProjectSummary s = summary(project);
     return new ProjectDetail(project.projectId(), project.projectName(), project.description(), project.sourceType(),
-        s.latestJobStatus(), s.lastTrainingTime(), s.lastTrainingOwner(), project.repositoryUrl(),
-        project.trainingEntrypoint(), new UserSummary(owner.userId(), owner.email(), owner.fullName()),
+        project.buildStatus(), project.buildLog(), s.latestJobStatus(), s.lastTrainingTime(), s.lastTrainingOwner(),
+        project.repositoryUrl(), project.trainingEntrypoint(),
+        new UserSummary(owner.userId(), owner.email(), owner.fullName()),
         project.createdAt(), project.updatedAt());
   }
 
@@ -212,6 +215,7 @@ public class ProjectService {
     var latest = jobs.listByProject(project.projectId(), null, 1).stream().findFirst();
     String owner = latest.map(j -> users.get(j.triggeredByUserId()).fullName()).orElse(null);
     return new ProjectSummary(project.projectId(), project.projectName(), project.description(), project.sourceType(),
+        project.buildStatus(),
         latest.map(com.phuchoang2005.aitraining.domain.Models.TrainingJob::status).orElse(null),
         latest.map(com.phuchoang2005.aitraining.domain.Models.TrainingJob::createdAt).orElse(null),
         owner);

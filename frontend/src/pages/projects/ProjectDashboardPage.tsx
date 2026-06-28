@@ -22,6 +22,17 @@ export function ProjectDashboardPage() {
 
   useEffect(() => { dispatch(actions.fetchProjects()); }, [dispatch]);
 
+  // The per-project Docker image is built in the background after registration, so a freshly
+  // registered project lands as BUILDING. Poll the list until no build is in flight (the row then
+  // flips to READY/FAILED). This is independent of the create request, so it survives a tab close.
+  const anyBuilding = projects.some((project) => project.buildStatus === "BUILDING")
+    || pendingBuilds.some((build) => build.status === "BUILDING");
+  useEffect(() => {
+    if (!anyBuilding) return;
+    const interval = window.setInterval(() => { dispatch(actions.fetchProjects()); }, 4000);
+    return () => window.clearInterval(interval);
+  }, [dispatch, anyBuilding]);
+
   const visibleProjects = projects.filter((project) =>
     `${project.projectName} ${project.description}`.toLowerCase().includes(query.toLowerCase()) &&
     (filter === "ALL" || project.latestJobStatus === filter),

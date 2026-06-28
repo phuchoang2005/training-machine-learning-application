@@ -48,7 +48,7 @@ class AuthorizationServiceTest {
     owner = new User(ownerId, "owner@example.com", "Owner", UserRole.USER, UserStatus.ACTIVE, Instant.now(), null);
     otherUser = new User(otherId, "other@example.com", "Other", UserRole.USER, UserStatus.ACTIVE, Instant.now(), null);
     admin = new User(UUID.randomUUID(), "admin@example.com", "Admin", UserRole.ADMIN, UserStatus.ACTIVE, Instant.now(), null);
-    project = new Project(projectId, ownerId, "Test", null, SourceType.GITHUB, null, null, "train.py", "ACTIVE", Instant.now(), Instant.now());
+    project = new Project(projectId, ownerId, "Test", null, SourceType.GITHUB, null, null, "train.py", "ACTIVE", "READY", null, Instant.now(), Instant.now());
     when(projectRepository.get(projectId)).thenReturn(project);
   }
 

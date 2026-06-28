@@ -102,13 +102,19 @@ export function ProjectDetailPage({ initialTab = "overview" }: { initialTab?: "o
             <button className="button danger" onClick={() => setDeleteOpen(true)} disabled={deleting}>
               <Trash2 size={17} /> {deleting ? "Deleting…" : "Delete"}
             </button>
-            <button className="button primary" onClick={() => setStartOpen(true)} disabled={starting || !config}>
+            <button className="button primary" onClick={() => setStartOpen(true)} disabled={starting || !config || project.buildStatus === "BUILDING" || project.buildStatus === "FAILED"}>
               <Play size={17} /> {starting ? "Starting…" : "Start Training"}
             </button>
           </>
         }
       />
-      {!config && <Banner tone="warning">No configuration found for this project.</Banner>}
+      {project.buildStatus === "BUILDING" && (
+        <Banner tone="warning">The project's Docker image is still building. Training can start once the build is ready.</Banner>
+      )}
+      {project.buildStatus === "FAILED" && (
+        <Banner tone="danger">The project's Docker image build failed. See the build log below; you may delete and re-register the project.</Banner>
+      )}
+      {project.buildStatus !== "BUILDING" && project.buildStatus !== "FAILED" && !config && <Banner tone="warning">No configuration found for this project.</Banner>}
       <div className="split-layout">
         <ProjectSummaryPanel project={project} />
         <section className="panel">
@@ -147,7 +153,14 @@ function ProjectSummaryPanel({ project }: { project: ProjectDetail }) {
       <KeyValue label="Repository" value={project.repositoryUrl ?? "ZIP upload"} />
       <KeyValue label="Entrypoint" value={project.trainingEntrypoint} />
       <KeyValue label="Owner" value={project.owner.email} />
+      <KeyValue label="Image build" value={project.buildStatus ?? "—"} />
       <KeyValue label="Latest status" value={project.latestJobStatus ? <StatusBadge status={project.latestJobStatus} /> : "No jobs yet"} />
+      {project.buildLog && (
+        <details className="build-log">
+          <summary>Build log</summary>
+          <pre>{project.buildLog}</pre>
+        </details>
+      )}
     </section>
   );
 }

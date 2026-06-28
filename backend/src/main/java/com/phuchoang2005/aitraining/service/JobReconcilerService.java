@@ -1,9 +1,11 @@
 package com.phuchoang2005.aitraining.service;
 
 import com.phuchoang2005.aitraining.domain.Enums.JobStatus;
+import com.phuchoang2005.aitraining.domain.Models.Project;
 import com.phuchoang2005.aitraining.domain.Models.TrainingJob;
 import com.phuchoang2005.aitraining.repo.JobQueueRepository;
 import com.phuchoang2005.aitraining.repo.JobRepository;
+import com.phuchoang2005.aitraining.repo.ProjectRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -30,10 +32,12 @@ public class JobReconcilerService implements ApplicationRunner {
 
   private final JobRepository jobs;
   private final JobQueueRepository queue;
+  private final ProjectRepository projects;
 
-  public JobReconcilerService(JobRepository jobs, JobQueueRepository queue) {
+  public JobReconcilerService(JobRepository jobs, JobQueueRepository queue, ProjectRepository projects) {
     this.jobs = jobs;
     this.queue = queue;
+    this.projects = projects;
   }
 
   /**
@@ -42,6 +46,29 @@ public class JobReconcilerService implements ApplicationRunner {
    */
   @Override
   public void run(ApplicationArguments args) {
+    reconcileStuckBuilds();
+    reconcileOrphanedJobs();
+  }
+
+  /**
+   * Recovers projects left {@code BUILDING} when the server last stopped. The image build runs as a
+   * JVM child process, so it died with the previous run and will never finalize — mark such projects
+   * {@code FAILED} so the dashboard stops showing a perpetual spinner and the user can delete/re-register.
+   */
+  private void reconcileStuckBuilds() {
+    List<Project> building = projects.findByBuildStatus("BUILDING");
+    if (building.isEmpty()) {
+      return;
+    }
+    log.warn("Found {} project(s) stuck in BUILDING from previous run — marking FAILED", building.size());
+    for (Project project : building) {
+      projects.markBuildFailed(project.projectId(),
+          "Image build did not complete: the server restarted before the build finished.");
+    }
+  }
+
+  /** Scans for orphaned RUNNING jobs and re-queues those whose Docker container is no longer alive. */
+  private void reconcileOrphanedJobs() {
     List<TrainingJob> running = jobs.findByStatus(JobStatus.RUNNING);
     if (running.isEmpty()) {
       return;
